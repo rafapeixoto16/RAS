@@ -1,0 +1,9 @@
+# IDE/Code Editors
+.idea
+.vscode
+
+# Dependencies
+node_modules
+
+# Miscelaneous
+.DS_Store
