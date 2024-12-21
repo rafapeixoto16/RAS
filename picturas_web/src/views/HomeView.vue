@@ -1,9 +1,7 @@
-<script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
-</script>
-
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="flex-1 flex items-center justify-center min-h-screen">
+    <p class="text-white text-4xl">HOME</p>
+  </div>
 </template>
+
+<script setup lang="ts"></script>
