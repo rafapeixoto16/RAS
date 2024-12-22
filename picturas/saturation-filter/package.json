@@ -1,0 +1,13 @@
+{
+  "name": "@picturas/saturation-filter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@picturas/filter-helper": "file:../filter-helper",
+    "sharp": "^0.33.5"
+  }
+}
