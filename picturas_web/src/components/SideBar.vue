@@ -3,16 +3,16 @@
         <!-- Sidebar with fixed width -->
         <div class="fixed left-0 flex flex-col items-center w-16 h-full bg-[#0c0b11] text-gray-400">
             <router-link class="flex items-center justify-center mt-3" to="/">
-                <img src="../../picturas.png" alt="Logo" class="w-14 h-14" />
+                <img src="../../logoFinal.png" alt="Logo" class="h-20" />
             </router-link>
             <div class="flex flex-col items-center mt-12 space-y-8">
-                <router-link class="flex items-center justify-center w-12 h-12" to="/" @click.native="selectOption(1)">
+                <router-link class="flex items-center justify-center w-12 h-12" to="/" @click="selectOption(1)">
                     <i :class="['bi bi-house-door-fill text-3xl', { 'text-[#5f59ee]': selected === 1, 'text-[#47464f]': selected !== 1 }]"></i>
                 </router-link>
-                <router-link class="flex items-center justify-center w-12 h-12" to="/projects" @click.native="selectOption(2)">
+                <router-link class="flex items-center justify-center w-12 h-12" to="/projects" @click="selectOption(2)">
                     <i :class="['bi bi-folder-fill text-3xl', { 'text-[#5f59ee]': selected === 2, 'text-[#47464f]': selected !== 2 }]"></i>
                 </router-link>
-                <router-link class="flex items-center justify-center w-12 h-12" to="/settings" @click.native="selectOption(3)">
+                <router-link class="flex items-center justify-center w-12 h-12" to="/settings" @click="selectOption(3)">
                     <i :class="['bi bi-gear-fill text-3xl', { 'text-[#5f59ee]': selected === 3, 'text-[#47464f]': selected !== 3 }]"></i>
                 </router-link>
             </div>
@@ -28,7 +28,7 @@ import { ref } from 'vue';
 
 const selected = ref(1);
 
-function selectOption(option) {
+function selectOption(option: number) {
         selected.value = option;
 }
 </script>
