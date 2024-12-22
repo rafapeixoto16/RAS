@@ -1,0 +1,15 @@
+{
+  "name": "@picturas/smart-crop-filter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@picturas/filter-helper": "file:../filter-helper",
+    "@tensorflow-models/coco-ssd": "^2.2.3",
+    "@tensorflow/tfjs-node": "^4.22.0",
+    "sharp": "^0.33.5"
+  }
+}
