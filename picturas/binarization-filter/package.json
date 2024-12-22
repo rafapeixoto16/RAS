@@ -1,5 +1,5 @@
 {
-  "name": "@picturas/grayscale-filter",
+  "name": "@picturas/binarization-filter",
   "private": true,
   "type": "module",
   "scripts": {
