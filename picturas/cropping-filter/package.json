@@ -1,12 +1,12 @@
 {
-  "name": "@picturas/cropping-filter",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "start": "node src/index.js"
-  },
-  "dependencies": {
-    "@picturas/filter-helper": "file:../filter-helper",
-    "sharp": "^0.33.5"
-  }
+    "name": "@picturas/cropping-filter",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "start": "node src/index.js"
+    },
+    "dependencies": {
+        "@picturas/filter-helper": "file:../filter-helper",
+        "sharp": "^0.33.5"
+    }
 }

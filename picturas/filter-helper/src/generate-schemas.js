@@ -1,6 +1,8 @@
-import {execSync} from 'child_process';
-import {existsSync, unlinkSync, writeFileSync} from 'fs';
-import {resolve} from 'path';
+/* eslint no-console: 0 */
+
+import { execSync } from 'child_process';
+import { existsSync, unlinkSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
 
 const [outputFile, ...folders] = process.argv.slice(2);
 
@@ -15,7 +17,10 @@ if (existsSync(resolvedOutputPath)) {
     try {
         unlinkSync(resolvedOutputPath);
     } catch (error) {
-        console.error(`Error removing schema file: ${resolvedOutputPath}`, error.message);
+        console.error(
+            `Error removing schema file: ${resolvedOutputPath}`,
+            error.message,
+        );
         process.exit(1);
     }
 }
@@ -27,16 +32,18 @@ folders.forEach((folder) => {
     console.log(`Processing folder: ${resolvedFolder}`);
 
     try {
-        execSync(
-            `npm run start -- ${resolvedOutputPath}`,
-            {
-                cwd: resolvedFolder,
-                env: {...process.env, EXPORT_SCHEMA: 'true'},
-                stdio: 'inherit',
-
-            }
-        );
+        execSync(`npm run start -- ${resolvedOutputPath}`, {
+            cwd: resolvedFolder,
+            env: {
+                ...process.env,
+                EXPORT_SCHEMA: 'true',
+            },
+            stdio: 'inherit',
+        });
     } catch (error) {
-        console.error(`Error processing folder: ${resolvedFolder}`, error.message);
+        console.error(
+            `Error processing folder: ${resolvedFolder}`,
+            error.message,
+        );
     }
 });

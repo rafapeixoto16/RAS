@@ -1,14 +1,14 @@
 {
-  "name": "@picturas/remove-bg-filter",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "start": "node src/index.js"
-  },
-  "dependencies": {
-    "@picturas/filter-helper": "file:../filter-helper",
-    "@remove-background-ai/rembg.js": "^1.1.9",
-    "dotenv": "^16.4.7",
-    "sharp": "^0.33.5"
-  }
+    "name": "@picturas/remove-bg-filter",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "start": "node src/index.js"
+    },
+    "dependencies": {
+        "@picturas/filter-helper": "file:../filter-helper",
+        "@remove-background-ai/rembg.js": "^1.1.9",
+        "dotenv": "^16.4.7",
+        "sharp": "^0.33.5"
+    }
 }

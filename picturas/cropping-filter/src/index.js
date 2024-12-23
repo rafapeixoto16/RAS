@@ -1,5 +1,5 @@
-import {createFilterHandler, schemaValidation} from "@picturas/filter-helper";
-import sharp from "sharp";
+import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
+import sharp from 'sharp';
 
 const croppingSchema = schemaValidation.object({
     width: schemaValidation.number().min(1).required(),
@@ -9,11 +9,21 @@ const croppingSchema = schemaValidation.object({
 });
 
 async function croppingHandler(imageBuffer, params) {
-    const {width, height, left, top} = params;
+    const {
+        width,
+        height,
+        left,
+        top,
+    } = params;
 
-    return await sharp(imageBuffer)
-        .extract({ left: left, top: top, width: width, height: height })
+    return sharp(imageBuffer)
+        .extract({
+            left,
+            top,
+            width,
+            height,
+        })
         .toBuffer();
 }
 
-createFilterHandler("cropping", croppingSchema, croppingHandler);
+createFilterHandler('cropping', croppingSchema, croppingHandler);
