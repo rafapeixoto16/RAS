@@ -1,16 +1,16 @@
 {
-  "name": "@picturas/filter-helper",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "generate-schemas": "node src/generate-schemas.js"
-  },
-  "dependencies": {
-    "zod": "^3.24.1",
-    "zod-to-json-schema": "^3.24.1"
-  },
-  "main": "./src/index.js",
-  "exports": {
-    ".": "./src/index.js"
-  }
+    "name": "@picturas/filter-helper",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "generate-schemas": "node src/generate-schemas.js"
+    },
+    "dependencies": {
+        "zod": "^3.24.1",
+        "zod-to-json-schema": "^3.24.1"
+    },
+    "main": "./src/index.js",
+    "exports": {
+        ".": "./src/index.js"
+    }
 }

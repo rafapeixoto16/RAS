@@ -1,16 +1,21 @@
 {
-  "name": "picturas",
-  "private": true,
-  "scripts": {
-    "generate-schemas": "cd filter-helper && npm run generate-schemas -- ../api-gateway/schemas.json ../*-filter"
-  },
-  "workspaces": [
-    "*/"
-  ],
-  "devDependencies": {
-    "nodemon": "^3.1.9"
-  },
-  "dependencies": {
-    "axios": "^1.7.9"
-  }
+    "name": "picturas",
+    "private": true,
+    "scripts": {
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write .",
+        "generate-schemas": "cd filter-helper && npm run generate-schemas -- ../api-gateway/schemas.json ../*-filter"
+    },
+    "workspaces": [
+        "*/"
+    ],
+    "devDependencies": {
+        "eslint": "^8.57.1",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-prettier": "^5.2.1",
+        "prettier": "^3.4.2"
+    }
 }
