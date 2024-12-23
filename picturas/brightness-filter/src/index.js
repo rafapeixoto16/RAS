@@ -5,7 +5,7 @@ const brightnessSchema = schemaValidation.object({
     brightness: schemaValidation.number().min(0).default(1),
 });
 
-async function brightnessHandler(imageBuffer, params) {
+async function brightnessHandler(imageBuffer, _, params) {
     const { brightness } = params;
 
     return sharp(imageBuffer).modulate({ brightness }).toBuffer();

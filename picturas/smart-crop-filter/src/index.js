@@ -39,7 +39,7 @@ function translateClass(className) {
     return classMap[className] || className;
 }
 
-async function smartCropHandler(imageBuffer, params) {
+async function smartCropHandler(imageBuffer, _, params) {
     const { object } = params;
 
     // fixme encontrar alguma api que traduza a palavra para ingles

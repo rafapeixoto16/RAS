@@ -6,7 +6,7 @@ const resizeSchema = schemaValidation.object({
     height: schemaValidation.number().min(1).required(),
 });
 
-async function resizeHandler(imageBuffer, params) {
+async function resizeHandler(imageBuffer, _, params) {
     const { width, height } = params;
 
     return sharp(imageBuffer)

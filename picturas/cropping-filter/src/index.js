@@ -8,7 +8,7 @@ const croppingSchema = schemaValidation.object({
     top: schemaValidation.number().min(0).default(0),
 });
 
-async function croppingHandler(imageBuffer, params) {
+async function croppingHandler(imageBuffer, _, params) {
     const { width, height, left, top } = params;
 
     return sharp(imageBuffer)

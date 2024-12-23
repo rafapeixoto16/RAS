@@ -5,7 +5,7 @@ const contrastSchema = schemaValidation.object({
     contrast: schemaValidation.number().default(1),
 });
 
-async function contrastHandler(imageBuffer, params) {
+async function contrastHandler(imageBuffer, _, params) {
     const { contrast } = params;
 
     const slope = contrast;
