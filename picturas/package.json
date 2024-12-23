@@ -1,6 +1,9 @@
 {
   "name": "picturas",
   "private": true,
+  "scripts": {
+    "generate-schemas": "cd filter-helper && npm run generate-schemas -- ../api-gateway/schemas.json ../*-filter"
+  },
   "workspaces": [
     "*/"
   ],
