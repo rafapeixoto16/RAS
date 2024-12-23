@@ -5,7 +5,7 @@ const grayscaleSchema = schemaValidation.object({
     brightness: schemaValidation.number().min(0).max(1).default(0.5),
 });
 
-async function grayscaleHandler(imageBuffer, params) {
+async function grayscaleHandler(imageBuffer, _, params) {
     const { brightness } = params;
 
     return sharp(imageBuffer).grayscale().modulate({ brightness }).toBuffer();

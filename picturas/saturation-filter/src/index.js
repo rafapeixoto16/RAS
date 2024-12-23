@@ -5,7 +5,7 @@ const saturationSchema = schemaValidation.object({
     saturation: schemaValidation.number().min(0).default(1),
 });
 
-async function saturationHandler(imageBuffer, params) {
+async function saturationHandler(imageBuffer, _, params) {
     const { saturation } = params;
 
     return sharp(imageBuffer).modulate({ saturation }).toBuffer();
