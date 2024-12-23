@@ -8,9 +8,7 @@ const binarizationSchema = schemaValidation.object({
 async function binarizationHandler(imageBuffer, params) {
     const { threshold } = params;
 
-    return sharp(imageBuffer)
-        .threshold(threshold)
-        .toBuffer();
+    return sharp(imageBuffer).threshold(threshold).toBuffer();
 }
 
 createFilterHandler('binarization', binarizationSchema, binarizationHandler);

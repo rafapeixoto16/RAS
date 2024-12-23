@@ -9,12 +9,7 @@ const croppingSchema = schemaValidation.object({
 });
 
 async function croppingHandler(imageBuffer, params) {
-    const {
-        width,
-        height,
-        left,
-        top,
-    } = params;
+    const { width, height, left, top } = params;
 
     return sharp(imageBuffer)
         .extract({

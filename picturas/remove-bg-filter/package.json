@@ -9,6 +9,7 @@
         "@picturas/filter-helper": "file:../filter-helper",
         "@remove-background-ai/rembg.js": "^1.1.9",
         "dotenv": "^16.4.7",
-        "sharp": "^0.33.5"
+        "sharp": "^0.33.5",
+        "transparent-background": "^1.5.0"
     }
 }

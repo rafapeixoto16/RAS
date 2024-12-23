@@ -19,7 +19,7 @@ if (existsSync(resolvedOutputPath)) {
     } catch (error) {
         console.error(
             `Error removing schema file: ${resolvedOutputPath}`,
-            error.message,
+            error.message
         );
         process.exit(1);
     }
@@ -43,7 +43,7 @@ folders.forEach((folder) => {
     } catch (error) {
         console.error(
             `Error processing folder: ${resolvedFolder}`,
-            error.message,
+            error.message
         );
     }
 });

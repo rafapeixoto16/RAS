@@ -8,10 +8,7 @@ const grayscaleSchema = schemaValidation.object({
 async function grayscaleHandler(imageBuffer, params) {
     const { brightness } = params;
 
-    return sharp(imageBuffer)
-        .grayscale()
-        .modulate({ brightness })
-        .toBuffer();
+    return sharp(imageBuffer).grayscale().modulate({ brightness }).toBuffer();
 }
 
 createFilterHandler('grayscale', grayscaleSchema, grayscaleHandler);

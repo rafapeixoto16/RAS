@@ -1,27 +1,17 @@
 import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
-import { rembg } from '@remove-background-ai/rembg.js';
-import { readFileSync } from 'fs';
-import process from 'process';
-import dotenv from 'dotenv';
+import { transparentBackground } from 'transparent-background';
 
-dotenv.config();
-const removeBgSchema = schemaValidation.object({});
+const removeBgSchema = schemaValidation.object({
+    fast: schemaValidation.boolean().default(false),
+    fileExtension: schemaValidation.string().default('jpg'),
+});
 
-async function removeBgHandler(imageBuffer, _) {
-    const apiKey = process.env.API_KEY;
+async function removeBgHandler(imageBuffer, params) {
+    const { fast, fileExtension } = params;
 
-    const {
-        outputImagePath,
-        cleanup,
-    } = await rembg({
-        apiKey,
-        inputImage: imageBuffer,
+    return transparentBackground(imageBuffer, fileExtension, {
+        fast,
     });
-
-    const buffer = readFileSync(outputImagePath);
-    cleanup();
-
-    return buffer;
 }
 
 createFilterHandler('remove-bg', removeBgSchema, removeBgHandler);

@@ -8,9 +8,7 @@ const brightnessSchema = schemaValidation.object({
 async function brightnessHandler(imageBuffer, params) {
     const { brightness } = params;
 
-    return sharp(imageBuffer)
-        .modulate({ brightness })
-        .toBuffer();
+    return sharp(imageBuffer).modulate({ brightness }).toBuffer();
 }
 
 createFilterHandler('brightness', brightnessSchema, brightnessHandler);

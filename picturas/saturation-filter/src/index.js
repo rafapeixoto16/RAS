@@ -8,9 +8,7 @@ const saturationSchema = schemaValidation.object({
 async function saturationHandler(imageBuffer, params) {
     const { saturation } = params;
 
-    return sharp(imageBuffer)
-        .modulate({ saturation })
-        .toBuffer();
+    return sharp(imageBuffer).modulate({ saturation }).toBuffer();
 }
 
 createFilterHandler('saturation', saturationSchema, saturationHandler);

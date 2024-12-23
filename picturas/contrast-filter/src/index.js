@@ -11,9 +11,7 @@ async function contrastHandler(imageBuffer, params) {
     const slope = contrast;
     const intercept = (1 - slope) * 128; // fixme verify
 
-    return sharp(imageBuffer)
-        .linear(slope, intercept)
-        .toBuffer();
+    return sharp(imageBuffer).linear(slope, intercept).toBuffer();
 }
 
 createFilterHandler('contrast', contrastSchema, contrastHandler);

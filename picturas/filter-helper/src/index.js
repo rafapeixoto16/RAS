@@ -38,7 +38,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
     const params = {};
     const imagePath = path.join(
         fileURLToPath(import.meta.url),
-        '../../sample.jpg',
+        '../../sample.jpg'
     );
     const outputPath = 'sample-proc.jpg';
 
@@ -54,8 +54,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
         await uploadImage(processedImage, outputPath);
     })();
 
-    setTimeout(() => {
-    }, 1000);
+    setTimeout(() => {}, 1000);
 }
 
 export { z as schemaValidation };

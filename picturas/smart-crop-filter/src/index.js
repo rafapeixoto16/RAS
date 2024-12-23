@@ -4,8 +4,7 @@ import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as tf from '@tensorflow/tfjs-node';
 
 const smartCropSchema = schemaValidation.object({
-    object: schemaValidation.string()
-        .default('person'),
+    object: schemaValidation.string().default('person'),
 });
 
 const classMap = {
