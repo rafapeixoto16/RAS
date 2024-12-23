@@ -1,0 +1,14 @@
+{
+    "name": "@picturas/object-identification-filter",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "start": "node src/index.js"
+    },
+    "dependencies": {
+        "@picturas/filter-helper": "file:../filter-helper",
+        "@tensorflow-models/coco-ssd": "^2.2.3",
+        "@tensorflow/tfjs-node": "^4.22.0",
+        "canvas": "^2.11.2"
+    }
+}
