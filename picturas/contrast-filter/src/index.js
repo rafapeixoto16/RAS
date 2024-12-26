@@ -9,7 +9,7 @@ async function contrastHandler(imageBuffer, _, params) {
     const { contrast } = params;
 
     const slope = contrast;
-    const intercept = (1 - slope) * 128; // fixme verify
+    const intercept = (1 - contrast) * 128;
 
     return sharp(imageBuffer).linear(slope, intercept).toBuffer();
 }

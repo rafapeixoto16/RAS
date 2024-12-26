@@ -2,8 +2,10 @@ import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
 import sharp from 'sharp';
 
 const croppingSchema = schemaValidation.object({
-    width: schemaValidation.number().min(1).required(),
-    height: schemaValidation.number().min(1).required(),
+    width: schemaValidation.number()
+        .min(1),
+    height: schemaValidation.number()
+        .min(1),
     left: schemaValidation.number().min(0).default(0),
     top: schemaValidation.number().min(0).default(0),
 });

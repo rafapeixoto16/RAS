@@ -1,14 +1,12 @@
 import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
 import sharp from 'sharp';
 
-const grayscaleSchema = schemaValidation.object({
-    brightness: schemaValidation.number().min(0).max(1).default(0.5),
-});
+const grayscaleSchema = schemaValidation.object({});
 
-async function grayscaleHandler(imageBuffer, _, params) {
-    const { brightness } = params;
-
-    return sharp(imageBuffer).grayscale().modulate({ brightness }).toBuffer();
+async function grayscaleHandler(imageBuffer, _, _params) {
+    return sharp(imageBuffer)
+        .grayscale()
+        .toBuffer();
 }
 
 createFilterHandler('grayscale', grayscaleSchema, grayscaleHandler);
