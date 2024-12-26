@@ -18,7 +18,7 @@ async function smartCropHandler(imageBuffer, _, _params) {
 
     // Calculate area for each detected object
     const areas = predictions.map((pred) => {
-        const [x, y, width, height] = pred.bbox;
+        const [_x, _y, width, height] = pred.bbox;
         return {
             ...pred,
             area: width * height,
@@ -54,7 +54,7 @@ async function smartCropHandler(imageBuffer, _, _params) {
             yMin: Infinity,
             xMax: -Infinity,
             yMax: -Infinity,
-        },
+        }
     );
 
     // Extract the tight bounding box
