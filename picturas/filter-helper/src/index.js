@@ -47,7 +47,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
     (async () => {
         const validatedParams = paramsSchema.safeParse(params);
 
-        if (!validatedParams.succsess) {
+        if (!validatedParams.success) {
             // validatedParams.error
             process.exit(1);
         }
