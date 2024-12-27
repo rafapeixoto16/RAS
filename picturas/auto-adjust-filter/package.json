@@ -1,12 +1,11 @@
 {
-  "name": "@picturas/borders-add-filter",
-  "private": true, 
-  "type": "module",
+  "name": "@picturas/auto-adjust-filter",
+  "private": true,
   "scripts": {
     "start": "node src/index.js"
   },
   "dependencies": {
-    "@picturas/filter-helper": "^1.0.0", 
+    "@picturas/filter-helper": "^1.0.0",
     "sharp": "^0.32.0",
     "joi": "^17.8.0"
   }
