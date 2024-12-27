@@ -5,7 +5,12 @@ import { readFileSync } from 'fs';
 
 const router = Router();
 
-const schemas = JSON.parse(readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../schemas.json'), 'utf-8'));
+const schemas = JSON.parse(
+    readFileSync(
+        resolve(dirname(fileURLToPath(import.meta.url)), '../schemas.json'),
+        'utf-8',
+    ),
+);
 
 router.get('/', (req, res) => {
     res.json(schemas);

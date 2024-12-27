@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 const secret = process.env.AUTH_JWT_SECRET;
 
 export const checkAuthToken = (req, res, next) => {
-    const token = req.headers['authorization'];
+    const token = req.headers.authorization;
 
     if (!token) {
         next();

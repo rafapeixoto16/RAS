@@ -16,7 +16,8 @@ const opts = {
     duration: 1, // Per second(s)
     inmemoryBlockOnConsumed: 200, // If 200 points consumed
     inmemoryBlockDuration: 60, // block for 60 seconds
-    insuranceLimiter: new RateLimiterMemory({ // In case Redis is down
+    insuranceLimiter: new RateLimiterMemory({
+        // In case Redis is down
         points: 20,
         duration: 1,
     }),
@@ -25,11 +26,12 @@ const opts = {
 const rateLimiterRedis = new RateLimiterRedis(opts);
 
 const rateLimiterMiddleware = (req, res, next) => {
-    rateLimiterRedis.consume(req.connection.remoteAddress)
+    rateLimiterRedis
+        .consume(req.connection.remoteAddress)
         .then(() => {
             next();
         })
-        .catch((rejRes) => {
+        .catch((_rejRes) => {
             res.status(429)
                 .send('Too Many Requests');
         });

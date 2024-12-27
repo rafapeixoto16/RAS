@@ -1,8 +1,8 @@
 import express, { createError } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import * as v1Router from './v1/index.js';
-import rateLimiterMiddleware from './utils/limiter.js';
+import * as v1Router from './v1';
+import rateLimiterMiddleware from './utils/limiter';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -30,5 +30,6 @@ app.use((err, req, res) => {
 
 // Listen
 app.listen(port, () => {
-    console.log('Server started on port ' + port);
+    // eslint-disable-next-line no-console
+    console.log(`Server started on port ${port}`);
 });
