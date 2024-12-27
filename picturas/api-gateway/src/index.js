@@ -2,6 +2,7 @@ import express, { createError } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import v1Router from './v1/index.js';
+import rateLimiterMiddleware from './utils/limiter.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,6 +11,7 @@ const port = process.env.PORT || 3000;
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors()); // TODO we might need to properly configure this
+app.use(rateLimiterMiddleware);
 
 // Routers
 app.use('/v1', v1Router);
