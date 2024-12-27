@@ -28,7 +28,7 @@
                     </button>
                 </div>
             </div>
-            <button @click="register" class="w-full py-2 bg-[#5f59ee] text-white rounded hover:bg-[#564fde] transition">Register</button>
+            <button @click="register" class="w-full py-2 bg-[#5f59ee] text-white rounded hover:bg-[#564fde] transition">Submit</button>
         </div>
     </div>
 </template>
