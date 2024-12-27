@@ -1,9 +1,12 @@
 import { Router } from 'express';
+import * as filtersRouter from './filters.js';
 
-const v1Router = Router();
+const router = Router();
 
-v1Router.get('/', (req, res) => {
+router.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-export default v1Router;
+router.use('/filters', filtersRouter);
+
+export default router;

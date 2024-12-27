@@ -1,7 +1,7 @@
 import express, { createError } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import v1Router from './v1/index.js';
+import * as v1Router from './v1/index.js';
 import rateLimiterMiddleware from './utils/limiter.js';
 
 const app = express();

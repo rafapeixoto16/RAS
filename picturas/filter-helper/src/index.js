@@ -37,7 +37,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
 
     const params = {};
     const imagePath = path.join(
-        fileURLToPath(import.meta.url),
+        path.dirname(fileURLToPath(import.meta.url)),
         '../../sample.jpg'
     );
     const outputPath = 'sample-proc';
