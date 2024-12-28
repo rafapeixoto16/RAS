@@ -3,68 +3,71 @@ import sharp from 'sharp';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as tf from '@tensorflow/tfjs-node';
 
-const smartCropSchema = schemaValidation.object({
-    object: schemaValidation.string().default('person'),
-});
+const smartCropSchema = schemaValidation.object({});
 
-const classMap = {
-    pessoa: 'person',
-    cão: 'dog',
-    gato: 'cat',
-    carro: 'car',
-    bicicleta: 'bicycle',
-    avião: 'airplane',
-    autocarro: 'bus',
-    comboio: 'train',
-    cavalo: 'horse',
-    ovelha: 'sheep',
-    vaca: 'cow',
-    passaro: 'bird',
-    'cachorro quente': 'hot dog',
-    pizza: 'pizza',
-    porta: 'door',
-    janela: 'window',
-    cadeira: 'chair',
-    mesa: 'table',
-    garrafa: 'bottle',
-    livro: 'book',
-    computador: 'laptop',
-    telefone: 'cell phone',
-    refrigerante: 'soda',
-    sapatilhas: 'sneaker',
-    bolsa: 'handbag',
-};
-
-function translateClass(className) {
-    return classMap[className] || className;
-}
-
-async function smartCropHandler(imageBuffer, params) {
-    const { object } = params;
-
-    // fixme encontrar alguma api que traduza a palavra para ingles
-    const objEnglish = translateClass(object);
-
+async function smartCropHandler(imageBuffer, _, _params) {
     const model = await cocoSsd.load();
-
     const tensor = tf.node.decodeImage(imageBuffer, 3);
     const predictions = await model.detect(tensor);
 
-    const target = predictions.find(
-        (pred) => pred.class === objEnglish && pred.score >= 0.5
-    );
-
     tensor.dispose();
 
-    if (!target) {
-        return {
-            error: '404',
-            message: `Nenhum objeto "${objEnglish}" foi detectado.`,
-        };
+    if (!predictions || predictions.length === 0) {
+        return imageBuffer;
     }
 
-    const { bbox } = target;
-    const [x, y, width, height] = bbox.map((v) => Math.max(Math.floor(v), 0));
+    // Calculate area for each detected object
+    const areas = predictions.map((pred) => {
+        const [_x, _y, width, height] = pred.bbox;
+        return {
+            ...pred,
+            area: width * height,
+        };
+    });
+
+    // Find the largest area
+    const largestArea = Math.max(...areas.map((pred) => pred.area));
+
+    // Filter objects with at least 85% of the largest area and limit to 5 objects
+    const selectedObjects = areas
+        .filter((pred) => pred.area >= 0.85 * largestArea)
+        .sort((a, b) => b.area - a.area) // Sort by area descending
+        .slice(0, 5);
+
+    if (selectedObjects.length === 0) {
+        return imageBuffer;
+    }
+
+    // Calculate a tight bounding box around selected objects
+    const tightBbox = selectedObjects.reduce(
+        (acc, obj) => {
+            const [x, y, width, height] = obj.bbox;
+            return {
+                xMin: Math.min(acc.xMin, x),
+                yMin: Math.min(acc.yMin, y),
+                xMax: Math.max(acc.xMax, x + width),
+                yMax: Math.max(acc.yMax, y + height),
+            };
+        },
+        {
+            xMin: Infinity,
+            yMin: Infinity,
+            xMax: -Infinity,
+            yMax: -Infinity,
+        }
+    );
+
+    // Extract the tight bounding box
+    const {
+        xMin,
+        yMin,
+        xMax,
+        yMax,
+    } = tightBbox;
+    const x = Math.max(Math.floor(xMin), 0);
+    const y = Math.max(Math.floor(yMin), 0);
+    const width = Math.max(Math.floor(xMax - xMin), 1);
+    const height = Math.max(Math.floor(yMax - yMin), 1);
 
     return sharp(imageBuffer)
         .extract({

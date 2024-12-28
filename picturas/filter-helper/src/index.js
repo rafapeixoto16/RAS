@@ -37,21 +37,43 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
 
     const params = {};
     const imagePath = path.join(
-        fileURLToPath(import.meta.url),
+        path.dirname(fileURLToPath(import.meta.url)),
         '../../sample.jpg'
     );
-    const outputPath = 'sample-proc.jpg';
+    const outputPath = 'sample-proc';
 
     // TODO use env test for running with sample image
 
     (async () => {
-        const validatedParams = paramsSchema.parse(params);
+        const validatedParams = paramsSchema.safeParse(params);
 
+        if (!validatedParams.success) {
+            // validatedParams.error
+            process.exit(1);
+        }
+
+        const inputFormat = imagePath.split('.')
+            .pop();
         const imageBuffer = await downloadImage(imagePath);
+        const result = await imageHandler(
+            imageBuffer,
+            inputFormat,
+            validatedParams.data,
+        );
 
-        const processedImage = await imageHandler(imageBuffer, validatedParams);
+        let output;
+        let outputFormat;
 
-        await uploadImage(processedImage, outputPath);
+        if (Array.isArray(result)) {
+            [output, outputFormat] = result;
+        } else {
+            output = result;
+            outputFormat = inputFormat;
+        }
+
+        // TODO content hash for name?
+
+        await uploadImage(output, `${outputPath}.${outputFormat}`);
     })();
 
     setTimeout(() => {}, 1000);
