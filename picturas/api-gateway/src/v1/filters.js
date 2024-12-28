@@ -8,8 +8,8 @@ const router = Router();
 const schemas = JSON.parse(
     readFileSync(
         resolve(dirname(fileURLToPath(import.meta.url)), '../schemas.json'),
-        'utf-8',
-    ),
+        'utf-8'
+    )
 );
 
 router.get('/', (req, res) => {
