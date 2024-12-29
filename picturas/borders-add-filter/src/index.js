@@ -1,23 +1,24 @@
 import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
 import sharp from 'sharp';
 
-// Define o esquema para as bordas
+// esquema para as bordas
 const borderSchema = schemaValidation.object({
-    color: schemaValidation.string().default('#000000'), // Cor da borda, padrão preto
-    size: schemaValidation.number().default(10), // Tamanho da borda em pixels
+    //color: schemaValidation.string().default('#FFFFFF'), // cor da borda, default branco (passar pra preto -> #000000')
+    color: schemaValidation.string().default('#000000'), 
+    size: schemaValidation.number().default(100), // tamanho da borda
 });
 
-// Função handler para adicionar bordas
+// funcao handler para adicionar bordas
 async function borderHandler(imageBuffer, _, params) {
     const { color, size } = params;
 
-    // Carrega a imagem original
+    // carrega a imagem original
     const image = sharp(imageBuffer);
 
-    // Obtém as dimensões da imagem original
+    // dimensoes da imagem original
     const { width, height } = await image.metadata();
 
-    // Cria uma nova imagem com o fundo expandido para adicionar bordas
+    // cria uma nova imagem com o fundo expandido para adicionar bordas
     return image
         .extend({
             top: size,
@@ -29,5 +30,5 @@ async function borderHandler(imageBuffer, _, params) {
         .toBuffer();
 }
 
-// Regista o handler
+// regista o handler
 createFilterHandler('addBorder', borderSchema, borderHandler);

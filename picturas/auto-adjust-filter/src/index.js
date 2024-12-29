@@ -1,23 +1,26 @@
 import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
 import sharp from 'sharp';
 
-// Define o esquema para ajuste automático
+//Permitir ao utilizador melhorar a imagem de forma rápida e eficaz,
+//ajustando automaticamente o brilho, contraste, e saturação.
+
+// define o schema pro ajuste automático
 const autoAdjustSchema = schemaValidation.object({
-    brightness: schemaValidation.number().default(1.2), // Aumenta brilho em 20% por padrão
-    saturation: schemaValidation.number().default(1.3), // Aumenta saturação em 30% por padrão
-    hue: schemaValidation.number().default(0), // Matiz sem alteração por padrão
+    brightness: schemaValidation.number().default(1.2),	// Aumenta brilho, 20% por default
+    //contrast: schemaValidation.number().default(1.1),	// Aumenta contraste, 10% por default
+    contrast: schemaValidation.number().default(10),    // Aumenta contraste, 10% por default
+    saturation: schemaValidation.number().default(1.3),	// Aumenta saturacao, 30% por default
 });
 
 // Função handler para ajuste automático
 async function autoAdjustHandler(imageBuffer, _, params) {
-    const { brightness, saturation, hue } = params;
+    const { brightness, saturation, contrast} = params;
 
-    // Aplica o método modulate para ajustar brilho, saturação e matiz
     return sharp(imageBuffer)
         .modulate({
             brightness: brightness,
             saturation: saturation,
-            hue: hue, // Hue é medido em graus (0-360)
+            contrast: contrast, 
         })
         .toBuffer();
 }
