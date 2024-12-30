@@ -1,5 +1,5 @@
 {
-    "name": "@picturas/person-count-filter",
+    "name": "@picturas/object-identification-filter",
     "private": true,
     "type": "module",
     "scripts": {
@@ -8,7 +8,6 @@
     "dependencies": {
         "@picturas/filter-helper": "file:../filter-helper",
         "@tensorflow-models/coco-ssd": "^2.2.3",
-        "@tensorflow/tfjs-node": "^4.22.0",
-        "sharp": "^0.33.5"
+        "@tensorflow/tfjs-node": "^4.22.0"
     }
 }

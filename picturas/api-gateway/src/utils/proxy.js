@@ -21,8 +21,7 @@ const ProxyRequest = (baseTarget) => {
                 apiRes.pipe(res, { end: true });
             })
             .on('error', (err) => {
-                res.status(500)
-                    .json({ error: err });
+                res.status(500).json({ error: err });
             });
 
         req.pipe(apiReq, { end: true });

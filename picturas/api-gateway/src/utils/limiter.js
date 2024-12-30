@@ -32,8 +32,7 @@ const rateLimiterMiddleware = (req, res, next) => {
             next();
         })
         .catch((_rejRes) => {
-            res.status(429)
-                .send('Too Many Requests');
+            res.status(429).send('Too Many Requests');
         });
 };
 

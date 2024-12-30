@@ -12,8 +12,7 @@ export const checkAuthToken = (req, res, next) => {
 
     jwt.verify(token, secret, (err, decoded) => {
         if (err) {
-            res.status(401)
-                .send({});
+            res.status(401).send({});
         } else {
             req.user = decoded;
             next();
@@ -23,8 +22,7 @@ export const checkAuthToken = (req, res, next) => {
 
 export const requiresAuth = (req, res, next) => {
     if (!req.user) {
-        res.status(401)
-            .send({});
+        res.status(401).send({});
     } else {
         next();
     }

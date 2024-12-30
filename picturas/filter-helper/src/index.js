@@ -52,13 +52,12 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
             process.exit(1);
         }
 
-        const inputFormat = imagePath.split('.')
-            .pop();
+        const inputFormat = imagePath.split('.').pop();
         const imageBuffer = await downloadImage(imagePath);
         const result = await imageHandler(
             imageBuffer,
             inputFormat,
-            validatedParams.data,
+            validatedParams.data
         );
 
         let output;

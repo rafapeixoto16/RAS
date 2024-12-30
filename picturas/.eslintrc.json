@@ -1,8 +1,5 @@
 {
-    "extends": [
-        "airbnb-base",
-        "plugin:prettier/recommended"
-    ],
+    "extends": ["airbnb-base", "plugin:prettier/recommended"],
     "env": {
         "node": true,
         "browser": true,
@@ -12,10 +9,7 @@
         "ecmaVersion": 2020
     },
     "rules": {
-        "indent": [
-            "error",
-            4
-        ],
+        "indent": ["error", 4],
         "no-unused-vars": [
             "error",
             {
