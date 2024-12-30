@@ -1,3 +1,5 @@
+/* eslint no-console: 0 */
+
 import socketIo from 'socket.io';
 import Redis from 'ioredis';
 import amqp from 'amqplib';
@@ -24,14 +26,16 @@ io.on('connection', (socket) => {
     });
 });
 
-amqp.connect(process.env.RABBITMQ_URL, (err, conn) => {
-    if (err) throw err;
+amqp.connect(process.env.RABBITMQ_URL, (connErr, conn) => {
+    if (connErr) throw connErr;
 
-    conn.createChannel((err, channel) => {
-        if (err) throw err;
+    conn.createChannel((chanErr, channel) => {
+        if (chanErr) throw chanErr;
 
         channel.assertQueue(process.env.RABBITMQ_QUEUE, { durable: true });
-        console.log(`Listening to RabbitMQ queue: ${process.env.RABBITMQ_QUEUE}`);
+        console.log(
+            `Listening to RabbitMQ queue: ${process.env.RABBITMQ_QUEUE}`,
+        );
 
         channel.consume(process.env.RABBITMQ_QUEUE, (event) => {
             const messageContent = event.content.toString();
