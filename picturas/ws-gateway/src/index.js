@@ -34,7 +34,7 @@ amqp.connect(process.env.RABBITMQ_URL, (connErr, conn) => {
 
         channel.assertQueue(process.env.RABBITMQ_QUEUE, { durable: true });
         console.log(
-            `Listening to RabbitMQ queue: ${process.env.RABBITMQ_QUEUE}`,
+            `Listening to RabbitMQ queue: ${process.env.RABBITMQ_QUEUE}`
         );
 
         channel.consume(process.env.RABBITMQ_QUEUE, (event) => {
