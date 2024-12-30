@@ -6,6 +6,7 @@
         "start": "node src/index.js"
     },
     "dependencies": {
+        "@picturas/filter-helper": "*",
         "tesseract.js": "^5.1.1"
     }
 }
