@@ -24,30 +24,25 @@ io.on('connection', (socket) => {
     });
 });
 
-async function listenToRabbitMQ() {
-    try {
-        const connection = await amqp.connect(process.env.RABBITMQ_URL);
-        const channel = await connection.createChannel();
+amqp.connect(process.env.RABBITMQ_URL, (err, conn) => {
+    if (err) throw err;
 
-        await channel.assertQueue(process.env.RABBITMQ_QUEUE, { durable: true });
+    conn.createChannel((err, channel) => {
+        if (err) throw err;
+
+        channel.assertQueue(process.env.RABBITMQ_QUEUE, { durable: true });
         console.log(`Listening to RabbitMQ queue: ${process.env.RABBITMQ_QUEUE}`);
 
-        channel.consume(process.env.RABBITMQ_QUEUE, (msg) => {
-            if (msg !== null) {
-                const messageContent = msg.content.toString();
-                console.log(`Received from RabbitMQ: ${messageContent}`);
+        channel.consume(process.env.RABBITMQ_QUEUE, (event) => {
+            const messageContent = event.content.toString();
+            console.log(`Received from RabbitMQ: ${messageContent}`);
 
-                io.emit('rabbitmq_message', messageContent);
+            io.emit('rabbitmq_message', messageContent);
 
-                channel.ack(msg);
-            }
+            channel.ack(event);
         });
-    } catch (error) {
-        console.error('RabbitMQ connection error:', error);
-    }
-}
-
-listenToRabbitMQ();
+    });
+});
 
 io.listen(port, () => {
     console.log(`Server running on port ${port}`);
