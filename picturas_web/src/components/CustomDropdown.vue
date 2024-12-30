@@ -38,6 +38,11 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const placement = props.placement;
+const trigger = props.trigger;
+const options = props.options;
+const isIcon = props.isIcon;
+
 const isOpen = ref(false);
 
 const toggleDropdown = () => {
@@ -73,5 +78,13 @@ const toggleDropdown = () => {
 .dropdown-enter-from, .dropdown-leave-to {
     opacity: 0;
     transform: translateY(-10px);
+}
+
+.absolute {
+    width: max-content;
+}
+
+.absolute ul {
+    display: inline-block;
 }
 </style>

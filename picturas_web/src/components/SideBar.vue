@@ -37,7 +37,7 @@
                             <Dropdown
                                 placement="right"
                                 trigger="..."
-                                :options="[{ label: 'Profile', icon: 'bi bi-person-circle' }]"
+                                :options="[{ label: 'Open in a new tab', icon: 'bi bi-box-arrow-up-right' }, { label: 'Move to Trash', icon: 'bi bi-trash' }]"
                             />
                         </div>
                     </div>
@@ -61,7 +61,7 @@
                 <div class="relative">
                     <Dropdown
                         placement="top"
-                        isIcon="true"
+                        :isIcon="true"
                         trigger="bi bi-arrow-down-up text-2xl text-gray-400 cursor-pointer"
                         :options="[
                             { label: 'Profile', icon: 'bi bi-person-circle' },
@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import Dropdown from './Dropdown.vue';
+import Dropdown from './CustomDropdown.vue'
 
 const projects = [
     { name: 'Project 1', link: '/project1' },
