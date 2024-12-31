@@ -6,28 +6,28 @@
         </span>
         <transition name="dropdown">
             <Teleport v-if="appendToBody && isOpen" to="body">
-                <div :style="dropdownStyle" class="absolute bg-[#1a1a2e] shadow-md rounded mt-2 border border-[#2C293C] z-50 text-gray-400">
+                <div :style="dropdownStyle" class="absolute bg-[#F5F7FA] shadow-md rounded mt-2 border border-gray-200 z-50 text-gray-700">
                     <ul>
                         <li 
                             v-for="option in options" 
                             :key="option.label" 
-                            class="flex items-center gap-2 px-4 py-2 hover:bg-[#141428] cursor-pointer"
+                            class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                             <i v-if="option.icon" :class="option.icon"></i>
-                            <span>{{ option.label }}</span>
+                            <span class="text-gray-700">{{ option.label }}</span>
                         </li>
                     </ul>
                 </div>
             </Teleport>
-            <div v-else-if="isOpen" class="absolute bg-[#1a1a2e] shadow-md rounded mt-2 border border-[#2C293C] z-50">
+            <div v-else-if="isOpen" class="absolute bg-[#F5F7FA] shadow-md rounded mt-2 border border-gray-200 z-50">
                 <ul>
                     <li 
                         v-for="option in options" 
                         :key="option.label" 
-                        class="flex items-center gap-2 px-4 py-2 hover:bg-[#141428] cursor-pointer"
+                        class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
                         <i v-if="option.icon" :class="option.icon"></i>
-                        <span>{{ option.label }}</span>
+                        <span class="text-gray-700">{{ option.label }}</span>
                     </li>
                 </ul>
             </div>

@@ -1,12 +1,12 @@
 <template>
     <div class="flex h-screen">
-        <div class="fixed left-0 flex flex-col w-1/6 h-full bg-[#1a1a2e] text-gray-400">
+        <div class="fixed left-0 flex flex-col w-1/6 h-full bg-blue-50 text-gray-700 border-r border-gray-200 shadow-lg">
             <router-link class="flex items-center justify-center px-8 py-4 w-full" to="/">
-                <h1 class="text-5xl font-bold text-white" style="font-family: 'Caveat', cursive;">Picturas</h1>
+                <h1 class="text-5xl font-bold text-gray-900" style="font-family: 'Caveat', cursive;">Picturas</h1>
             </router-link>
             <div class="px-4 space-y-4">
                 <router-link
-                    class="flex items-center justify-center px-2 py-3 w-full bg-[#5f59ee] text-white hover:bg-[#4e48d4] rounded rounded-xl"
+                    class="flex items-center justify-center px-2 py-3 w-full bg-[#3B82F6] text-white hover:bg-[#2563EB] rounded-xl"
                     to="/create-project"
                 >
                     <i class="bi bi-plus mr-2 fs-5"></i>
@@ -22,7 +22,7 @@
             </div>
             <div class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow overflow-y-auto">
                 <h2 class="text-sm font-semibold">Projects</h2>
-                <div class="flex flex-col text-white w-full relative">
+                <div class="flex flex-col w-full relative">
                     <div
                         v-for="project in visibleProjects"
                         :key="project.name"
@@ -45,25 +45,25 @@
                     <button
                         v-if="showSeeAllButton"
                         @click="toggleSeeAll"
-                        class="mt-2 text-[#5f59ee] hover:underline"
+                        class="mt-2 text-[#3B82F6] hover:underline"
                     >
                         {{ seeAll ? 'See Less' : 'See All' }}
                     </button>
                 </div>
             </div>
-            <div class="flex items-center justify-between w-full p-4 mt-auto bg-[#1a1a2e]">
+            <div class="flex items-center justify-between w-full p-4 mt-auto bg-gray-50">
                 <div class="flex items-center">
-                    <i class="bi bi-person-circle text-4xl text-gray-400"></i>
+                    <i class="bi bi-person-circle text-4xl text-gray-700"></i>
                     <div class="ml-4">
-                        <p class="text-white font-semibold">Username</p>
-                        <p class="text-gray-400 text-sm">user@example.com</p>
+                        <p class="text-gray-500 font-semibold">Username</p>
+                        <p class="text-sm">user@example.com</p>
                     </div>
                 </div>
                 <div class="relative">
                     <Dropdown
                         placement="top"
                         :isIcon="true"
-                        trigger="bi bi-arrow-down-up text-2xl text-gray-400 cursor-pointer"
+                        trigger="bi bi-arrow-down-up text-2xl text-gray-700 cursor-pointer"
                         :options="[
                             { label: 'Profile', icon: 'bi bi-person-circle' },
                             { label: 'Settings', icon: 'bi bi-gear' },
@@ -123,21 +123,21 @@ const toggleSeeAll = () => {
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
-    background: #1a1a2e;
+    background: #F5F7FA;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-    background-color: #5f59ee;
+    background-color: #3B82F6;
     border-radius: 10px;
-    border: 2px solid #1a1a2e;
+    border: 2px solid #F5F7FA;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background-color: #4e48d4;
+    background-color: #2563EB;
 }
 
 .overflow-y-auto {
     scrollbar-width: thin;
-    scrollbar-color: #5f59ee #1a1a2e;
+    scrollbar-color: #3B82F6 #F5F7FA;
 }
 </style>

@@ -10,7 +10,7 @@ const showSidebar = computed(() => !hideSidebarRoutes.includes(route.path))
 </script>
 
 <template>
-  <div class="bg-[#0c0b11] flex h-full">
+  <div class="bg-white flex h-full">
     <Sidebar v-if="showSidebar" class="w-64" />
     <div :class="{'ml-24': showSidebar, 'ml-0': !showSidebar}" class="flex-1 overflow-auto">
       <RouterView />
