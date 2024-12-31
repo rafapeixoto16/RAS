@@ -106,7 +106,7 @@ const changedFields = computed(() => {
 
 const updateUserInfo = (key: string, value: string) => {
   if (key in user.value) {
-    (user.value as any)[key] = value;
+    (user.value as User)[key as keyof User] = value as never;
   }
 };
 
