@@ -1,11 +1,25 @@
 <template>
-    <div :class="['relative', placement]">
+    <div :class="['relative', placement]" ref="triggerElement">
         <span @click="toggleDropdown" class="cursor-pointer">
             <i v-if="isIcon" :class="trigger"></i>
             <span v-else>{{ trigger }}</span>
         </span>
         <transition name="dropdown">
-            <div v-if="isOpen" class="absolute bg-[#1a1a2e] shadow-md rounded mt-2 border border-[#2C293C] z-50">
+            <Teleport v-if="appendToBody && isOpen" to="body">
+                <div :style="dropdownStyle" class="absolute bg-[#1a1a2e] shadow-md rounded mt-2 border border-[#2C293C] z-50 text-gray-400">
+                    <ul>
+                        <li 
+                            v-for="option in options" 
+                            :key="option.label" 
+                            class="flex items-center gap-2 px-4 py-2 hover:bg-[#141428] cursor-pointer"
+                        >
+                            <i v-if="option.icon" :class="option.icon"></i>
+                            <span>{{ option.label }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </Teleport>
+            <div v-else-if="isOpen" class="absolute bg-[#1a1a2e] shadow-md rounded mt-2 border border-[#2C293C] z-50">
                 <ul>
                     <li 
                         v-for="option in options" 
@@ -22,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 interface Option {
     label: string;
@@ -34,6 +48,7 @@ interface Props {
     trigger: string;
     options: Option[];
     isIcon?: boolean;
+    appendToBody?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -42,12 +57,38 @@ const placement = props.placement;
 const trigger = props.trigger;
 const options = props.options;
 const isIcon = props.isIcon;
+const appendToBody = props.appendToBody;
 
 const isOpen = ref(false);
+const triggerElement = ref<HTMLElement | null>(null);
+const dropdownStyle = ref({});
 
 const toggleDropdown = () => {
     isOpen.value = !isOpen.value;
+    if (isOpen.value && appendToBody) {
+        updateDropdownPosition();
+    }
 };
+
+const updateDropdownPosition = () => {
+    if (triggerElement.value) {
+        const rect = triggerElement.value.getBoundingClientRect();
+        dropdownStyle.value = {
+            top: `${rect.bottom + window.scrollY}px`,
+            left: `${rect.left + window.scrollX}px`,
+        };
+    }
+};
+
+onMounted(() => {
+    window.addEventListener('resize', updateDropdownPosition);
+    window.addEventListener('scroll', updateDropdownPosition);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateDropdownPosition);
+    window.removeEventListener('scroll', updateDropdownPosition);
+});
 </script>
 
 <style scoped>

@@ -20,9 +20,9 @@
                     Upgrade To Premium
                 </router-link>
             </div>
-            <div class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow">
+            <div class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow overflow-y-auto">
                 <h2 class="text-sm font-semibold">Projects</h2>
-                <div class="flex flex-col text-white w-full">
+                <div class="flex flex-col text-white w-full relative">
                     <div
                         v-for="project in visibleProjects"
                         :key="project.name"
@@ -32,12 +32,13 @@
                             {{ project.name }}
                         </router-link>
                         <div
-                            class="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            class="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                         >
                             <Dropdown
                                 placement="right"
                                 trigger="..."
                                 :options="[{ label: 'Open in a new tab', icon: 'bi bi-box-arrow-up-right' }, { label: 'Move to Trash', icon: 'bi bi-trash' }]"
+                                append-to-body
                             />
                         </div>
                     </div>
@@ -112,3 +113,12 @@ const toggleSeeAll = () => {
     seeAll.value = !seeAll.value;
 };
 </script>
+
+<style scoped>
+.flex-grow {
+    flex-grow: 1;
+}
+.overflow-y-auto {
+    overflow-y: auto;
+}
+</style>
