@@ -65,7 +65,7 @@
                         :isIcon="true"
                         trigger="bi bi-arrow-down-up text-2xl text-gray-700 cursor-pointer"
                         :options="[
-                            { label: 'Profile', icon: 'bi bi-person-circle' },
+                            { label: 'Profile', icon: 'bi bi-person-circle', route: '/profile' },
                             { label: 'Settings', icon: 'bi bi-gear' },
                             { label: 'Logout', icon: 'bi bi-box-arrow-right' }
                         ]"

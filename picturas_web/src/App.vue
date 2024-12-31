@@ -5,7 +5,7 @@ import Sidebar from './components/SideBar.vue'
 import { computed } from 'vue'
 
 const route = useRoute()
-const hideSidebarRoutes = ['/login', '/register']
+const hideSidebarRoutes = ['/login', '/register', '/profile']
 const showSidebar = computed(() => !hideSidebarRoutes.includes(route.path))
 </script>
 
