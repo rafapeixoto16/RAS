@@ -9,9 +9,7 @@ const colorSchema = z.string().regex(/^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/, {
 
 // Esquema para as bordas
 const borderSchema = schemaValidation.object({
-    color: schemaValidation.string()
-        .refine((val) => colorSchema.safeParse(val).success, "Invalid color format")
-        .default('#000000'), // cor da borda, default preto
+    color: colorSchema.default('#000000'), // cor da borda, default preto
     size: schemaValidation.number().default(100), // tamanho da borda
 });
 
