@@ -1,5 +1,5 @@
 <template>
-    <div class="flex h-screen bg-gray-900">
+    <div class="flex h-screen">
         <div class="fixed left-0 flex flex-col w-1/6 h-full bg-[#1a1a2e] text-gray-400">
             <router-link class="flex items-center justify-center px-8 py-4 w-full" to="/">
                 <h1 class="text-5xl font-bold text-white" style="font-family: 'Caveat', cursive;">Picturas</h1>
