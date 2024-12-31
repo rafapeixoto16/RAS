@@ -1,10 +1,17 @@
 import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
 import sharp from 'sharp';
+import { z } from 'zod';
 
-// esquema para as bordas
+// Validação para cores no formato hexadecimal
+const colorSchema = z.string().regex(/^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/, {
+    message: "Color must be a valid hex code in the format #RRGGBB or #RGB",
+});
+
+// Esquema para as bordas
 const borderSchema = schemaValidation.object({
-    //color: schemaValidation.string().default('#FFFFFF'), // cor da borda, default branco (passar pra preto -> #000000')
-    color: schemaValidation.string().default('#000000'), 
+    color: schemaValidation.string()
+        .refine((val) => colorSchema.safeParse(val).success, "Invalid color format")
+        .default('#000000'), // cor da borda, default preto
     size: schemaValidation.number().default(100), // tamanho da borda
 });
 
