@@ -2,7 +2,7 @@ import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
 import sharp from 'sharp';
 
 const rotationSchema = schemaValidation.object({
-    rotationAngle: schemaValidation.number().min(-180).max(180)
+    angle: schemaValidation.number().min(-180).max(180)
 });
 
 async function rotationHandler(imageBuffer, _, params) {
