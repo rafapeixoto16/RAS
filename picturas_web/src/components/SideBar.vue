@@ -121,4 +121,23 @@ const toggleSeeAll = () => {
 .overflow-y-auto {
     overflow-y: auto;
 }
+
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: #1a1a2e;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: #5f59ee;
+    border-radius: 10px;
+    border: 2px solid #1a1a2e;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background-color: #4e48d4;
+}
+
+.overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: #5f59ee #1a1a2e;
+}
 </style>
