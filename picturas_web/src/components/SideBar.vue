@@ -51,26 +51,8 @@
                     </button>
                 </div>
             </div>
-            <div class="flex items-center justify-between w-full p-4 mt-auto bg-gray-50">
-                <div class="flex items-center">
-                    <i class="bi bi-person-circle text-4xl text-gray-700"></i>
-                    <div class="ml-4">
-                        <p class="text-gray-500 font-semibold">Username</p>
-                        <p class="text-sm">user@example.com</p>
-                    </div>
-                </div>
-                <div class="relative">
-                    <Dropdown
-                        placement="top"
-                        :isIcon="true"
-                        trigger="bi bi-arrow-down-up text-2xl text-gray-700 cursor-pointer"
-                        :options="[
-                            { label: 'Profile', icon: 'bi bi-person-circle', route: '/profile' },
-                            { label: 'Settings', icon: 'bi bi-gear' },
-                            { label: 'Logout', icon: 'bi bi-box-arrow-right' }
-                        ]"
-                    />
-                </div>
+            <div class="mt-auto w-full">
+                <ProfileMenu />
             </div>
         </div>
     </div>
@@ -79,6 +61,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import Dropdown from './CustomDropdown.vue'
+import ProfileMenu from './ProfileMenu.vue';
 
 const projects = [
     { name: 'Project 1', link: '/project1' },
