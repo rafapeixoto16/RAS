@@ -1,0 +1,136 @@
+<template>
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 pt-20 sm:pt-8">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-8 sm:mb-16 mt-4 sm:mt-0">
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Choose the perfect plan for your creativity
+          </h1>
+          <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            Unlock powerful editing tools and bring your ideas to life
+          </p>
+        </div>
+  
+        <PlanToggle 
+          v-model="billingCycle"
+          class="mb-8 sm:mb-12"
+        />
+  
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+          <PricingCard
+            title="Anonymous"
+            description="Try basic features without an account"
+            :price="0"
+            :billing-cycle="billingCycle"
+            button-text="Start Now"
+            button-variant="secondary"
+            :features="anonymousFeatures"
+          />
+          
+          <PricingCard
+            title="Free Account"
+            description="Perfect for getting started with photo editing"
+            :price="0"
+            :billing-cycle="billingCycle"
+            button-text="Sign Up Free"
+            button-variant="primary"
+            :features="freeFeatures"
+          />
+  
+          <PricingCard
+            title="Premium"
+            description="Advanced tools for serious creators"
+            :price="billingCycle === 'monthly' ? 9.99 : 99"
+            :billing-cycle="billingCycle"
+            button-text="Upgrade Now"
+            button-variant="premium"
+            :is-popular="true"
+            :features="premiumFeatures"
+          />
+        </div>
+  
+        <FeatureComparison 
+          class="mt-16 sm:mt-24"
+          :features="comparisonFeatures"
+        />
+      </div>
+    </div>
+  </template>
+  
+  <script setup lang="ts">
+  import { ref } from 'vue'
+  import PricingCard from '@/components/PricingCard.vue'
+  import PlanToggle from '@/components/PlanToggle.vue'
+  import FeatureComparison from '@/components/FeatureComparison.vue'
+  
+  const billingCycle = ref<'monthly' | 'yearly'>('monthly')
+  
+  const anonymousFeatures = [
+    { text: 'Basic photo editing tools', included: true },
+    { text: 'Up to 5 projects', included: true },
+    { text: 'Limited templates', included: true },
+    { text: '2GB storage', included: true },
+    { text: 'Standard export quality', included: true },
+    { text: 'Basic filters', included: true },
+  ]
+  
+  const freeFeatures = [
+    { text: 'Everything in Anonymous, plus:', included: true },
+    { text: 'Unlimited projects', included: true },
+    { text: 'Access to all templates', included: true },
+    { text: '10GB storage', included: true },
+    { text: 'HD export quality', included: true },
+    { text: 'Advanced filters', included: true },
+  ]
+  
+  const premiumFeatures = [
+    { text: 'Everything in Free, plus:', included: true },
+    { text: 'AI-powered editing tools', included: true },
+    { text: 'Unlimited storage', included: true },
+    { text: '4K export quality', included: true },
+    { text: 'Priority support', included: true },
+    { text: 'Custom branding', included: true },
+  ]
+  
+  const comparisonFeatures = [
+    {
+      category: 'Storage & Projects',
+      features: [
+        {
+          name: 'Storage Space',
+          anonymous: '2GB',
+          free: '10GB',
+          premium: 'Unlimited'
+        },
+        {
+          name: 'Project Limit',
+          anonymous: '5 projects',
+          free: 'Unlimited',
+          premium: 'Unlimited'
+        }
+      ]
+    },
+    {
+      category: 'Editing Tools',
+      features: [
+        {
+          name: 'Basic Editing',
+          anonymous: true,
+          free: true,
+          premium: true
+        },
+        {
+          name: 'Advanced Filters',
+          anonymous: false,
+          free: true,
+          premium: true
+        },
+        {
+          name: 'AI Tools',
+          anonymous: false,
+          free: false,
+          premium: true
+        }
+      ]
+    }
+  ]
+  </script>  
