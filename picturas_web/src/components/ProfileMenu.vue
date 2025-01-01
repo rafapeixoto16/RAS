@@ -47,7 +47,7 @@
   
   const profileOptions = [
     { label: 'Profile', icon: 'bi bi-person-circle', action: () => router.push('/profile') },
-    { label: 'Settings', icon: 'bi bi-gear', action: () => console.log('Settings clicked') },
+    { label: 'Settings', icon: 'bi bi-gear', action: () => router.push('/settings') },
     { label: 'Logout', icon: 'bi bi-box-arrow-right', action: () => console.log('Logout clicked') },
   ];
   

@@ -5,7 +5,7 @@ import MobileNav from './components/MobileNav.vue'
 import { ref, computed } from 'vue'
 
 const route = useRoute()
-const hideSidebarRoutes = ['/login', '/register', '/profile']
+const hideSidebarRoutes = ['/login', '/register', '/profile', '/settings']
 const showSidebar = computed(() => !hideSidebarRoutes.includes(route.path))
 const isMobileMenuOpen = ref(false)
 </script>
@@ -28,9 +28,9 @@ const isMobileMenuOpen = ref(false)
     <div 
       :class="{
         'md:ml-72': showSidebar,
-        'ml-0': !showSidebar
+        'ml-0 w-full': !showSidebar
       }" 
-      class="flex-1 w-full transition-all duration-300"
+      class="flex-1 transition-all duration-300"
     >
       <RouterView />
     </div>
