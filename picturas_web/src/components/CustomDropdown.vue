@@ -13,8 +13,14 @@
                             :key="option.label" 
                             class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
-                            <i v-if="option.icon" :class="option.icon"></i>
-                            <span class="text-gray-700">{{ option.label }}</span>
+                            <router-link v-if="option.route" :to="option.route" class="flex items-center gap-2">
+                                <i v-if="option.icon" :class="option.icon"></i>
+                                <span class="text-gray-700">{{ option.label }}</span>
+                            </router-link>
+                            <div v-else class="flex items-center gap-2">
+                                <i v-if="option.icon" :class="option.icon"></i>
+                                <span class="text-gray-700">{{ option.label }}</span>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -26,8 +32,14 @@
                         :key="option.label" 
                         class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
-                        <i v-if="option.icon" :class="option.icon"></i>
-                        <span class="text-gray-700">{{ option.label }}</span>
+                        <router-link v-if="option.route" :to="option.route" class="flex items-center gap-2">
+                            <i v-if="option.icon" :class="option.icon"></i>
+                            <span class="text-gray-700">{{ option.label }}</span>
+                        </router-link>
+                        <div v-else class="flex items-center gap-2">
+                            <i v-if="option.icon" :class="option.icon"></i>
+                            <span class="text-gray-700">{{ option.label }}</span>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -37,10 +49,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { RouterLink } from 'vue-router';
 
 interface Option {
     label: string;
     icon?: string;
+    route?: string;
 }
 
 interface Props {
