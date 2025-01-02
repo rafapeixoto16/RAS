@@ -1,4 +1,4 @@
-name: Deploy Picturas App
+name: Undeploy Picturas App
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
 
       - name: Setup SSH Tunnels for Kubernetes API and Docker Registry
         run: |
-          ssh -f -N -L 6443:127.0.0.1:6443 -L 5000:127.0.0.1:5000 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -i ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh -f -N -L 6443:127.0.0.1:6443 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -i ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Configure kubeconfig for Local Use
         uses: appleboy/ssh-action@v0.1.6
@@ -41,9 +41,6 @@ jobs:
           sed -i 's/127.0.0.1:[0-9]\+/localhost:6443/g' $HOME/.kube/config
           export KUBECONFIG=$HOME/.kube/config
 
-      - name: Build and Push Docker Images
-        run: bash .github/scripts/build-docker.sh
-
-      - name: Deploy Helm Chart
+      - name: Undeploy Helm Chart
         run: |
-          helm upgrade --install picturas ./picturas-chart
+          helm uninstall picturas
