@@ -19,7 +19,11 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            - name: RATE_LIMITER_REDIS_HOST
-              value: "rate_limiter_redis"
-            - name: RATE_LIMITER_REDIS_PASSWORD
-              value: "{{ .Values.rate_limiter_redis.auth.password }}"
+            - name: WS_ADAPTER_REDIS_HOST
+              value: "ws_adapter_redis"
+            - name: WS_ADAPTER_REDIS_PASSWORD
+              value: "{{ .Values.ws_adapter_redis.auth.password }}"
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq"
+            - name: RABBITMQ_QUEUE
+              value: "{{ .Values.filter_queue_name }}"

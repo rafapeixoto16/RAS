@@ -9,6 +9,7 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 auth_jwt_secret: "secret"
+filter_queue_name: "filters"
 
 # Rate Limiter Redis
 rate_limiter_redis:
