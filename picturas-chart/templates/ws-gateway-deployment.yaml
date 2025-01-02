@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ws-gateway
+  labels:
+    app: ws-gateway
+spec:
+  selector:
+    matchLabels:
+      app: ws-gateway
+  template:
+    metadata:
+      labels:
+        app: ws-gateway
+    spec:
+      containers:
+        - name: ws-gateway
+          image: TODO/ws-gateway:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: RATE_LIMITER_REDIS_HOST
+              value: "rate_limiter_redis"
+            - name: RATE_LIMITER_REDIS_PASSWORD
+              value: "{{ .Values.rate_limiter_redis.auth.password }}"
