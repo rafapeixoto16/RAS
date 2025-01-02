@@ -8,7 +8,6 @@ import { createAdapter } from '@socket.io/redis-streams-adapter';
 const port = process.env.PORT || 3000;
 
 const redis = new Redis({
-    port: process.env.WS_ADAPTER_REDIS_PORT,
     host: process.env.WS_ADAPTER_REDIS_HOST,
     password: process.env.WS_ADAPTER_REDIS_PASSWORD,
 });
