@@ -11,39 +11,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install kubectl and Helm
-        run: |
-          # Install kubectl
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          mv kubectl /usr/local/bin/
-          
-          # Install Helm
-          curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-      - name: Setup SSH Tunnels for Kubernetes API
-        run: |
-          echo "$SSH_PRIVATE_KEY" > private_key
-          ssh -f -N -L 6443:127.0.0.1:6443 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -p ${{ secrets.SSH_PORT }} -i private_key
-          rm private_key
-
-      - name: Configure kubeconfig for Local Use
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cat $HOME/.kube/config
-        id: retrieve_kubeconfig
-
-      - name: Update kubeconfig
-        run: |
-          echo "${{ steps.retrieve_kubeconfig.outputs.stdout }}" > $HOME/.kube/config
-          sed -i 's/127.0.0.1:[0-9]\+/localhost:6443/g' $HOME/.kube/config
-          export KUBECONFIG=$HOME/.kube/config
-
-      - name: Undeploy Helm Chart
-        run: |
-          helm uninstall picturas
+      - name: Undeploy
+        run: .github/scripts/undeploy.sh
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
