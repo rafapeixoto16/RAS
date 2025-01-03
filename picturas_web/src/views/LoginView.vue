@@ -20,15 +20,12 @@
       </div>
     </div>
     
-    <!-- Right side - Login form with enhanced visual elements -->
     <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-blue-50 to-white relative overflow-hidden">
-      <!-- Animated background elements -->
       <div class="absolute inset-0 overflow-hidden">
         <div class="absolute top-0 left-0 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
         <div class="absolute top-0 right-0 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
         <div class="absolute bottom-0 left-20 w-64 h-64 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
         
-        <!-- Floating shapes -->
         <div class="absolute inset-0 animate-float">
           <div class="absolute top-1/4 left-1/4 w-12 h-12 bg-blue-400 rounded-lg rotate-45 opacity-20"></div>
           <div class="absolute top-3/4 right-1/4 w-16 h-16 bg-blue-300 rounded-full opacity-20"></div>
@@ -36,7 +33,6 @@
         </div>
       </div>
 
-      <!-- Login form container -->
       <div class="w-full max-w-md relative z-10">
         <div class="text-center mb-10">
           <h1 class="text-4xl font-bold text-blue-600 mb-2">Welcome Back</h1>
@@ -80,9 +76,11 @@
           </button>
         </form>
         <div class="mt-6 flex items-center justify-between">
-          <div class="text-sm">
-            <a href="#" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline">Forgot Password?</a>
-          </div>
+            <div class="text-sm">
+            <router-link to="/forgot-password" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline">
+              Forgot Password?
+            </router-link>
+            </div>
           <div class="text-sm">
             <router-link to="/register" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline">
               Create an account
@@ -107,7 +105,6 @@ const toggleShowPassword = () => {
 
 const login = () => {
   console.log('Logging in:', username.value, password.value);
-  // Implement login logic here
 };
 
 const carouselImages = [
