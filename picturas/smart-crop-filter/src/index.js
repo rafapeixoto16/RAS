@@ -57,7 +57,7 @@ async function smartCropHandler(imageBuffer, _, _params) {
         }
     );
 
-    // Extract the tight bounding box
+    // Extract the tight bounding box using area
     const { xMin, yMin, xMax, yMax } = tightBbox;
     const x = Math.max(Math.floor(xMin), 0);
     const y = Math.max(Math.floor(yMin), 0);
