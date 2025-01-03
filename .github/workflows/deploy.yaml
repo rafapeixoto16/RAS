@@ -24,7 +24,7 @@ jobs:
       - name: Setup SSH Tunnels for Kubernetes API and Docker Registry
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key
-          ssh -f -N -L 6443:127.0.0.1:6443 -L 5000:127.0.0.1:5000 ${{ secrets.SSH_USER }}:${{ secrets.SSH_PORT }}@${{ secrets.SSH_HOST }} -i private_key
+          ssh -f -N -L 6443:127.0.0.1:6443 -L 5000:127.0.0.1:5000 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -p ${{ secrets.SSH_PORT }} -i private_key
           rm private_key
 
       - name: Configure kubeconfig for Local Use
