@@ -23,12 +23,15 @@ jobs:
 
       - name: Setup SSH Tunnels for Kubernetes API and Docker Registry
         run: |
-          ssh -f -N -L 6443:127.0.0.1:6443 -L 5000:127.0.0.1:5000 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -i ${{ secrets.SSH_PRIVATE_KEY }}
+          echo "$SSH_PRIVATE_KEY" > private_key
+          ssh -f -N -L 6443:127.0.0.1:6443 -L 5000:127.0.0.1:5000 ${{ secrets.SSH_USER }}:${{ secrets.SSH_PORT }}@${{ secrets.SSH_HOST }} -i private_key
+          rm private_key
 
       - name: Configure kubeconfig for Local Use
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: ${{ secrets.SSH_HOST }}dd
+          port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |

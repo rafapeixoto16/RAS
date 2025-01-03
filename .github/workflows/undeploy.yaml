@@ -21,14 +21,17 @@ jobs:
           # Install Helm
           curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-      - name: Setup SSH Tunnels for Kubernetes API and Docker Registry
+      - name: Setup SSH Tunnels for Kubernetes API
         run: |
-          ssh -f -N -L 6443:127.0.0.1:6443 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -i ${{ secrets.SSH_PRIVATE_KEY }}
+          echo "$SSH_PRIVATE_KEY" > private_key
+          ssh -f -N -L 6443:127.0.0.1:6443 ${{ secrets.SSH_USER }}:${{ secrets.SSH_PORT }}@${{ secrets.SSH_HOST }} -i private_key
+          rm private_key
 
       - name: Configure kubeconfig for Local Use
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |

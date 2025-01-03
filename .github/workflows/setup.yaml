@@ -15,6 +15,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
@@ -42,9 +43,16 @@ jobs:
             apt-get update
             apt-get install -y kubelet kubeadm kubectl
             apt-mark hold kubelet kubeadm kubectl
+            
+            # Enable CRI in containerd
+            sed -i 's/^disabled_plugins = \["cri"\]/#disabled_plugins = ["cri"]/' /etc/containerd/config.toml
+            systemctl restart containerd
+            
+            # Disable swap
+            echo 'KUBELET_EXTRA_ARGS="--fail-swap-on=false"' | tee /etc/default/kubelet > /dev/null
 
             # Initialize Kubernetes Cluster
-            kubeadm init --cri-socket /var/run/docker.sock --pod-network-cidr=192.168.0.0/16
+            kubeadm init --pod-network-cidr=192.168.0.0/16
 
             # Setup kubectl for the user
             mkdir -p $HOME/.kube
