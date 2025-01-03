@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projects-ms
+  labels:
+    app: projects-ms
+spec:
+  selector:
+    matchLabels:
+      app: projects-ms
+  template:
+    metadata:
+      labels:
+        app: projects-ms
+    spec:
+      containers:
+        - name: projects-ms
+          image: localhost:5000/projects-ms:latest
+          ports:
+            - containerPort: 3000

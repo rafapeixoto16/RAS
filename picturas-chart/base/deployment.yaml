@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: EXAMPLE
+  labels:
+    app: EXAMPLE
+spec:
+  selector:
+    matchLabels:
+      app: EXAMPLE
+  template:
+    metadata:
+      labels:
+        app: EXAMPLE
+    spec:
+      containers:
+        - name: EXAMPLE
+          image: localhost:5000/EXAMPLE:latest
+          ports:
+            - containerPort: 3000

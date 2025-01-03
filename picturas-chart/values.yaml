@@ -1,0 +1,44 @@
+nameOverride: ""
+fullnameOverride: ""
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+auth_jwt_secret: "secret"
+filter_queue_name: "filters"
+
+# Rate Limiter Redis
+rate_limiter_redis:
+  auth:
+    enabled: yes
+    password: "safePassword1"
+
+# WS Adapter Redis
+ws_adapter_redis:
+  auth:
+    enabled: yes
+    password: "safePassword2"
+
+# TODO mongo
+
+# Filters
+filters:
+  - auto-adjust-filter
+  - binarization-filter
+  - borders-add-filter
+  - brightness-filter
+  - contrast-filter
+  - cropping-filter
+  - grayscale-filter
+  - object-identification-filter
+  - ocr-filter
+  - person-count-filter
+  - remove-bg-filter
+  - resize-filter
+  - rotate-filter
+  - saturation-filter
+  - smart-crop-filter

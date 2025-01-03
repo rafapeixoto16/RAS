@@ -1,0 +1,23 @@
+{{- range .Values.filters }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ . }}
+  labels:
+    app: {{ . }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ . }}
+  template:
+    metadata:
+      labels:
+        app: {{ . }}
+    spec:
+      containers:
+        - name: {{ . }}
+          image: localhost:5000/{{ . }}:latest
+          ports:
+            - containerPort: 3000
+{{-end }}

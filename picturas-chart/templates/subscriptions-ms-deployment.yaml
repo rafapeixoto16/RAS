@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subscriptions-ms
+  labels:
+    app: subscriptions-ms
+spec:
+  selector:
+    matchLabels:
+      app: subscriptions-ms
+  template:
+    metadata:
+      labels:
+        app: subscriptions-ms
+    spec:
+      containers:
+        - name: subscriptions-ms
+          image: localhost:5000/subscriptions-ms:latest
+          ports:
+            - containerPort: 3000
