@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: EXAMPLE
-          image: TODO/EXAMPLE:latest
+          image: localhost:5000/EXAMPLE:latest
           ports:
             - containerPort: 3000
