@@ -5,7 +5,7 @@ import MobileNav from './components/MobileNav.vue'
 import { ref, computed } from 'vue'
 
 const route = useRoute()
-const hideSidebarRoutes = ['/login', '/register', '/profile', '/settings']
+const hideSidebarRoutes = ['/login', '/register', '/profile', '/settings', '/forgot-password']
 const showSidebar = computed(() => !hideSidebarRoutes.includes(route.path))
 const isMobileMenuOpen = ref(false)
 </script>
