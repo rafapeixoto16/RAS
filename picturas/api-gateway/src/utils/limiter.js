@@ -2,7 +2,6 @@ import { RateLimiterMemory, RateLimiterRedis } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
 
 const redisClient = new Redis({
-    port: process.env.RATE_LIMITER_REDIS_PORT,
     host: process.env.RATE_LIMITER_REDIS_HOST,
     password: process.env.RATE_LIMITER_REDIS_PASSWORD,
     options: {

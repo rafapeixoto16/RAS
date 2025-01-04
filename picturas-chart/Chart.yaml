@@ -1,0 +1,32 @@
+apiVersion: v2
+name: picturas-chart
+description: A Helm chart for deploying Picturas in Kubernetes
+
+type: application
+version: 0.0.1
+appVersion: "latest"
+
+dependencies:
+  - name: rabbitmq
+    version: 15.2.1
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    version: 20.6.1
+    repository: https://charts.bitnami.com/bitnami
+    alias: rate_limiter_redis
+  - name: redis
+    version: 20.6.1
+    repository: https://charts.bitnami.com/bitnami
+    alias: ws_adapter_redis
+  - name: mongodb
+    version: 16.4.0
+    repository: https://charts.bitnami.com/bitnami
+    alias: users-ms-db
+  - name: mongodb
+    version: 16.4.0
+    repository: https://charts.bitnami.com/bitnami
+    alias: projects-ms-db
+  - name: mongodb
+    version: 16.4.0
+    repository: https://charts.bitnami.com/bitnami
+    alias: subscriptions-ms-db
