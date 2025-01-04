@@ -1,49 +1,44 @@
 <template>
-  <div class="flex relative">
-    <!-- Sidebar -->
-    <div class="w-64 h-screen bg-gray-800 text-white p-6">
-      <div class="flex flex-col items-center">
-        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-8" style='font-family: "Caveat", cursive;'>PICTURAS</h1>
-        <nav class="flex flex-col space-y-4">
-          <a href="#home" class="hover:bg-gray-700 py-2 px-4 rounded-md">Back to home</a>
-          <a href="#settings" class="hover:bg-gray-700 py-2 px-4 rounded-md">Settings</a>
-        </nav>
-      </div>
-    </div>
-
+  <div class="flex flex-col items-center justify-start relative min-h-screen">
     <!-- Main content -->
     <div class="flex-1 flex flex-col p-4 sm:p-6 md:p-8 w-full max-w-[1600px] mx-auto mt-16 md:mt-0">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-12">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
-          Your Profile
-          <span v-if="isEditing" class="text-blue-500"> > Edit Profile</span>
-        </h1>
-        <div class="flex justify-end w-full">
-          <!-- Edit Profile Button or Save/Cancel Buttons -->
-          <button
-            v-if="!isEditing"
-            @click="startEditing"
-            class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 text-white text-base sm:text-lg rounded-full hover:bg-blue-600 transition-colors duration-300"
-          >
-            Edit Profile
-          </button>
-          <div v-if="isEditing" class="flex space-x-4">
+      <!-- PICTURAS Heading -->
+      <h1 class="text-5xl font-bold text-gray-800 mb-8 text-center" style='font-family: "Caveat", cursive;'>PICTURAS</h1>
+
+      <div class="bg-white rounded-xl shadow-lg p-4 sm:p-8 md:p-12">
+        <!-- Your Profile and Edit buttons -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-12">
+          <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
+            Your Profile
+            <span v-if="isEditing" class="text-blue-500"> > Edit Profile</span>
+          </h1>
+          <div class="flex justify-end w-full">
+            <!-- Edit Profile Button or Save/Cancel Buttons -->
             <button
-              @click="cancelEditing"
-              class="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-gray-100 text-gray-700 text-base sm:text-lg rounded-full hover:bg-gray-200 transition-colors duration-300"
+              v-if="!isEditing"
+              @click="startEditing"
+              class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 text-white text-base sm:text-lg rounded-full hover:bg-blue-600 transition-colors duration-300"
             >
-              Cancel
+              Edit Profile
             </button>
-            <button
-              @click="saveChanges"
-              class="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-blue-500 text-white text-base sm:text-lg rounded-full hover:bg-blue-600 transition-colors duration-300"
-            >
-              Save Changes
-            </button>
+            <div v-if="isEditing" class="flex space-x-4">
+              <button
+                @click="cancelEditing"
+                class="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-gray-100 text-gray-700 text-base sm:text-lg rounded-full hover:bg-gray-200 transition-colors duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                @click="saveChanges"
+                class="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-blue-500 text-white text-base sm:text-lg rounded-full hover:bg-blue-600 transition-colors duration-300"
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-lg p-4 sm:p-8 md:p-12">
+
+        <!-- Avatar and Info Section -->
         <div class="flex flex-col md:flex-row md:gap-12 lg:gap-24">
           <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-0">
             <!-- Avatar -->
@@ -94,6 +89,8 @@
     @cancel="cancelChanges"
   />
 </template>
+
+
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
