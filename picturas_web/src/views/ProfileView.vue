@@ -41,7 +41,7 @@
         <!-- Avatar and Info Section -->
         <div class="flex flex-col md:flex-row md:gap-12 lg:gap-24">
           <!-- Avatar and Upload Section -->
-          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-0 flex-col items-center">
+          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-100 flex-col items-center">
             <!-- Avatar -->
             <UserAvatar
               :image-url="user.avatarUrl"
@@ -82,6 +82,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Back Home Link -->
+    <div class="absolute top-0 right-0 mt-10 mr-10">
+      <a 
+        href="#"
+        @click=""
+        class="text-blue-500 hover:text-blue-700 text-lg font-medium hover:underline"
+      >
+        Back to Home
+      </a>
+    </div>
   </div>
 
   <!-- Confirmation Modal -->
@@ -92,7 +103,6 @@
     @cancel="cancelChanges"
   />
 </template>
-
 
 
 <script setup lang="ts">
