@@ -41,19 +41,34 @@
         <!-- Avatar and Info Section -->
         <div class="flex flex-col md:flex-row md:gap-12 lg:gap-240">
           <!-- Avatar and Upload Section -->
-          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-100 flex-col items-center mt-[-70px]">
+          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-100 flex-col items-center mt-[-70px] relative">
             <!-- Avatar -->
-            <UserAvatar
-              :image-url="user.avatarUrl"
-              :username="user.username"
-            />
-            <!-- Avatar Upload  -->
-            <div v-if="isEditing" class="mt-4">
+            <div class="relative group">
+              <div
+                v-if="!user.avatarUrl"
+                class="w-32 h-32 rounded-full bg-blue-500 text-white text-4xl font-bold flex items-center justify-center uppercase"
+              >
+                {{ user.username.charAt(0) }}
+              </div>
+              <img
+                v-else
+                :src="user.avatarUrl"
+                :alt="user.username"
+                class="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
+              />
+              <div
+                v-if="isEditing"
+                class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                @click="triggerFileInput"
+              >
+                <span class="text-white text-xl font-bold">+</span>
+              </div>
               <input
+                ref="fileInput"
                 type="file"
                 @change="handleAvatarUpload"
                 accept="image/*"
-                class="bg-gray-200 text-sm p-2 rounded-md"
+                class="hidden"
               />
             </div>
           </div>
@@ -104,11 +119,9 @@
   />
 </template>
 
-
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import UserAvatar from '@/components/UserAvatar.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
 interface User {
@@ -124,7 +137,7 @@ const user = ref<User>({
   username: 'johndoe',
   email: 'john.doe@example.com',
   fullName: 'John Doe',
-  avatarUrl: '',
+  avatarUrl: '', // Avatar inicial vazio
   location: 'New York, USA',
   bio: 'Passionate photographer and digital artist',
 });
@@ -167,8 +180,6 @@ const saveChanges = () => {
 };
 
 const confirmChanges = () => {
-  // Implement save changes functionality
-  console.log('Saving changes', user.value);
   originalUser.value = { ...user.value };
   isEditing.value = false;
   showConfirmationModal.value = false;
@@ -187,6 +198,11 @@ const handleAvatarUpload = (event: Event) => {
     };
     reader.readAsDataURL(file);
   }
+};
+
+const triggerFileInput = () => {
+  const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+  fileInput?.click();
 };
 
 const router = useRouter();
