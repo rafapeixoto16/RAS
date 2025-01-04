@@ -5,7 +5,7 @@
       <div class="flex flex-col items-center">
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-8" style='font-family: "Caveat", cursive;'>PICTURAS</h1>
         <nav class="flex flex-col space-y-4">
-          <a href="#home" class="hover:bg-gray-700 py-2 px-4 rounded-md">Home</a>
+          <a href="#home" class="hover:bg-gray-700 py-2 px-4 rounded-md">Back to home</a>
           <a href="#settings" class="hover:bg-gray-700 py-2 px-4 rounded-md">Settings</a>
         </nav>
       </div>
@@ -14,7 +14,34 @@
     <!-- Main content -->
     <div class="flex-1 flex flex-col p-4 sm:p-6 md:p-8 w-full max-w-[1600px] mx-auto mt-16 md:mt-0">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-12">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Your Profile</h1>
+        <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
+          Your Profile
+          <span v-if="isEditing" class="text-blue-500"> > Edit Profile</span>
+        </h1>
+        <div class="flex justify-end w-full">
+          <!-- Edit Profile Button or Save/Cancel Buttons -->
+          <button
+            v-if="!isEditing"
+            @click="startEditing"
+            class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 text-white text-base sm:text-lg rounded-full hover:bg-blue-600 transition-colors duration-300"
+          >
+            Edit Profile
+          </button>
+          <div v-if="isEditing" class="flex space-x-4">
+            <button
+              @click="cancelEditing"
+              class="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-gray-100 text-gray-700 text-base sm:text-lg rounded-full hover:bg-gray-200 transition-colors duration-300"
+            >
+              Cancel
+            </button>
+            <button
+              @click="saveChanges"
+              class="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-blue-500 text-white text-base sm:text-lg rounded-full hover:bg-blue-600 transition-colors duration-300"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
       </div>
       <div class="bg-white rounded-xl shadow-lg p-4 sm:p-8 md:p-12">
         <div class="flex flex-col md:flex-row md:gap-12 lg:gap-24">
@@ -24,18 +51,17 @@
               :image-url="user.avatarUrl"
               :username="user.username"
             />
+            <!-- Avatar Upload  -->
+            <div v-if="isEditing" class="mt-4">
+              <input
+                type="file"
+                @change="handleAvatarUpload"
+                accept="image/*"
+                class="bg-gray-200 text-sm p-2 rounded-md"
+              />
+            </div>
           </div>
           <div class="w-full md:w-3/4">
-            <!-- Edit Profile Button inside the profile rectangle -->
-            <div class="flex justify-end mb-4">
-              <button
-                v-if="!isEditing"
-                @click="startEditing"
-                class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 text-white text-base sm:text-lg rounded-full hover:bg-blue-600 transition-colors duration-300"
-              >
-                Edit Profile
-              </button>
-            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
               <div v-for="(item, index) in userInfoItems" :key="index" class="flex flex-col space-y-2">
                 <label class="text-gray-600 text-base sm:text-lg font-medium">{{ item.label }}</label>
@@ -54,20 +80,6 @@
                 <div v-if="index < userInfoItems.length - 1" class="border-b border-gray-100 mt-4"></div>
               </div>
             </div>
-            <div v-if="isEditing" class="mt-8 sm:mt-12 flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
-              <button
-                @click="cancelEditing"
-                class="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-gray-100 text-gray-700 text-base sm:text-lg rounded-full hover:bg-gray-200 transition-colors duration-300"
-              >
-                Cancel
-              </button>
-              <button
-                @click="saveChanges"
-                class="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-blue-500 text-white text-base sm:text-lg rounded-full hover:bg-blue-600 transition-colors duration-300"
-              >
-                Save Changes
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -82,10 +94,6 @@
     @cancel="cancelChanges"
   />
 </template>
-
-
-
-
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
@@ -157,5 +165,16 @@ const confirmChanges = () => {
 
 const cancelChanges = () => {
   showConfirmationModal.value = false;
+};
+
+const handleAvatarUpload = (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      user.value.avatarUrl = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
 };
 </script>
