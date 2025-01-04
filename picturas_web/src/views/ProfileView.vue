@@ -8,7 +8,7 @@
       <div class="bg-white rounded-xl shadow-lg p-4 sm:p-8 md:p-12">
         <!-- Your Profile and Edit buttons -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-12">
-          <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0 flex items-center">
+          <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0 flex items-center whitespace-nowrap">
             Your Profile
             <span v-if="isEditing" class="text-blue-500 ml-2"> > Edit Profile</span>
           </h1>
@@ -39,9 +39,9 @@
         </div>
 
         <!-- Avatar and Info Section -->
-        <div class="flex flex-col md:flex-row md:gap-12 lg:gap-24">
+        <div class="flex flex-col md:flex-row md:gap-12 lg:gap-240">
           <!-- Avatar and Upload Section -->
-          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-100 flex-col items-center">
+          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-100 flex-col items-center mt-[-70px]">
             <!-- Avatar -->
             <UserAvatar
               :image-url="user.avatarUrl"
@@ -87,7 +87,7 @@
     <div class="absolute top-0 right-0 mt-10 mr-10">
       <a 
         href="#"
-        @click=""
+        @click="goHome"
         class="text-blue-500 hover:text-blue-700 text-lg font-medium hover:underline"
       >
         Back to Home
@@ -107,6 +107,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import UserAvatar from '@/components/UserAvatar.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
@@ -186,5 +187,10 @@ const handleAvatarUpload = (event: Event) => {
     };
     reader.readAsDataURL(file);
   }
+};
+
+const router = useRouter();
+const goHome = () => {
+  router.push('/');
 };
 </script>
