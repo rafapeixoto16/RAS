@@ -8,9 +8,9 @@
       <div class="bg-white rounded-xl shadow-lg p-4 sm:p-8 md:p-12">
         <!-- Your Profile and Edit buttons -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-12">
-          <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
+          <h1 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0 flex items-center">
             Your Profile
-            <span v-if="isEditing" class="text-blue-500"> > Edit Profile</span>
+            <span v-if="isEditing" class="text-blue-500 ml-2"> > Edit Profile</span>
           </h1>
           <div class="flex justify-end w-full">
             <!-- Edit Profile Button or Save/Cancel Buttons -->
@@ -40,7 +40,8 @@
 
         <!-- Avatar and Info Section -->
         <div class="flex flex-col md:flex-row md:gap-12 lg:gap-24">
-          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-0">
+          <!-- Avatar and Upload Section -->
+          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-0 flex-col items-center">
             <!-- Avatar -->
             <UserAvatar
               :image-url="user.avatarUrl"
@@ -56,6 +57,8 @@
               />
             </div>
           </div>
+
+          <!-- Info Section -->
           <div class="w-full md:w-3/4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
               <div v-for="(item, index) in userInfoItems" :key="index" class="flex flex-col space-y-2">
