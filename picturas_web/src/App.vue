@@ -2,6 +2,7 @@
 import { RouterView, useRoute } from 'vue-router'
 import Sidebar from './components/SideBar.vue'
 import MobileNav from './components/MobileNav.vue'
+import Footer from './components/Footer.vue'
 import { ref, computed } from 'vue'
 
 const route = useRoute()
@@ -30,9 +31,16 @@ const isMobileMenuOpen = ref(false)
         'md:ml-[16.6667%]': showSidebar,
         'ml-0 w-full': !showSidebar
       }" 
-      class="flex-1 transition-all duration-300"
+      class="flex-1 transition-all duration-300 flex-col w-full"
     >
-      <RouterView />
+    <div class="min-h-screen-app" >
+      <RouterView  />
     </div>
+
+    <!-- Footer -->
+      <Footer />
+    </div>
+
+ 
   </div>
 </template>

@@ -56,3 +56,8 @@ const goHome = () => {
   router.push('/');
 };
 </script>
+<style scoped>
+.min-h-screen {
+    min-height: calc(100vh - 5.3vh);
+  }
+</style>
