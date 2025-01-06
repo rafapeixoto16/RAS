@@ -19,12 +19,6 @@ rate-limiter-redis:
     enabled: yes
     password: "safePassword1"
 
-# WS Adapter Redis
-ws-adapter-redis:
-  auth:
-    enabled: yes
-    password: "safePassword2"
-
 # TODO mongo
 
 stripe_private_key: ""
