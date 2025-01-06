@@ -6,21 +6,21 @@ import sharp from 'sharp';
 
 // define o schema pro ajuste automático
 const autoAdjustSchema = schemaValidation.object({
-    brightness: schemaValidation.number().default(1.2),	// Aumenta brilho, 20% por default
+    brightness: schemaValidation.number().default(1.2), // Aumenta brilho, 20% por default
     //contrast: schemaValidation.number().default(1.1),	// Aumenta contraste, 10% por default
-    contrast: schemaValidation.number().default(10),    // Aumenta contraste, 10% por default
-    saturation: schemaValidation.number().default(1.3),	// Aumenta saturacao, 30% por default
+    contrast: schemaValidation.number().default(10), // Aumenta contraste, 10% por default
+    saturation: schemaValidation.number().default(1.3), // Aumenta saturacao, 30% por default
 });
 
 // Função handler para ajuste automático
 async function autoAdjustHandler(imageBuffer, _, params) {
-    const { brightness, saturation, contrast} = params;
+    const { brightness, saturation, contrast } = params;
 
     return sharp(imageBuffer)
         .modulate({
             brightness: brightness,
             saturation: saturation,
-            contrast: contrast, 
+            contrast: contrast,
         })
         .toBuffer();
 }

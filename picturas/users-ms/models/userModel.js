@@ -1,24 +1,26 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
-let SALT_WORK_FACTOR = 10
+let SALT_WORK_FACTOR = 10;
 
-const userSchema = new mongoose.Schema({
-    nome: { type: String, required: true },
-    email: { type: String, required: true, unique: true, index: true },
-    password: { type: String, required: true },
-    username: { type: String, required: true, unique: true, index: true },
-    location: { type: String, required: true },
-    bio: { type: String, required: false },
-    refresh: {type: String, required: false},
-    active: { type: Boolean, default: false },
-}, { versionKey: false });
+const userSchema = new mongoose.Schema(
+    {
+        nome: { type: String, required: true },
+        email: { type: String, required: true, unique: true, index: true },
+        password: { type: String, required: true },
+        username: { type: String, required: true, unique: true, index: true },
+        location: { type: String, required: true },
+        bio: { type: String, required: false },
+        refresh: { type: String, required: false },
+        active: { type: Boolean, default: false },
+    },
+    { versionKey: false }
+);
 
 const User = mongoose.model('user', userSchema);
 
 function bcryptEncripter(user, next) {
-    if (!user.isModified('password'))
-        return next();
+    if (!user.isModified('password')) return next();
 
     bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
         if (err) return next(err);
@@ -46,4 +48,4 @@ userSchema.pre('findOneAndUpdate', function (next) {
     bcryptEncripter(this, next);
 });
 
-export {User}
+export { User };

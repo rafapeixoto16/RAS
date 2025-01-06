@@ -1,13 +1,13 @@
 import express, { createError } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 import usersRouter from './routes/users';
 
 const app = express();
 const port = 3000;
 
-var mongoBD = "mongodb://127.0.0.1/users" //TODO USER ENV
+var mongoBD = 'mongodb://127.0.0.1/users'; //TODO USER ENV
 mongoose.connect(mongoDB);
 
 const db = mongoose.connection;
@@ -41,4 +41,4 @@ app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
 
-app.listen(3000)
+app.listen(3000);

@@ -5,7 +5,6 @@ const secret = process.env.AUTH_JWT_SECRET;
 //module.exports.PREMIUM = 3
 //module.exports.REGISTADO = 2
 
-
 export const checkAuthToken = (req, res, next) => {
     const token = req.headers.authorization;
 
