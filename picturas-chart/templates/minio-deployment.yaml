@@ -16,6 +16,9 @@ spec:
       containers:
         - name: minio
           image: minio/minio:latest
+          args:
+            - "server"
+            - "/data"
           ports:
             - containerPort: 9000
           env:
