@@ -7,11 +7,24 @@ import nodemailer from "nodemailer" ;
 const app = express();
 const router = express.Router();
 
+const kinds = {
+    resetPassword: 'ResetPassword',
+    validateAccount: 'ValidateAccount'
+}
+
 router.post('/', async (req, res) => {
-    User.addUser(req.body).then(dados => res.status(201).jsonp({ dados: dados })).catch(err => {
+    User.addUser(req.body).then(user => {
+            const filteredUser = { _id: user._id, kind: kinds.validateAccount };
+
+            const validationToken = jwt.sign(filteredUser, process.env.VALIDATE_JWT_SECRET, { expiresIn: '24h' });
+            sendEmail (user, validationToken, kinds.validateAccount);
+            res.sendStatus(200);
+    }
+    ).catch(err => {
         res.status(444).jsonp({ error: 'Failed to add user' }); //TODO email
     });
 });
+
 
 router.post('/login', async (req, res) => {
     const user = User.getUserByEmail(req.body.email);
@@ -21,11 +34,7 @@ router.post('/login', async (req, res) => {
     }
 
     if(!user.active){
-        const filteredUser = { _id: user._id, }
-
-        const accessToken = jwt.sign(filteredUser, process.env.AUTH_JWT_SECRET, { expiresIn: '24h'});
-
-
+        return res.status(401).send('User must be validated first');
     }
 
     try {
@@ -107,12 +116,12 @@ router.delete('/logout', (req, res) => {
         User.updateUser(userInfo._id, userInfo).then(resp => res.sendStatus(200)).catch(err => res.sendStatus(400));});
 });
 
-function sendEmail (){
+function sendEmail (user,token,kind){
 
     const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOSTNAME,
         port: process.env.EMAIL_PORT,
-        secure: false, // true for port 465, false for other ports
+        secure: false,
         auth: {
             user: `no-reply@${process.env.EMAIL_HOSTNAME}`,
             pass: process.env.EMAIL_PASSWORD,
@@ -120,12 +129,9 @@ function sendEmail (){
     });
 
     transporter.sendMail({
-        from: '"Maddison Foo Koch 👻" <maddison53@ethereal.email>', // sender address
-        to: "bar@example.com, baz@example.com", // list of receivers
-        subject: "Hello ✔", // Subject line
-        text: "Hello world?", // plain text body
-        html: "<b>Hello world?</b>", // html body
+        from: `no-reply@${process.env.EMAIL_HOSTNAME}`,
+        to: user.email,
+        subject: kind,
+        html: `<a href="${process.env.FRONTEND_URL}/validate/${token}" target="_blank">Click here!</a> max time is 24h.`,
     });
-
-
 }
