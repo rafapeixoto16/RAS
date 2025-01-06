@@ -28,6 +28,10 @@ stripe_webhook_secret: ""
 s3_user: "se-username"
 s3_pass: "se-password"
 
+# By default, it is no-reply@{{ email_hostname }}
+email_hostname: "picturas.pt"
+email_password: "safePassword2"
+
 # Filters
 filters:
   - auto-adjust-filter
