@@ -1,33 +1,48 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
-import User from '../controllers/user';
-import { getUser } from '../controler/user.js';
+import { getUser, addUser, getUserByEmail, User, updateUserPassword, updateUser } from '../controller/user.js';
 const app = express()
-const SALT_WORK_FACTOR = 10;
+const router = express.Router();
 
-app.get('/', (req, res) => {
-    //res.json(users)
-})
-
-app.post('/', async (req, res) => {
+router.post('/', async (req, res) => {
     User.addUser(req.body).then(dados => res.status(201).jsonp({ dados: dados })).catch(err => {
         res.status(444).jsonp({ error: 'Failed to add user'});
     });
 })
 
-app.post('/users/login', async (req, res) => {
-    const user = User.getUser(req.body.email)
+router.post('/users/login', async (req, res) => {
+    const user = User.getUserByEmail(req.body.email) //TODO token maybe
 
     if (user == null) {
         return res.status(400).send('Cannot find user')
     }
     try {//fixme verify
         if(await bcrypt.compare(req.body.password, user.password)) {
-            res.send('Success')
+            //TODO token
         } else {
-            res.send('Not Allowed')
+
         }
     } catch {
-        res.status(500).send()
+        res.status(445).send()
     }
 })
+
+router.get('/:id',  (req, res) => {
+    User.getUser(req.params.id).then(resp => res.status.jsonp(resp)).catch(err => res.status(446).send(err))
+})
+
+router.put('/:id/update',  (req, res) => {
+    User.updateUser(req.params.id,req.body).then(resp => res.status.jsonp(resp)).catch(err => res.status(447).send(err))
+})
+
+router.put('/:id/password', function (req, res) {
+    User.updateUserPassword(req.params.id, req.body.password)
+        .then(dados => {
+            res.status(201).jsonp(dados);
+        })
+        .catch(erro => {
+            res.status(448).render('error', { error: erro, message: 'Erro na alteração do utilizador' });
+        });
+});
+
+
