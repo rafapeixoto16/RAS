@@ -1,3 +1,5 @@
+registry: ""
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -6,19 +8,19 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 auth_jwt_secret: "secret"
 filter_queue_name: "filters"
 
 # Rate Limiter Redis
-rate_limiter_redis:
+rate-limiter-redis:
   auth:
     enabled: yes
     password: "safePassword1"
 
 # WS Adapter Redis
-ws_adapter_redis:
+ws-adapter-redis:
   auth:
     enabled: yes
     password: "safePassword2"

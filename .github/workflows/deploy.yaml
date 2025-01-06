@@ -11,6 +11,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Write production values to values-production.yaml
+        run: |
+          echo "${{ secrets.HELM_CONFIG_VALUES }}" > values-production.yaml
+
       - name: Deploy
         run: .github/scripts/deploy.sh
         env:

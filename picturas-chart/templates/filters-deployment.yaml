@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: {{ . }}
-          image: localhost:5000/{{ . }}:latest
+          image: {{ $.Values.registry }}{{ . }}:latest
           ports:
             - containerPort: 3000
-{{-end }}
+{{- end }}

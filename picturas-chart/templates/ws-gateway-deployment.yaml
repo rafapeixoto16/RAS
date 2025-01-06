@@ -15,14 +15,14 @@ spec:
     spec:
       containers:
         - name: ws-gateway
-          image: localhost:5000/ws-gateway:latest
+          image: {{ .Values.registry }}ws-gateway:latest
           ports:
             - containerPort: 3000
           env:
             - name: WS_ADAPTER_REDIS_HOST
-              value: "ws_adapter_redis"
+              value: "ws-adapter-redis"
             - name: WS_ADAPTER_REDIS_PASSWORD
-              value: "{{ .Values.ws_adapter_redis.auth.password }}"
+              value: "{{ index .Values "ws-adapter-redis" "auth" "password" }}"
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq"
             - name: RABBITMQ_QUEUE
