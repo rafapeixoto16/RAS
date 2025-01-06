@@ -15,6 +15,7 @@ filter_queue_name: "filters"
 
 # Rate Limiter Redis
 rate-limiter-redis:
+  architecture: standalone
   auth:
     enabled: yes
     password: "safePassword1"
