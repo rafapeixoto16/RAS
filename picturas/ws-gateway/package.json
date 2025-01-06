@@ -6,9 +6,7 @@
         "start": "node src/index.js"
     },
     "dependencies": {
-        "@socket.io/redis-streams-adapter": "^0.2.2",
         "amqplib": "^0.10.5",
-        "ioredis": "^5.4.2",
         "socket.io": "^4.8.1"
     }
 }

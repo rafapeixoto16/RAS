@@ -18,3 +18,12 @@ spec:
           image: {{ .Values.registry }}subscriptions-ms:latest
           ports:
             - containerPort: 3000
+          env:
+            - name: STRIPE_PRIVATE_KEY
+              value: {{ .Values.stripe_private_key }}
+            - name: STRIPE_WEBHOOK_SECRET
+              value: {{ .Values.stripe_webhook_secret }}
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq"
+            - name: RABBITMQ_QUEUE
+              value: "{{ .Values.filter_queue_name }}"
