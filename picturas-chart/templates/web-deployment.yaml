@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: web
-          image: localhost:5000/web:latest
+          image: {{ .Values.registry }}web:latest
           ports:
             - containerPort: 80

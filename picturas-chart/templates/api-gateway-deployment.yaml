@@ -15,11 +15,11 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: localhost:5000/api-gateway:latest
+          image: {{ .Values.registry }}api-gateway:latest
           ports:
             - containerPort: 3000
           env:
             - name: RATE_LIMITER_REDIS_HOST
-              value: "rate_limiter_redis"
+              value: "rate-limiter-redis"
             - name: RATE_LIMITER_REDIS_PASSWORD
-              value: "{{ .Values.rate_limiter_redis.auth.password }}"
+              value: "{{ index .Values "rate-limiter-redis" "auth" "password" }}"

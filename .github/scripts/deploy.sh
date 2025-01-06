@@ -22,7 +22,7 @@ sed -i 's/127.0.0.1:[0-9]\+/localhost:6443/g' $HOME/.kube/config
 export KUBECONFIG=$HOME/.kube/config
 
 # Build Images
-bash .github/scripts/build-docker.sh
+bash scripts/build-docker.sh true
 
 # Helm install
-helm upgrade --install picturas ./picturas-chart
+helm upgrade --install picturas ./picturas-chart -f values-production.yaml

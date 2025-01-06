@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: projects-ms
-          image: localhost:5000/projects-ms:latest
+          image: {{ .Values.registry }}projects-ms:latest
           ports:
             - containerPort: 3000
