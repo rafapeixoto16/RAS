@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     username: { type: String, required: true, unique: true, index: true },
     location: { type: String, required: true },
+    bio: { type: String, required: false },
+    refresh: {type: String, required: false},
+    active: { type: Boolean, default: false },
 }, { versionKey: false });
 
 const User = mongoose.model('user', userSchema);

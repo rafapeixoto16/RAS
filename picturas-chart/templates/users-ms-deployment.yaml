@@ -18,3 +18,8 @@ spec:
           image: {{ .Values.registry }}users-ms:latest
           ports:
             - containerPort: 3000
+          env:
+            - name: AUTH_JWT_SECRET
+              value: {{ .Values.auth_jwt_secret }}
+            - name: REFRESH_JWT_SECRET
+              value: {{ .Values.refresh_jwt_secret }}
