@@ -5,7 +5,7 @@ import * as v1Router from './v1';
 import rateLimiterMiddleware from './utils/limiter';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 // Default configs
 app.use(morgan('dev'));

@@ -5,7 +5,7 @@ import Redis from 'ioredis';
 import amqp from 'amqplib';
 import { createAdapter } from '@socket.io/redis-streams-adapter';
 
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 const redis = new Redis({
     host: process.env.WS_ADAPTER_REDIS_HOST,

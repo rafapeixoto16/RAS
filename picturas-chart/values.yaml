@@ -27,6 +27,9 @@ ws-adapter-redis:
 
 # TODO mongo
 
+stripe_private_key: ""
+stripe_webhook_secret: ""
+
 # Filters
 filters:
   - auto-adjust-filter
