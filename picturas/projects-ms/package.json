@@ -1,8 +1,8 @@
 {
-  "name": "@picturas/projects-ms",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "start": "node src/index.js"
-  }
+    "name": "@picturas/projects-ms",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "start": "node src/index.js"
+    }
 }

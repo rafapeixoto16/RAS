@@ -10,7 +10,12 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
-auth_jwt_secret: "secret"
+frontend_url: "localhost"
+
+auth_jwt_secret: "auth-secret"
+refresh_jwt_secret: "refresh-secret"
+validate_jwt_secret: "validate-secret"
+
 filter_queue_name: "filters"
 
 # Rate Limiter Redis
@@ -30,6 +35,7 @@ s3_pass: "s3-password"
 
 # By default, it is no-reply@{{ email_hostname }}
 email_hostname: "picturas.pt"
+email_port: 1025
 email_password: "email-password"
 
 # Filters
