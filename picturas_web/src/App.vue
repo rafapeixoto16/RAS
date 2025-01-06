@@ -15,7 +15,7 @@ const isMobileMenuOpen = ref(false)
     <!-- Desktop Sidebar -->
     <Sidebar 
       v-if="showSidebar" 
-      class="hidden md:block w-64 fixed h-full" 
+      class="hidden md:block fixed h-full" 
     />
     
     <!-- Mobile Navigation -->
@@ -27,7 +27,7 @@ const isMobileMenuOpen = ref(false)
     <!-- Main Content -->
     <div 
       :class="{
-        'md:ml-72': showSidebar,
+        'md:ml-[16.6667%]': showSidebar,
         'ml-0 w-full': !showSidebar
       }" 
       class="flex-1 transition-all duration-300"

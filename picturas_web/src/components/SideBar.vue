@@ -2,18 +2,18 @@
     <div class="flex h-screen">
         <div class="fixed left-0 flex flex-col w-1/6 h-full bg-blue-50 text-gray-700 border-r border-gray-200 shadow-lg">
             <router-link class="flex items-center justify-center px-8 py-4 w-full" to="/">
-                <h1 class="text-5xl font-bold text-gray-900" style="font-family: 'Caveat', cursive;">Picturas</h1>
+                <h1 class="text-3xl xl:text-5xl font-bold text-gray-900" style="font-family: 'Caveat', cursive;">Picturas</h1>
             </router-link>
             <div class="px-4 space-y-4">
                 <router-link
-                    class="flex items-center justify-center px-2 py-3 w-full bg-[#3B82F6] text-white hover:bg-[#2563EB] rounded-xl"
+                    class="flex items-center justify-center px-2 py-3 w-full bg-[#3B82F6] text-sm xl:text-base text-white hover:bg-[#2563EB] rounded-xl"
                     to="/create-project"
                 >
                     <i class="bi bi-plus mr-2 fs-5"></i>
                     Create a Project
                 </router-link>
                 <router-link
-                    class="flex items-center justify-center px-2 py-3 w-full bg-[#ff9800] text-white hover:bg-[#e68900] rounded rounded-xl"
+                    class="flex items-center justify-center px-2 py-3 w-full bg-[#ff9800] text-sm xl:text-base text-white hover:bg-[#e68900] rounded rounded-xl"
                     to="/upgrade"
                 >
                     <i class="bi bi-gem mr-2"></i>
