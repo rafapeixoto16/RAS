@@ -25,7 +25,6 @@ router.post('/', async (req, res) => {
     });
 });
 
-
 router.post('/login', async (req, res) => {
     const user = User.getUserByEmail(req.body.email);
 
@@ -60,6 +59,19 @@ router.post('/login', async (req, res) => {
     } catch {
         res.status(445).send();
     }
+});
+
+router.post('/passwordRecovery', async (req, res) => {
+    await User.findUserByEmail(req.body.email).then(user => {
+            const filteredUser = { _id: user._id, kind: kinds.resetPassword };
+
+            const validationToken = jwt.sign(filteredUser, process.env.VALIDATE_JWT_SECRET, { expiresIn: '24h' });
+            sendEmail (user, validationToken, kinds.resetPassword);
+            res.sendStatus(200);
+        }
+    ).catch(err => {
+        res.status(404).jsonp({ error: 'Failed to find the user' }); //TODO email
+    });
 });
 
 router.get('/:id', (req, res) => {
