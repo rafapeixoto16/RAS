@@ -25,6 +25,9 @@ rate-limiter-redis:
 stripe_private_key: ""
 stripe_webhook_secret: ""
 
+s3_user: "se-username"
+s3_pass: "se-password"
+
 # Filters
 filters:
   - auto-adjust-filter

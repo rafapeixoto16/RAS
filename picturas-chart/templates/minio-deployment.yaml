@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels:
+    app: minio
+spec:
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          image: minio/minio
+          ports:
+            - containerPort: 9000
+          env:
+            - name: MINIO_ROOT_USER
+              value: {{ .Values.s3_user }}
+            - name: MINIO_ROOT_PASSWORD
+              value: {{ .Values.s3_pass }}
