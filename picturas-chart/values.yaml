@@ -18,19 +18,19 @@ rate-limiter-redis:
   architecture: standalone
   auth:
     enabled: yes
-    password: "safePassword1"
+    password: "rate-limit-password"
 
 # TODO mongo
 
-stripe_private_key: ""
-stripe_webhook_secret: ""
+stripe_private_key: "stripe-private-key"
+stripe_webhook_secret: "stripe-webhook-key"
 
-s3_user: "se-username"
-s3_pass: "se-password"
+s3_user: "s3-username"
+s3_pass: "s3-password"
 
 # By default, it is no-reply@{{ email_hostname }}
 email_hostname: "picturas.pt"
-email_password: "safePassword2"
+email_password: "email-password"
 
 # Filters
 filters:
