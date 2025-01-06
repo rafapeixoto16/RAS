@@ -24,10 +24,10 @@
               class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
               <i class="bi bi-upload mr-2"></i>
-              Carregar Arquivos
+              Upload Files
             </button>
-            <p class="text-gray-500 text-sm mt-2">ou arraste e solte aqui</p>
-            <p class="text-gray-400 text-xs mt-1">Suporta imagens ou ZIP</p>
+            <p class="text-gray-500 text-sm mt-2">or drag and drop here</p>
+            <p class="text-gray-400 text-xs mt-1">Supports images or ZIP</p>
           </div>
         </div>
 
@@ -80,7 +80,7 @@
     <!-- Sidebar -->
     <div class="w-full md:w-1/4 bg-blue-100 border-l border-gray-200 shadow-lg">
       <div class="sticky top-0 p-4 max-h-screen overflow-y-auto">
-        <h2 class="text-lg font-semibold mb-4">Editar</h2>
+        <h2 class="text-lg font-semibold mb-4">Edit</h2>
         <div class="space-y-2">
           <router-link
             v-for="(option, index) in editOptions"
@@ -119,18 +119,18 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const additionalFileInput = ref<HTMLInputElement | null>(null)
 
 const editOptions = [
-  { label: 'Binarização', url: '/edit/binary' },
-  { label: 'Alteração do tamanho', url: '/edit/resize' },
-  { label: 'Colocação de bordos coloridos', url: '/edit/borders' },
-  { label: 'Remoção do fundo da imagem', url: '/edit/background' },
-  { label: 'Passar de imagem colorida para tons de cinzento', url: '/edit/grayscale' },
-  { label: 'Rotações', url: '/edit/rotate' },
-  { label: 'Alteração do brilho e contraste', url: '/edit/brightness' },
-  { label: 'Contar pessoas', url: '/edit/count-people' },
-  { label: 'Extrair texto presente na imagem', url: '/edit/ocr' },
-  { label: 'Identificar objetos', url: '/edit/objects' },
-  { label: 'Colocar óculos em todas as pessoas', url: '/edit/glasses' },
-  { label: 'Colocar a linha de fora de jogo em lances de futebol', url: '/edit/offside' }
+  { label: 'Binarization', url: '/edit/binary' },
+  { label: 'Resizing', url: '/edit/resize' },
+  { label: 'Adding colored borders', url: '/edit/borders' },
+  { label: 'Removing the background from the image, leaving only people', url: '/edit/background' },
+  { label: 'Converting a colored image to grayscale', url: '/edit/grayscale' },
+  { label: 'Rotations', url: '/edit/rotate' },
+  { label: 'Adjusting brightness and contrast', url: '/edit/brightness' },
+  { label: 'Counting people', url: '/edit/count-people' },
+  { label: 'Extracting text from the image', url: '/edit/ocr' },
+  { label: 'Identifying objects', url: '/edit/objects' },
+  { label: 'Adding glasses to all the people', url: '/edit/glasses' },
+  { label: 'Adding an offside line in football plays', url: '/edit/offside' }
 ]
 
 const triggerFileInput = () => {
