@@ -4,7 +4,6 @@ import { getUser, addUser, getUserByEmail, User, updateUserPassword, updateUser 
 import jwt from 'jsonwebtoken';
 import nodemailer from "nodemailer" ;
 
-const app = express();
 const router = express.Router();
 
 const kinds = {
