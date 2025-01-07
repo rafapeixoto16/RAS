@@ -1,1 +1,140 @@
-<a href="{{frontendUrl}}/{{path}}/{{token}}" target="_blank">Click here!</a> max time is 24h.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>{{title}} - Picturas</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+            font-family: Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+        }
+
+        .logo {
+            display: block;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+        }
+
+        .content {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .title {
+            color: #1f2937;
+            margin-bottom: 16px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .description {
+            color: #4b5563;
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: background-color 0.2s ease;
+        }
+
+        .button:hover {
+            background-color: #2563eb;
+        }
+
+        .expiry {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+                padding: 24px;
+            }
+
+            .title {
+                font-size: 20px;
+            }
+
+            .description {
+                font-size: 15px;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1f2937;
+            }
+
+            .container {
+                background-color: #111827;
+            }
+
+            .title {
+                color: #f9fafb;
+            }
+
+            .description {
+                color: #e5e7eb;
+            }
+
+            .expiry {
+                color: #9ca3af;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .button {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <img alt="Picturas Logo" class="logo" src="{{frontendUrl}}//logo_square.png">
+
+    <div class="content">
+        <h1 class="title">{{title}}</h1>
+
+        <p class="description">
+            {{description}}
+        </p>
+
+        <a class="button" href="{{frontendUrl}}/{{path}}/{{token}}" target="_blank">
+            <i class="bi bi-check2-circle mr-2 fs-5"></i>
+            {{title}}!
+        </a>
+
+        <p class="expiry">
+            The link is only valid for 24 hours.
+        </p>
+    </div>
+</div>
+</body>
+</html>

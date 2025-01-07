@@ -3,6 +3,17 @@ import { readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
+const vars = {
+    'validateAccount': {
+        title: 'Confirm your Account Creation',
+        description: 'Please click the button below to confirm your email address.',
+    },
+    'resetPassword': {
+        title: 'Reset Password',
+        description: 'We received a request to reset your password. Click the button below to create a new password.',
+    },
+};
+
 function renderTemplate(filePath, variables) {
     const path = resolve(dirname(fileURLToPath(import.meta.url)), filePath);
     const template = readFileSync(path, 'utf-8');
@@ -27,6 +38,7 @@ export default function sendEmail(email, token, kind) {
         frontendUrl: process.env.FRONTEND_URL,
         token,
         path: kind,
+        ...vars[kind],
     });
 
     transporter.sendMail({

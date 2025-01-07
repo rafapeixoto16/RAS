@@ -10,7 +10,7 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
-frontend_url: "localhost"
+frontend_url: "http://localhost"
 
 auth_jwt_secret: "auth-secret"
 refresh_jwt_secret: "refresh-secret"
