@@ -1,4 +1,4 @@
-import * as User from '../models/userModel';
+import * as User from '../models/userModel.js';
 
 export const getUser = (id) => {
     return User.findOne({ _id: id }).exec();
