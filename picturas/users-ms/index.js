@@ -1,3 +1,5 @@
+/* eslint no-console: 0 */
+
 import express, { createError } from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
@@ -6,8 +8,8 @@ import usersRouter from './routes/users';
 const app = express();
 const port = 3000;
 
-let mongoBD = 'mongodb://127.0.0.1/users'; //TODO USER ENV
-mongoose.connect(mongoDB);
+const mongoBD = 'mongodb://127.0.0.1/users'; // TODO USER ENV
+mongoose.connect(mongoBD);
 
 const db = mongoose.connection;
 
@@ -37,7 +39,6 @@ app.use((err, req, res) => {
 
 // Listen
 app.listen(port, () => {
-    // eslint-disable-next-line no-console
     console.log(`Server started on port ${port}`);
 });
 

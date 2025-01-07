@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
-import * as User from '../controller/user.js';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import * as OTPAuth from 'otpauth';
+import * as User from '../controller/user';
 
 const router = Router();
 
@@ -14,6 +14,25 @@ const kinds = {
 };
 
 const issuer = 'Picturas - Stolen from UMinho Students Work';
+
+function sendEmail(user, token, kind) {
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOSTNAME,
+        port: process.env.EMAIL_PORT,
+        secure: false,
+        auth: {
+            user: `no-reply@${process.env.EMAIL_HOSTNAME}`,
+            pass: process.env.EMAIL_PASSWORD,
+        },
+    });
+
+    transporter.sendMail({
+        from: `no-reply@${process.env.EMAIL_HOSTNAME}`,
+        to: user.email,
+        subject: kind,
+        html: `<a href="${process.env.FRONTEND_URL}/${kind}/${token}" target="_blank">Click here!</a> max time is 24h.`,
+    });
+}
 
 router.post('/', async (req, res) => {
     User.addUser(req.body)
@@ -90,7 +109,7 @@ router.post('/login/2', async (req, res) => {
 
             if (userInfo.otpEnabled) {
                 const totp = new OTPAuth.TOTP({
-                    issuer: issuer,
+                    issuer,
                     label: userInfo.username,
                     algorithm: 'SHA1',
                     digits: 6,
@@ -119,7 +138,7 @@ router.post('/login/2', async (req, res) => {
 
             const randomBytes = crypto.randomBytes(16)
                 .toString('hex');
-            filteredUser['accessId'] = randomBytes;
+            filteredUser.accessId = randomBytes;
             const refreshToken = jwt.sign(
                 filteredUser,
                 process.env.REFRESH_JWT_SECRET,
@@ -129,9 +148,9 @@ router.post('/login/2', async (req, res) => {
             User.updateUser(user._id, user)
                 .then((_) =>
                     res.json({
-                        accessToken: accessToken,
-                        refreshToken: refreshToken,
-                    }),
+                        accessToken,
+                        refreshToken,
+                    })
                 )
                 .catch((_) => res.status(447));
         }
@@ -160,7 +179,7 @@ router.post('/passwordRecovery', async (req, res) => {
         });
 });
 
-//TODO what about validating the user (ps: being done in the gateway, but must be checked), but that is the work of another issue
+// TODO what about validating the user (ps: being done in the gateway, but must be checked), but that is the work of another issue
 router.get('/:id', (req, res) => {
     User.getUser(req.params.id)
         .then((resp) => res.status.json(resp)) // TODO what about filtering it's data??
@@ -192,12 +211,12 @@ router.post('/:id/otp', (req, res) => {
     const secret = new OTPAuth.Secret({ size: 20 });
 
     const totp = new OTPAuth.TOTP({
-        issuer: issuer,
+        issuer,
         label: userInfo.username,
         algorithm: 'SHA1',
         digits: 6,
         period: 30,
-        secret: secret,
+        secret,
     });
 
     userInfo.otpEnabled = true;
@@ -236,7 +255,7 @@ router.post('/token', (req, res) => {
         const accessToken = jwt.sign(user.name, process.env.AUTH_JWT_SECRET, {
             expiresIn: '15m',
         });
-        res.json({ accessToken: accessToken });
+        res.json({ accessToken });
     });
 });
 
@@ -260,22 +279,3 @@ router.delete('/logout', (req, res) => {
             .catch((err) => res.sendStatus(400));
     });
 });
-
-function sendEmail(user, token, kind) {
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOSTNAME,
-        port: process.env.EMAIL_PORT,
-        secure: false,
-        auth: {
-            user: `no-reply@${process.env.EMAIL_HOSTNAME}`,
-            pass: process.env.EMAIL_PASSWORD,
-        },
-    });
-
-    transporter.sendMail({
-        from: `no-reply@${process.env.EMAIL_HOSTNAME}`,
-        to: user.email,
-        subject: kind,
-        html: `<a href="${process.env.FRONTEND_URL}/${kind}/${token}" target="_blank">Click here!</a> max time is 24h.`,
-    });
-}
