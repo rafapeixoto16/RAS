@@ -46,7 +46,7 @@ app.post('/create-subscription', async (req, res) => {
     try {
         const customer = await stripe.customers.create({
             payment_method: paymentMethodId,
-            email: email,
+            email,
             invoice_settings: { default_payment_method: paymentMethodId },
         });
 
@@ -71,9 +71,10 @@ app.post('/create-subscription', async (req, res) => {
             trial_period_days: user.trialUsed ? 0 : 7,
         });
 
-        res.json({ subscriptionId: subscription.id });
+        return res.json({ subscriptionId: subscription.id });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to create subscription' });
+        return res.status(500)
+            .json({ error: 'Failed to create subscription' });
     }
 });
 
@@ -96,12 +97,14 @@ app.get('/transaction-history', async (req, res) => {
             date: new Date(inv.created * 1000),
         }));
 
-        res.json({
+        return res.json({
             email,
             history,
         });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch transaction history' });
+        return res
+            .status(500)
+            .json({ error: 'Failed to fetch transaction history' });
     }
 });
 
@@ -127,81 +130,79 @@ app.get('/billing-info', async (req, res) => {
                 : null,
         };
 
-        res.json({
+        return res.json({
             email,
             billingInfo,
         });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch billing info' });
+        return res.status(500)
+            .json({ error: 'Failed to fetch billing info' });
     }
 });
 
-app.post(
-    '/webhook',
-    bodyParser.raw({ type: 'application/json' }),
-    async (req, res) => {
-        const sig = req.headers['stripe-signature'];
-        let event;
+app.post('/webhook', async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
 
-        try {
-            event = stripe.webhooks.constructEvent(
-                req.body,
-                sig,
-                process.env.STRIPE_WEBHOOK_SECRET
-            );
-        } catch (err) {
-            return res.status(400).send(`Webhook Error: ${err.message}`);
-        }
-
-        if (event.type === 'invoice.payment_succeeded') {
-            const invoice = event.data.object;
-            const subscriptionId = invoice.subscription;
-
-            const subscription =
-                await stripe.subscriptions.retrieve(subscriptionId);
-            const email = subscription.metadata.email;
-
-            if (users[email]) {
-                users[email] = {
-                    ...users[email],
-                    premium: true,
-                    plan:
-                        subscription.items.data[0].price.unit_amount ===
-                        PLANS.monthly.amount
-                            ? 'monthly'
-                            : 'yearly',
-                };
-            }
-        } else if (event.type === 'invoice.payment_failed') {
-            const invoice = event.data.object;
-            const subscriptionId = invoice.subscription;
-
-            const subscription =
-                await stripe.subscriptions.retrieve(subscriptionId);
-            const email = subscription.metadata.email;
-
-            if (users[email]) {
-                users[email] = {
-                    ...users[email],
-                    premium: false,
-                };
-            }
-        } else if (event.type === 'customer.subscription.deleted') {
-            const subscription = event.data.object;
-            const email = subscription.metadata.email;
-
-            if (users[email]) {
-                users[email] = {
-                    ...users[email],
-                    premium: false,
-                    plan: 'regular',
-                };
-            }
-        }
-
-        res.status(200);
+    try {
+        event = stripe.webhooks.constructEvent(
+            req.body,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET,
+        );
+    } catch (err) {
+        return res.status(400)
+            .send(`Webhook Error: ${err.message}`);
     }
-);
+
+    if (event.type === 'invoice.payment_succeeded') {
+        const invoice = event.data.object;
+        const subscriptionId = invoice.subscription;
+
+        const subscription =
+            await stripe.subscriptions.retrieve(subscriptionId);
+        const { email } = subscription.metadata;
+
+        if (users[email]) {
+            users[email] = {
+                ...users[email],
+                premium: true,
+                plan:
+                    subscription.items.data[0].price.unit_amount ===
+                    PLANS.monthly.amount
+                        ? 'monthly'
+                        : 'yearly',
+            };
+        }
+    } else if (event.type === 'invoice.payment_failed') {
+        const invoice = event.data.object;
+        const subscriptionId = invoice.subscription;
+
+        const subscription =
+            await stripe.subscriptions.retrieve(subscriptionId);
+        const { email } = subscription.metadata;
+
+        if (users[email]) {
+            users[email] = {
+                ...users[email],
+                premium: false,
+            };
+        }
+    } else if (event.type === 'customer.subscription.deleted') {
+        const subscription = event.data.object;
+        const { email } = subscription.metadata;
+
+        if (users[email]) {
+            users[email] = {
+                ...users[email],
+                premium: false,
+                plan: 'regular',
+            };
+        }
+    }
+
+    return res.status(200);
+});
 
 // Listen
 app.listen(port, () => {

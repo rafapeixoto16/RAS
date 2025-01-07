@@ -20,9 +20,6 @@ async function borderHandler(imageBuffer, _, params) {
     // carrega a imagem original
     const image = sharp(imageBuffer);
 
-    // dimensoes da imagem original
-    const { width, height } = await image.metadata();
-
     // cria uma nova imagem com o fundo expandido para adicionar bordas
     return image
         .extend({

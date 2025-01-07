@@ -1,11 +1,12 @@
-import { User } from '../models/userModel.js';
+import * as User from '../models/userModel';
 
 export const getUser = (id) => {
     return User.findOne({ _id: id }).exec();
 };
 
 export const getUserByEmail = (email) => {
-    return User.findOne({ email: email }).exec();
+    return User.findOne({ email })
+        .exec();
 };
 
 export const addUser = (u) => {
@@ -17,7 +18,8 @@ export const updateUser = (id, info) => {
 };
 
 export const updateUserPassword = (id, pwd) => {
-    return User.updateOne({ _id: id }, pwd).exec(); //excute
+    return User.updateOne({ _id: id }, pwd)
+        .exec(); // excute
 };
 
 export const deleteUser = (id) => {
