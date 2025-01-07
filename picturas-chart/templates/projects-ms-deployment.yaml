@@ -18,3 +18,11 @@ spec:
           image: {{ .Values.registry }}projects-ms:latest
           ports:
             - containerPort: 3000
+          volumeMounts:
+            - mountPath: /mnt/nfs
+              name: nfs-volume
+      volumes:
+        - name: nfs-volume
+          nfs:
+            path: /
+            server: nfs

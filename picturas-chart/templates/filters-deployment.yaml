@@ -20,4 +20,12 @@ spec:
           image: {{ $.Values.registry }}{{ . }}:latest
           ports:
             - containerPort: 3000
+          volumeMounts:
+            - mountPath: /mnt/nfs
+              name: nfs-volume
+      volumes:
+        - name: nfs-volume
+          nfs:
+            path: /
+            server: nfs
 {{- end }}
