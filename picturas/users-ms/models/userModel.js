@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
         email: { type: String, required: true, unique: true, index: true },
         password: { type: String, required: true },
         username: { type: String, required: true, unique: true, index: true },
+        profilePic: { type: String, default: null }, // URL da imagem 
         location: { type: String, required: true },
         bio: { type: String, required: false },
         refresh: { type: String, required: false },

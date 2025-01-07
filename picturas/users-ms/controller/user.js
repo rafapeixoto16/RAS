@@ -22,6 +22,10 @@ export const updateUserPassword = (id, pwd) => {
         .exec(); // excute
 };
 
+export const updateUserProfilePic = (id, profilePicUrl) => {
+    return User.updateOne({ _id: id }, { profilePic: profilePicUrl }).exec();
+};
+
 export const deleteUser = (id) => {
     return User.deleteOne({ _id: id }).exec();
 };
