@@ -1,17 +1,19 @@
 <template>
   <div class="flex-1 flex flex-col p-4 sm:p-6 md:p-8 z-10">
     <!-- Notification Pop-Up with Transition -->
-
     <transition name="slide-fade">
       <div
         v-if="notification"
-        class="fixed top-4 left-1/2 transform bg-azure-radiance-500 text-white px-4 py-2 rounded-lg shadow-lg z-50"
+        class="fixed top-4 left-1/4 md:left-1/2 transform bg-azure-radiance-500 text-white px-4 py-2 rounded-lg shadow-lg z-50"
+        style="will-change: transform;"
       >
         {{ notification }}
       </div>
     </transition>
 
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Your Projects</h1>
+    <h1 class="text-3xl font-bold text-azure-radiance-500 mb-8">
+      Your Projects
+    </h1>
     <div class="w-full flex justify-center mb-6 sm:mb-8 mt-16 md:mt-0">
       <div class="relative w-full max-w-2xl px-4">
         <input
