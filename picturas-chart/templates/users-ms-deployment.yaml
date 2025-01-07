@@ -30,6 +30,6 @@ spec:
             - name: EMAIL_HOSTNAME
               value: {{ .Values.email_hostname }}
             - name: EMAIL_PORT
-              value: {{ .Values.email_port }}
+              value: "{{ .Values.email_port }}"
             - name: EMAIL_PASSWORD
               value: {{ .Values.email_password }}
