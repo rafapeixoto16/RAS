@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import sendEmail from '../email/sendEmail.js';
 import * as OTPAuth from 'otpauth';
 import * as User from '../controller/user';
+import * as z from '../../utils/zodDemo.js';
 
 const router = Router();
 
@@ -164,14 +165,28 @@ router.post('/passwordRecovery', async (req, res) => {
 router.get('/:id', (req, res) => {
     User.getUser(req.params.id)
         .then((resp) => {
-            res.status.json(resp);
-        }) // TODO what about filtering it's data??
+            const filteredUser = {
+                username: resp.username,
+                email: resp.email,
+                location: resp.location,
+                bio: resp.bio,
+                nome: resp.nome
+            };
+
+            res.status.json(filteredUser);
+        })
         .catch((err) => res.sendStatus(446));
 });
 
-router.put('/:id/update', (req, res) => {
+router.put('/:id/update', validateRequest({
+    body: z.object({//TODO redo ask RUI
+        bodyKey: z.number(),
+    })}), (req, res) => {
+
     User.updateUser(req.params.id, req.body) // TODO what about filtering input data and using zod validation??
-        .then((resp) => res.status.json(resp))
+        .then((resp) => {
+            res.status.json(resp);
+        })
         .catch((err) => res.sendStatus(447));
 });
 
@@ -207,7 +222,7 @@ router.post('/:id/otp', (req, res) => {
 
     User.updateUser(userInfo._id, userInfo)
         .then((_) => res.json({ totp: totp.toString() }))
-        .catch((_) => res.status(447)); // TODO what about correcting the status codes?
+        .catch((_) => res.status(447)); // TODO what about correcting the status codes? RESP : No
 });
 
 router.delete('/:id/otp', (req, res) => {
