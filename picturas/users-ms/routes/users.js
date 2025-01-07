@@ -79,59 +79,63 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/login/2', async (req, res) => {
-    jwt.verify(req.body.validationToken, process.env.VALIDATE_JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
-        if (user.kind !== kinds.login2phase) return res.sendStatus(403);
+    jwt.verify(
+        req.body.validationToken,
+        process.env.VALIDATE_JWT_SECRET,
+        (err, user) => {
+            if (err) return res.sendStatus(403);
+            if (user.kind !== kinds.login2phase) return res.sendStatus(403);
 
-        const userInfo = User.getUser(user._id);
+            const userInfo = User.getUser(user._id);
 
-        if (userInfo.otpEnabled) {
-            const totp = new OTPAuth.TOTP({
-                issuer: issuer,
-                label: userInfo.username,
-                algorithm: 'SHA1',
-                digits: 6,
-                period: 30,
-                secret: userInfo.otpSecret,
-            });
-            const val = totp.validate({
-                token: req.body.code,
-                window: 1,
-            });
+            if (userInfo.otpEnabled) {
+                const totp = new OTPAuth.TOTP({
+                    issuer: issuer,
+                    label: userInfo.username,
+                    algorithm: 'SHA1',
+                    digits: 6,
+                    period: 30,
+                    secret: userInfo.otpSecret,
+                });
+                const val = totp.validate({
+                    token: req.body.code,
+                    window: 1,
+                });
 
-            if (val == null) return res.sendStatus(401);
+                if (val == null) return res.sendStatus(401);
+            }
+
+            const filteredUser = {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+            };
+
+            const accessToken = jwt.sign(
+                filteredUser,
+                process.env.AUTH_JWT_SECRET,
+                { expiresIn: '15m' },
+            );
+
+            const randomBytes = crypto.randomBytes(16)
+                .toString('hex');
+            filteredUser['accessId'] = randomBytes;
+            const refreshToken = jwt.sign(
+                filteredUser,
+                process.env.REFRESH_JWT_SECRET,
+            );
+            user.refresh = randomBytes;
+
+            User.updateUser(user._id, user)
+                .then((_) =>
+                    res.json({
+                        accessToken: accessToken,
+                        refreshToken: refreshToken,
+                    }),
+                )
+                .catch((_) => res.status(447));
         }
-
-        const filteredUser = {
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-        };
-
-        const accessToken = jwt.sign(
-            filteredUser,
-            process.env.AUTH_JWT_SECRET,
-            { expiresIn: '15m' },
-        );
-
-        const randomBytes = crypto.randomBytes(16)
-            .toString('hex');
-        filteredUser['accessId'] = randomBytes;
-        const refreshToken = jwt.sign(
-            filteredUser,
-            process.env.REFRESH_JWT_SECRET,
-        );
-        user.refresh = randomBytes;
-
-        User.updateUser(user._id, user)
-            .then((_) =>
-                res.json({
-                    accessToken: accessToken,
-                    refreshToken: refreshToken,
-                }),
-            )
-            .catch((_) => res.status(447));
-    });
+    );
 });
 
 router.post('/passwordRecovery', async (req, res) => {
@@ -164,7 +168,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.put('/:id/update', (req, res) => {
-    User.updateUser(req.params.id, req.body)// TODO what about filtering input data and using zod validation??
+    User.updateUser(req.params.id, req.body) // TODO what about filtering input data and using zod validation??
         .then((resp) => res.status.json(resp))
         .catch((err) => res.sendStatus(447));
 });
