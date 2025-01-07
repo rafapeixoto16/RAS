@@ -1,0 +1,9 @@
+{
+  "name": "@picturas/watermark-filter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "install": "sh setup.sh",
+    "start": "sh start.sh"
+  }
+}
