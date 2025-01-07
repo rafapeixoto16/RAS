@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+import sendEmail from '../email/sendEmail.js';
 import * as OTPAuth from 'otpauth';
 import * as User from '../controller/user';
 
@@ -14,25 +14,6 @@ const kinds = {
 };
 
 const issuer = 'Picturas - Stolen from UMinho Students Work';
-
-function sendEmail(user, token, kind) {
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOSTNAME,
-        port: process.env.EMAIL_PORT,
-        secure: false,
-        auth: {
-            user: `no-reply@${process.env.EMAIL_HOSTNAME}`,
-            pass: process.env.EMAIL_PASSWORD,
-        },
-    });
-
-    transporter.sendMail({
-        from: `no-reply@${process.env.EMAIL_HOSTNAME}`,
-        to: user.email,
-        subject: kind,
-        html: `<a href="${process.env.FRONTEND_URL}/${kind}/${token}" target="_blank">Click here!</a> max time is 24h.`,
-    });
-}
 
 router.post('/', async (req, res) => {
     User.addUser(req.body)
@@ -47,7 +28,7 @@ router.post('/', async (req, res) => {
                 process.env.VALIDATE_JWT_SECRET,
                 { expiresIn: '24h' },
             );
-            sendEmail(user, validationToken, kinds.validateAccount);
+            sendEmail(user.email, validationToken, kinds.validateAccount);
             res.sendStatus(200);
         })
         .catch((err) => {
@@ -170,7 +151,7 @@ router.post('/passwordRecovery', async (req, res) => {
                 process.env.VALIDATE_JWT_SECRET,
                 { expiresIn: '24h' },
             );
-            sendEmail(user, validationToken, kinds.resetPassword);
+            sendEmail(user.email, validationToken, kinds.resetPassword);
             res.sendStatus(200);
         })
         .catch((err) => {
