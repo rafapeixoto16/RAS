@@ -163,7 +163,9 @@ router.post('/passwordRecovery', async (req, res) => {
 // TODO what about validating the user (ps: being done in the gateway, but must be checked), but that is the work of another issue
 router.get('/:id', (req, res) => {
     User.getUser(req.params.id)
-        .then((resp) => res.status.json(resp)) // TODO what about filtering it's data??
+        .then((resp) => {
+            res.status.json(resp);
+        }) // TODO what about filtering it's data??
         .catch((err) => res.sendStatus(446));
 });
 
