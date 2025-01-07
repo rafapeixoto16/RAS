@@ -13,6 +13,14 @@ const userSchema = new mongoose.Schema(
         bio: { type: String, required: false },
         refresh: { type: String, required: false },
         active: { type: Boolean, default: false },
+        otpSecret: {
+            type: String,
+            required: false,
+        },
+        otpEnabled: {
+            type: Boolean,
+            default: false,
+        },
     },
     { versionKey: false }
 );
