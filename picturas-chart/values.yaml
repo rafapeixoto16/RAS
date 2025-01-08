@@ -16,7 +16,16 @@ auth_jwt_secret: "auth-secret"
 refresh_jwt_secret: "refresh-secret"
 validate_jwt_secret: "validate-secret"
 
-filter_queue_name: "filters"
+filter_output_queue: "filters-output"
+
+# RabbitMQ
+rabbitmq:
+  auth:
+    username: "rabbitmq-user"
+    password: "rabbitmq-password"
+  service:
+    ports:
+      amqp: 5672
 
 # Rate Limiter Redis
 rate-limiter-redis:
