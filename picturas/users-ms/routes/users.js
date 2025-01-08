@@ -275,7 +275,8 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
     }
 
     // nome unico pra imagem
-    const profilePicName = `${uuidv4()}.jpg`; // jpg
+    const extensionName = path.extname(req.file.name);
+    const profilePicName = `${uuidv4()}.${extensionName}`;
 
     const metaData = {
         'Content-Type': req.file.mimetype,
@@ -295,6 +296,5 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
             .catch((err) => res.status(500).json({ error: 'Failed to update user profile picture', details: err }));
     });
 });
-
 
 export default router;
