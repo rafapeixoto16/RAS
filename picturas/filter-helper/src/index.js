@@ -1,9 +1,6 @@
-import { z } from 'zod';
 import amqp from 'amqplib';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { readFileSync, writeFileSync } from 'node:fs';
-
-export { z as schemaValidation };
+import {toJsonSchema} from "@picturas/schema-validation";
 
 export function createFilterHandler(filterName, paramsSchema, imageHandler) {
     if (process.env.EXPORT_SCHEMA === 'true') {
@@ -16,7 +13,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
         const fileContent = readFileSync(schemaPath, 'utf-8');
         const jsonData = JSON.parse(fileContent);
 
-        jsonData[filterName] = zodToJsonSchema(paramsSchema, filterName);
+        jsonData[filterName] = toJsonSchema(filterName, paramsSchema);
 
         writeFileSync(schemaPath, JSON.stringify(jsonData, null, 2), 'utf-8');
 
