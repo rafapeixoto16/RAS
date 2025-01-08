@@ -1,150 +1,176 @@
 <template>
-  <div class="flex h-screen">
-    <div class="flex left-0 top-0 w-3/4 h-screen items-center justify-center bg-gray-50">
-      <div class="w-3/4 h-3/4 border border-gray-300 bg-white shadow-md rounded-md flex items-center justify-center">
-        <img
-          v-if="imageSrc"
-          :src="imageSrc"
-          alt="Preview"
-          class="max-w-full max-h-full object-contain"
-        />
-        <p v-else class="text-gray-500 text-sm">Nenhuma imagem selecionada.</p>
-      </div>
-    </div>
-    <div class="flex-1 flex flex-col p-4 sm:p-6 md:p-8 z-10">
-      <div class="fixed right-0 flex flex-col w-1/10 h-full bg-blue-100 text-gray-700 border-l border-gray-200 shadow-lg">
-        <div class="flex flex-col items-start mt-8 px-4 space-y-4 flex-grow overflow-y-auto">
-          <h2 class="text-sm font-semibold">Carregar Imagem</h2>
-          <div class="flex flex-col items-center space-y-2">
-            <input
-              type="file"
-              @change="handleImageUpload"
-              class="file-input border border-gray-300 p-2 rounded-md cursor-pointer focus:outline-none"
+  <div class="flex h-screen bg-gray-100">
+    <aside class="w-20 bg-white border-r border-gray-200 shadow-md overflow-y-auto">
+      <div class="flex flex-col items-center py-6 space-y-6">
+        <div class="w-full px-2">
+          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4">Tools</h3>
+          <div class="space-y-4">
+            <ToolButton 
+              v-for="tool in tools" 
+              :key="tool.name" 
+              :name="tool.name" 
+              :icon="tool.icon" 
+              :options="tool.options"
+              @click="selectTool(tool)" 
             />
-            <button
-              @click="clearImage"
-              class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-            >
-              Limpar Imagem
-            </button>
-          </div>
-
-          <div class="mt-8">
-            <h2 class="text-sm font-semibold">Edit</h2>
-            <div class="flex flex-col w-full relative">
-              <div style="max-width: 200px" class="px-1 space-y-2">
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url1"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Binarização
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url2"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Alteração do tamanho
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url3"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Colocação de bordos coloridos
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url4"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Remoção do fundo da imagem
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url5"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Passar de imagem colorida para tons de cinzento
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url6"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Rotações
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url7"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Alteração do brilho e contraste
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url8"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Contar pessoas
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url9"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Extrair texto presente na imagem
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url10"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Identificar objetos
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url11"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Colocar óculos em todas as pessoas
-                </router-link>
-                <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#3be3f6] text-black hover:bg-[#3bf6f3] rounded-xl"
-                  to="/url12"
-                >
-                  <i class="bi bi-brush mr-2"></i>
-                  Colocar a linha de fora de jogo em lances de futebol
-                </router-link>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-    </div>
+    </aside>
+
+    <main class="flex-1 overflow-hidden">
+      <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <h1 class="text-2xl font-bold text-gray-900">Projects</h1>
+          <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-500">Page {{ currentPage + 1 }} of {{ pages.length }}</span>
+            <div class="flex space-x-2">
+              <button @click="deleteCurrentPage" class="p-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
+                <i class="bi bi-trash text-xl"></i>
+              </button>
+              <button @click="downloadCurrentImage" class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200">
+                <i class="bi bi-download text-xl"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="h-[calc(100vh-4rem)] overflow-hidden bg-gray-100 p-8">
+        <Carousel 
+          v-model="currentPage" 
+          :items="pages" 
+          :canAddPage="true" 
+          @add-page="addNewPage" 
+          class="h-full"
+        >
+          <template #default="{ item }">
+            <div class="w-full h-full flex items-center justify-center">
+              <div class="bg-white rounded-lg shadow-lg w-full h-full max-w-4xl mx-auto transform rotate-0 relative" style="box-shadow: 1px 1px 15px rgba(0,0,0,0.1);">
+                <div class="absolute inset-0 p-8 flex items-center justify-center">
+                  <img v-if="item.imageUrl" :src="item.imageUrl" alt="Project image" class="max-w-full max-h-full object-contain" />
+                  <DropZone v-else @files-dropped="handleFilesDropped" />
+                </div>
+              </div>
+            </div>
+          </template>
+        </Carousel>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import Carousel from '@/components/PageCarousel.vue';
+import DropZone from '@/components/DropZone.vue';
+import ToolButton from '@/components/ToolButton.vue';
 
-const imageSrc = ref<string | null>(null);
+interface Page {
+  id: number;
+  imageUrl: string | null;
+}
 
-function handleImageUpload(event: Event) {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-  if (file) {
-    imageSrc.value = URL.createObjectURL(file);
+const pages = ref<Page[]>([{ id: 1, imageUrl: null }]);
+const currentPage = ref(0);
+
+watch(() => pages.value.length, (newLength) => {
+  if (currentPage.value >= newLength) {
+    currentPage.value = Math.max(0, newLength - 1);
   }
-}
-function clearImage() {
-  imageSrc.value = null;
-}
-</script>
+});
 
-<style scoped>
-.file-input {
-  width: 100%;
-}
-</style>
+const tools = [
+  { 
+    name: 'Resize', 
+    icon: 'bi-arrows-angle-expand', 
+    options: {
+      width: { label: 'Width', value: 800, unit: 'px' },
+      height: { label: 'Height', value: 600, unit: 'px' }
+    }
+  },
+  { 
+    name: 'Crop', 
+    icon: 'bi-crop',
+    options: {
+      aspect: { label: 'Aspect Ratio', value: '16:9' }
+    }
+  },
+  { 
+    name: 'Rotate', 
+    icon: 'bi-arrow-clockwise',
+    options: {
+      angle: { label: 'Angle', value: 90, unit: '°' }
+    }
+  },
+  { 
+    name: 'Filters', 
+    icon: 'bi-filter',
+    options: {
+      brightness: { label: 'Brightness', value: 100, unit: '%' },
+      contrast: { label: 'Contrast', value: 100, unit: '%' }
+    }
+  },
+  { 
+    name: 'Adjust', 
+    icon: 'bi-sliders',
+    options: {
+      saturation: { label: 'Saturation', value: 100, unit: '%' },
+      exposure: { label: 'Exposure', value: 0, unit: 'EV' }
+    }
+  },
+];
+
+const addNewPage = () => {
+  pages.value.push({ id: Date.now(), imageUrl: null });
+  currentPage.value = pages.value.length - 1;
+};
+
+const handleFilesDropped = async (files: File[]) => {
+  const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+  
+  if (imageFiles.length === 0) return;
+
+  const newPages = await Promise.all(imageFiles.map(async (file) => ({
+    id: Date.now() + Math.random(),
+    imageUrl: URL.createObjectURL(file)
+  })));
+
+  if (pages.value[currentPage.value].imageUrl === null) {
+    pages.value.splice(currentPage.value, 1, newPages[0]);
+    // Add remaining images as new pages
+    if (newPages.length > 1) {
+      pages.value.push(...newPages.slice(1));
+    }
+  } else {
+    pages.value.push(...newPages);
+  }
+
+  currentPage.value = pages.value.indexOf(newPages[0]);
+};
+
+const deleteCurrentPage = () => {
+  if (pages.value.length > 1) {
+    pages.value.splice(currentPage.value, 1);
+    if (currentPage.value >= pages.value.length) {
+      currentPage.value = pages.value.length - 1;
+    }
+  } else {
+    pages.value[0].imageUrl = null;
+  }
+};
+
+const downloadCurrentImage = () => {
+  const currentImage = pages.value[currentPage.value].imageUrl;
+  if (currentImage) {
+    const link = document.createElement('a');
+    link.href = currentImage;
+    link.download = `project-image-${currentPage.value + 1}.png`;
+    link.click();
+  }
+};
+
+const selectTool = (tool: { name: string, icon: string, options?: any }) => {
+  console.log(`Selected tool: ${tool.name}`);
+};
+</script>
