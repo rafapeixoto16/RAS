@@ -161,7 +161,7 @@ router.post('/passwordRecovery', async (req, res) => {
         });
 });
 
-// TODO what about validating the user (ps: being done in the gateway, but must be checked), but that is the work of another issue
+
 router.get('/:id', (req, res) => {
     User.getUser(req.params.id)
         .then((resp) => {
@@ -183,7 +183,7 @@ router.put('/:id/update', validateRequest({
         bodyKey: z.number(),
     })}), (req, res) => {
 
-    User.updateUser(req.params.id, req.body) // TODO what about filtering input data and using zod validation??
+    User.updateUser(req.params.id, req.body)
         .then((resp) => {
             res.status.json(resp);
         })
@@ -222,7 +222,7 @@ router.post('/:id/otp', (req, res) => {
 
     User.updateUser(userInfo._id, userInfo)
         .then((_) => res.json({ totp: totp.toString() }))
-        .catch((_) => res.status(447)); // TODO what about correcting the status codes? RESP : No
+        .catch((_) => res.status(488));
 });
 
 router.delete('/:id/otp', (req, res) => {

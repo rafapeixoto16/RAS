@@ -3,12 +3,12 @@
 import express, { createError } from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
-import usersRouter from './routes/users';
+import subscriptionsRouter from './routes/subscriptions';
 
 const app = express();
-const port = 3000;
+const port = 3000; //TODO
 
-const mongoBD = 'mongodb://127.0.0.1/users'; // TODO USER ENV
+const mongoBD = 'mongodb://127.0.0.1/subscriptions'; // TODO SUBSCRIPTIONS ENV
 mongoose.connect(mongoBD);
 
 const db = mongoose.connection;
@@ -24,7 +24,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 // Routers
-app.use('/users', usersRouter);
+app.use('/', subscriptionsRouter);
 
 // 404
 app.use((req, res, next) => {

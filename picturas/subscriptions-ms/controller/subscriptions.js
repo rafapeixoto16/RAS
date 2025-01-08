@@ -1,31 +1,34 @@
-import * as Sub from '../models/subscriptionModel.js';
+import {Subscription} from '../models/subscriptionModel.js';
 
 export const getSubcriptionByEmail = (email) => {
-    return User.findOne({ email: email }).exec();
+    return Subscription.findOne({ email: email }).exec();
 };
 
-export const getUserByEmail = (email) => {
-    return User.findOne({ email })
+export const getSubcriptionById = (id) => {
+    return Subscription.findOne({ _id: id })
         .exec();
 };
 
-export const addUser = (u) => {
-    return new User(u).save();
+export const addSubcription = (u) => {
+    return new Subscription(u).save();
 };
 
-export const updateUser = (id, info) => {
-    return User.updateOne({ _id: id }, info).exec();
+export const updateSubcription = (id, info) => {
+    return Subscription.updateOne({ _id: id }, info).exec();
 };
 
-export const updateUserPassword = (id, pwd) => {
-    return User.updateOne({ _id: id }, pwd)
-        .exec(); // excute
+export const updateSubcriptionByEmail = (email, info) => {
+    return Subscription.updateOne({ email: email }, info).exec();
 };
 
-export const deleteUser = (id) => {
-    return User.deleteOne({ _id: id }).exec();
+export const deleteSubcription = (id) => {
+    return Subscription.deleteOne({ _id: id }).exec();
+};
+
+export const deleteSubcriptionByEmail = (email) => {
+    return Subscription.deleteOne({ email: email }).exec();
 };
 
 export const deleteAll = () => {
-    return User.deleteMany().exec();
+    return Subscription.deleteMany().exec();
 };
