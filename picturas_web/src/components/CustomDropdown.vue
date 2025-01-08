@@ -6,7 +6,7 @@
         </span>
         <transition name="dropdown">
             <Teleport v-if="appendToBody && isOpen" to="body">
-                <div :style="dropdownStyle" class="absolute bg-[#F5F7FA] shadow-md rounded mt-2 border border-gray-200 z-50 text-gray-700">
+                <div :style="dropdownStyle" class="absolute bg-blue-50 shadow-md rounded mt-2 border border-gray-200 z-50 text-gray-700" ref="dropdownElement">
                     <ul>
                         <li 
                             v-for="option in options" 
@@ -25,7 +25,7 @@
                     </ul>
                 </div>
             </Teleport>
-            <div v-else-if="isOpen" class="absolute bg-[#F5F7FA] shadow-md rounded mt-2 border border-gray-200 z-50">
+            <div v-else-if="isOpen" class="absolute bg-[#F5F7FA] shadow-md rounded mt-2 border border-gray-200 z-50" ref="dropdownElement">
                 <ul>
                     <li 
                         v-for="option in options" 
@@ -75,6 +75,7 @@ const appendToBody = props.appendToBody;
 
 const isOpen = ref(false);
 const triggerElement = ref<HTMLElement | null>(null);
+const dropdownElement = ref<HTMLElement | null>(null);
 const dropdownStyle = ref({});
 
 const toggleDropdown = () => {
@@ -94,14 +95,24 @@ const updateDropdownPosition = () => {
     }
 };
 
+const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+    if (dropdownElement.value && !dropdownElement.value.contains(event.target as Node) && !triggerElement.value?.contains(event.target as Node)) {
+        isOpen.value = false;
+    }
+};
+
 onMounted(() => {
     window.addEventListener('resize', updateDropdownPosition);
     window.addEventListener('scroll', updateDropdownPosition);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
 });
 
 onBeforeUnmount(() => {
     window.removeEventListener('resize', updateDropdownPosition);
     window.removeEventListener('scroll', updateDropdownPosition);
+    document.removeEventListener('mousedown', handleClickOutside);
+    document.removeEventListener('touchstart', handleClickOutside);
 });
 </script>
 
