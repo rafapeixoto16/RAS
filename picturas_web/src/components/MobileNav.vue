@@ -65,6 +65,17 @@
             <MobileProjectList :projects="projects" @close-menu="closeMenu" />
           </div>
         </div>
+        
+        <div class="px-4 py-2 border-t border-gray-200">
+          <router-link
+            class="flex items-center px-4 py-3 w-full bg-gray-100 text-sm xl:text-base text-gray-700 hover:bg-gray-200 rounded-xl"
+            to="/trash"
+            @click="closeMenu"
+          >
+            <i class="bi bi-trash3 mr-2"></i>
+            Trash
+          </router-link>
+        </div>
 
         <div class="border-t border-gray-200 p-4">
           <MobileProfileMenu @close-menu="closeMenu" />
