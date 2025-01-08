@@ -3,7 +3,12 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import sendEmail from '../email/sendEmail.js';
 import * as OTPAuth from 'otpauth';
-import * as User from '../controller/user';
+import * as User from '../controller/user.js';
+import multer from '../config/multerConfig.js';  
+import minioClient from '../config/minioClient.js';  
+import { v4 as uuidv4 } from 'uuid';
+
+const BUCKET_NAME = 'bucket-name'; // **TROCAR PELO bucket-name do MinIO**
 
 const router = Router();
 
@@ -260,3 +265,36 @@ router.delete('/logout', (req, res) => {
             .catch((err) => res.sendStatus(400));
     });
 });
+
+router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
+    const { id } = req.params;
+
+    // verificar se o arquivo foi enviado
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // nome unico pra imagem
+    const extensionName = path.extname(req.file.name);
+    const profilePicName = `${uuidv4()}.${extensionName}`;
+
+    const metaData = {
+        'Content-Type': req.file.mimetype,
+    };
+
+    // enviar imagem pro bucket S3 do MinIO
+    minioClient.putObject(BUCKET_NAME, profilePicName, req.file.buffer, metaData, (err, etag) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to upload image to MinIO', details: err });
+        }
+
+        const imageUrl = `https://${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
+
+        // update no user
+        User.updateUserProfilePic(id, imageUrl)
+            .then(() => res.status(200).json({ message: 'Profile picture updated successfully', imageUrl }))
+            .catch((err) => res.status(500).json({ error: 'Failed to update user profile picture', details: err }));
+    });
+});
+
+export default router;
