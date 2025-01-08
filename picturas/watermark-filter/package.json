@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "install": "sh setup.sh",
+    "preinstall": "sh setup.sh",
     "start": "sh start.sh"
   }
 }

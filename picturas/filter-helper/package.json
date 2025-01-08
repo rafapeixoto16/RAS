@@ -5,12 +5,12 @@
     "scripts": {
         "generate-schemas": "node src/generate-schemas.js"
     },
-    "dependencies": {
-        "zod": "^3.24.1",
-        "zod-to-json-schema": "^3.24.1"
-    },
     "main": "./src/index.js",
     "exports": {
         ".": "./src/index.js"
+    },
+    "dependencies": {
+        "@picturas/schema-validation": "file:../schema-validation",
+        "amqplib": "^0.10.5"
     }
 }

@@ -18,6 +18,17 @@ spec:
       containers:
         - name: {{ . }}
           image: {{ $.Values.registry }}{{ . }}:latest
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: {{ .Values.rabbitmq.service.ports.amqp }}
+            - name: RABBITMQ_USERNAME
+              value: {{ .Values.rabbitmq.auth.username }}
+            - name: RABBITMQ_PASSWORD
+              value: {{ .Values.rabbitmq.auth.password }}
+            - name: FILTER_OUTPUT_QUEUE
+              value: {{ .Values.filter_output_queue }}
           ports:
             - containerPort: 3000
           volumeMounts:
