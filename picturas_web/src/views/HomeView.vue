@@ -1,6 +1,5 @@
 <template>
   <div class="flex-1 flex flex-col p-4 sm:p-6 md:p-8 z-10">
-    <!-- Notification Pop-Up with Transition -->
     <transition name="slide-fade">
       <div
         v-if="notification"
@@ -43,7 +42,6 @@
       </div>
     </div>
 
-    <!-- Drag and Drop Area -->
     <div
       class="drag-drop-area border-2 border-dashed border-gray-400 rounded-lg p-6 flex flex-col items-center justify-center mb-8"
       @dragover.prevent="onDragOver"
@@ -53,7 +51,7 @@
     >
       <p class="text-gray-500 mb-2 text-center">
         Drag and drop an image here, or
-        <span class="text-blue-500 cursor-pointer" @click="triggerFileUpload"
+        <span class="text-blue-500 cursor-pointer hover:underline" @click="triggerFileUpload"
           >click to upload</span
         >.
       </p>
@@ -155,7 +153,6 @@ const editProject = (id: number) => {
   console.log(`Editing project with id: ${id}`);
 };
 
-// Drag and Drop Handlers
 const onDragOver = () => {
   isDragging.value = true;
 };
@@ -183,7 +180,6 @@ const handleFile = (file: File) => {
       lastEdited: "just now",
     });
 
-    // Show success notification
     showNotification("Project successfully created!");
   };
   reader.readAsDataURL(file);
@@ -203,12 +199,11 @@ const handleFileUpload = (event: Event) => {
   }
 };
 
-// Notification Handlers
 const showNotification = (message: string) => {
   notification.value = message;
   setTimeout(() => {
     notification.value = null;
-  }, 3000); // Notification disappears after 3 seconds
+  }, 3000);
 };
 </script>
 
@@ -217,7 +212,6 @@ const showNotification = (message: string) => {
   transition: background-color 0.2s ease;
 }
 
-/* Slide and fade transition for notification */
 .slide-fade-enter-active,
 .slide-fade-leave-active {
   transition: all 0.5s ease;
