@@ -17,6 +17,9 @@
                 "varsIgnorePattern": "^_",
                 "caughtErrorsIgnorePattern": "^_"
             }
-        ]
+        ],
+        "no-continue": "off",
+        "no-await-in-loop": "off",
+        "no-restricted-syntax": "off"
     }
 }
