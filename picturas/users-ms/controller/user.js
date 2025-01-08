@@ -5,8 +5,7 @@ export const getUser = (id) => {
 };
 
 export const getUserByEmail = (email) => {
-    return User.findOne({ email })
-        .exec();
+    return User.findOne({ email }).exec();
 };
 
 export const addUser = (u) => {
@@ -18,8 +17,7 @@ export const updateUser = (id, info) => {
 };
 
 export const updateUserPassword = (id, pwd) => {
-    return User.updateOne({ _id: id }, pwd)
-        .exec(); // excute
+    return User.updateOne({ _id: id }, pwd).exec(); // excute
 };
 
 export const updateUserProfilePic = (id, profilePicUrl) => {

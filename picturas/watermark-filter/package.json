@@ -1,9 +1,9 @@
 {
-  "name": "@picturas/watermark-filter",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "preinstall": "sh setup.sh",
-    "start": "sh start.sh"
-  }
+    "name": "@picturas/watermark-filter",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "preinstall": "sh setup.sh",
+        "start": "sh start.sh"
+    }
 }

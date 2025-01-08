@@ -1,10 +1,11 @@
 /* eslint no-console: 0 */
 
 import express from 'express';
-const { createError } = express;
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import usersRouter from './routes/users.js';
+
+const { createError } = express;
 
 const app = express();
 const port = 3000;

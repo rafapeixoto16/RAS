@@ -17,4 +17,4 @@ const imageSchema = new mongoose.Schema(
 
 const Image = mongoose.model('image', imageSchema);
 
-export { Image as Project };
+export default Image;
