@@ -50,17 +50,17 @@ email_password: "email-password"
 # Filters
 filters:
   - auto-adjust-filter
-  - binarization-filter
-  - borders-add-filter
-  - brightness-filter
-  - contrast-filter
-  - cropping-filter
-  - grayscale-filter
-  - object-identification-filter
-  - ocr-filter
-  - person-count-filter
-  - remove-bg-filter
-  - resize-filter
-  - rotate-filter
-  - saturation-filter
-  - smart-crop-filter
+#  - binarization-filter
+#  - borders-add-filter
+#  - brightness-filter
+#  - contrast-filter
+#  - cropping-filter
+#  - grayscale-filter
+#  - object-identification-filter
+#  - ocr-filter
+#  - person-count-filter
+#  - remove-bg-filter
+#  - resize-filter
+#  - rotate-filter
+#  - saturation-filter
+#  - smart-crop-filter

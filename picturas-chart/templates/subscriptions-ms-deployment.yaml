@@ -2,16 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: subscriptions-ms
-  labels:
-    app: subscriptions-ms
 spec:
   selector:
     matchLabels:
-      app: subscriptions-ms
+      name: subscriptions-ms
   template:
     metadata:
       labels:
-        app: subscriptions-ms
+        name: subscriptions-ms
     spec:
       containers:
         - name: subscriptions-ms

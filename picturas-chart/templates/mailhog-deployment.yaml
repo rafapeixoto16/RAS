@@ -2,16 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mailhog
-  labels:
-    app: mailhog
 spec:
   selector:
     matchLabels:
-      app: mailhog
+      name: mailhog
   template:
     metadata:
       labels:
-        app: mailhog
+        name: mailhog
     spec:
       containers:
         - name: mailhog

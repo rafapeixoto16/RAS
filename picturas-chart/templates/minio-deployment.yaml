@@ -2,16 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: minio
-  labels:
-    app: minio
 spec:
   selector:
     matchLabels:
-      app: minio
+      name: minio
   template:
     metadata:
       labels:
-        app: minio
+        name: minio
     spec:
       containers:
         - name: minio

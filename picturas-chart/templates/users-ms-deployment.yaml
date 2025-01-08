@@ -2,16 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: users-ms
-  labels:
-    app: users-ms
 spec:
   selector:
     matchLabels:
-      app: users-ms
+      name: users-ms
   template:
     metadata:
       labels:
-        app: users-ms
+        name: users-ms
     spec:
       containers:
         - name: users-ms
