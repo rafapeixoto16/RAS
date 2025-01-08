@@ -2,16 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nfs
-  labels:
-    app: nfs
 spec:
   selector:
     matchLabels:
-      app: nfs
+      name: nfs
   template:
     metadata:
       labels:
-        app: nfs
+        name: nfs
     spec:
       containers:
         - name: nfs

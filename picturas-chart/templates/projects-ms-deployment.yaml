@@ -2,16 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: projects-ms
-  labels:
-    app: projects-ms
 spec:
   selector:
     matchLabels:
-      app: projects-ms
+      name: projects-ms
   template:
     metadata:
       labels:
-        app: projects-ms
+        name: projects-ms
     spec:
       containers:
         - name: projects-ms

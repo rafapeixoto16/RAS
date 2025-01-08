@@ -2,16 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ws-gateway
-  labels:
-    app: ws-gateway
 spec:
   selector:
     matchLabels:
-      app: ws-gateway
+      name: ws-gateway
   template:
     metadata:
       labels:
-        app: ws-gateway
+        name: ws-gateway
     spec:
       containers:
         - name: ws-gateway

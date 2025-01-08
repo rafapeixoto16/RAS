@@ -2,16 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: localstripe
-  labels:
-    app: localstripe
 spec:
   selector:
     matchLabels:
-      app: localstripe
+      name: localstripe
   template:
     metadata:
       labels:
-        app: localstripe
+        name: localstripe
     spec:
       containers:
         - name: localstripe
