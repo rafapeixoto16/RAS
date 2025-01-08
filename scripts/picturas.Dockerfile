@@ -3,7 +3,7 @@ FROM python:3.13-bookworm
 WORKDIR /app
 
 RUN apt update
-RUN apt install nodejs python3.13-venv ffmpeg libsm6 libxext6 -y
+RUN apt install nodejs ffmpeg libsm6 libxext6 -y
 
 COPY picturas/ ./
 

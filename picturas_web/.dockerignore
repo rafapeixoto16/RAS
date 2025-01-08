@@ -1,0 +1,10 @@
+# IDE/Code Editors
+../.idea
+.vscode
+
+# Dependencies
+node_modules
+venv
+
+# Miscelaneous
+.DS_Store
