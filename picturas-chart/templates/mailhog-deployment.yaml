@@ -20,3 +20,5 @@ spec:
           env:
             - name: MH_HOSTNAME
               value: {{ .Values.email_hostname }}
+            - name: MH_UI_WEB_PATH
+              value: mailhog
