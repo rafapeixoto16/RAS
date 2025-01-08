@@ -21,7 +21,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
     }
 
     const inputQueue = filterName;
-    const outputQueue = 'filterResponseQueue';
+    const outputQueue = process.env.FILTER_OUTPUT_QUEUE;
 
     async function processMessage(message) {
         const content = JSON.parse(message.content.toString());
@@ -105,7 +105,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
     }
 
     (async () => {
-        const connection = await amqp.connect('amqp://localhost');
+        const connection = await amqp.connect(`amqp://${process.env.RABBITMQ_USERNAME}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`);
         const channel = await connection.createChannel();
 
         await channel.assertQueue(inputQueue, { durable: true });
