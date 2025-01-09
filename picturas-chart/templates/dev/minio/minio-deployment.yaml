@@ -21,6 +21,12 @@ spec:
             - containerPort: 9000
           env:
             - name: MINIO_ROOT_USER
-              value: {{ .Values.s3_user }}
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secret
+                  key: username
             - name: MINIO_ROOT_PASSWORD
-              value: {{ .Values.s3_pass }}
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secret
+                  key: password

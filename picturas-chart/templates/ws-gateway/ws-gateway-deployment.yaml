@@ -20,4 +20,4 @@ spec:
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq"
             - name: RABBITMQ_QUEUE
-              value: "{{ .Values.filter_queue_name }}"
+              value: {{ .Values.filter_queue_name | quote }}

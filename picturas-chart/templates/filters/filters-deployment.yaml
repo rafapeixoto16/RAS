@@ -20,11 +20,17 @@ spec:
             - name: RABBITMQ_HOST
               value: rabbitmq
             - name: RABBITMQ_PORT
-              value: "{{ $.Values.rabbitmq.service.ports.amqp }}"
+              value: {{ $.Values.rabbitmq.service.ports.amqp | quote }}
             - name: RABBITMQ_USERNAME
-              value: {{ $.Values.rabbitmq.auth.username }}
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: username
             - name: RABBITMQ_PASSWORD
-              value: {{ $.Values.rabbitmq.auth.password }}
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: password
             - name: FILTER_OUTPUT_QUEUE
               value: {{ $.Values.filter_output_queue }}
           ports:
