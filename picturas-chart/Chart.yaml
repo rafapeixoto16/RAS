@@ -35,4 +35,8 @@ dependencies:
     version: 11.4.2
     repository: https://charts.bitnami.com/bitnami
     condition: production.enabled
+  - name: grafana-loki
+    version: 4.7.1
+    repository: https://charts.bitnami.com/bitnami
+    condition: production.enabled
   # TODO Thanos + Grafana Mimir

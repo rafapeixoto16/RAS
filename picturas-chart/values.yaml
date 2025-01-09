@@ -7,7 +7,7 @@ production:
   enabled: false
   autoscaling:
     minReplicas: 2
-    maxReplicas: 100
+    maxReplicas: 10
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
 
@@ -113,6 +113,22 @@ grafana:
           url: http://alertmanager-operated:9093
           version: 1
           editable: false
+        - name: Loki
+          uid: loki
+          type: loki
+          access: proxy
+          orgId: 1
+          url: http://picturas-grafana-loki-gateway
+          version: 1
+          editable: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+grafana-loki:
+  promtail:
+    enabled: true
   metrics:
     enabled: true
     serviceMonitor:
