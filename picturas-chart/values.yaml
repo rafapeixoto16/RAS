@@ -26,6 +26,8 @@ rabbitmq:
   service:
     ports:
       amqp: 5672
+  persistence:
+    enabled: false
 
 # Rate Limiter Redis
 rate-limiter-redis:
@@ -33,6 +35,9 @@ rate-limiter-redis:
   auth:
     enabled: yes
     password: "rate-limit-password"
+  master:
+    persistence:
+      enabled: false
 
 # TODO mongo
 
