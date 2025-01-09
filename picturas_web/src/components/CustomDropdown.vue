@@ -1,50 +1,67 @@
 <template>
-    <div :class="['relative', placement]" ref="triggerElement">
-        <span @click="toggleDropdown" class="cursor-pointer">
-            <i v-if="isIcon" :class="trigger"></i>
-            <span v-else>{{ trigger }}</span>
-        </span>
-        <transition name="dropdown">
-            <Teleport v-if="appendToBody && isOpen" to="body">
-                <div :style="dropdownStyle" class="absolute bg-blue-50 shadow-md rounded mt-2 border border-gray-200 z-50 text-gray-700" ref="dropdownElement">
-                    <ul>
-                        <li 
-                            v-for="option in options" 
-                            :key="option.label" 
-                            class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
-                            <router-link v-if="option.route" :to="option.route" class="flex items-center gap-2">
-                                <i v-if="option.icon" :class="option.icon"></i>
-                                <span class="text-gray-700">{{ option.label }}</span>
-                            </router-link>
-                            <div v-else class="flex items-center gap-2">
-                                <i v-if="option.icon" :class="option.icon"></i>
-                                <span class="text-gray-700">{{ option.label }}</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </Teleport>
-            <div v-else-if="isOpen" class="absolute bg-[#F5F7FA] shadow-md rounded mt-2 border border-gray-200 z-50" ref="dropdownElement">
-                <ul>
-                    <li 
-                        v-for="option in options" 
-                        :key="option.label" 
-                        class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                        <router-link v-if="option.route" :to="!option.target ? option.route : undefined" class="flex items-center gap-2"  @click.prevent="openInNewTab(option.route)">
-                            <i v-if="option.icon" :class="option.icon"></i>
-                            <span class="text-gray-700">{{ option.label }}</span>
-                        </router-link>
-                        <div v-else class="flex items-center gap-2">
-                            <i v-if="option.icon" :class="option.icon"></i>
-                            <span class="text-gray-700">{{ option.label }}</span>
-                        </div>
-                    </li>
-                </ul>
+  <div :class="['relative', placement]" ref="triggerElement">
+    <span @click="toggleDropdown" class="cursor-pointer">
+      <i v-if="isIcon" :class="trigger"></i>
+      <span v-else>{{ trigger }}</span>
+    </span>
+    <transition name="dropdown">
+      <Teleport v-if="appendToBody && isOpen" to="body">
+        <div
+          :style="dropdownStyle"
+          class="absolute bg-blue-50 shadow-md rounded mt-2 border border-gray-200 z-50 text-gray-700"
+          ref="dropdownElement"
+        >
+          <ul>
+            <li
+              v-for="option in options"
+              :key="option.label"
+              class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              <router-link
+                v-if="option.route"
+                :to="option.route"
+                class="flex items-center gap-2"
+              >
+                <i v-if="option.icon" :class="option.icon"></i>
+                <span class="text-gray-700">{{ option.label }}</span>
+              </router-link>
+              <div v-else class="flex items-center gap-2">
+                <i v-if="option.icon" :class="option.icon"></i>
+                <span class="text-gray-700">{{ option.label }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </Teleport>
+      <div
+        v-else-if="isOpen"
+        class="absolute bg-[#F5F7FA] shadow-md rounded mt-2 border border-gray-200 z-50"
+        ref="dropdownElement"
+      >
+        <ul>
+          <li
+            v-for="option in options"
+            :key="option.label"
+            class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+          >
+          <a
+              v-if="option.route"
+              href="javascript:void(0)"
+              @click.prevent="openInNewTab(option)"
+              class="flex items-center gap-2"
+            >
+              <i v-if="option.icon" :class="option.icon"></i>
+              <span class="text-gray-700">{{ option.label }}</span>
+            </a>
+            <div v-else class="flex items-center gap-2">
+              <i v-if="option.icon" :class="option.icon"></i>
+              <span class="text-gray-700">{{ option.label }}</span>
             </div>
-        </transition>
-    </div>
+          </li>
+        </ul>
+      </div>
+    </transition>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -55,6 +72,7 @@ interface Option {
   label: string;
   icon?: string;
   route?: string;
+  target?: "_blank" | "_self";
 }
 
 interface Props {
@@ -98,10 +116,16 @@ const updateDropdownPosition = () => {
   }
 };
 
-const openInNewTab = (route) => {
-  console.log(route);
-  // Open the URL in a new tab
-  window.open(route, "_blank");
+const openInNewTab = (option: Option) => {
+  console.log(option);
+  if (option.route) {
+    const fullUrl = window.location.origin + option.route;
+    if (option.target === "_blank") {
+      window.open(fullUrl, "_blank");
+    } else {
+      window.location.href = fullUrl;
+    }
+  }
 };
 
 const handleClickOutside = (event: MouseEvent | TouchEvent) => {

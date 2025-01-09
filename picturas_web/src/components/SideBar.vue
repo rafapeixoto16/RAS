@@ -23,24 +23,24 @@
           Create a Project
         </router-link>
         <a
-                href="#"
-                class="flex items-center justify-center px-2 py-3 w-full bg-[#ff9800] text-sm xl:text-base text-white hover:bg-[#e68900] rounded rounded-xl"
-                @click="openPremiumModal"
-              >
-                <i class="bi bi-gem mr-2"></i>
-                Try Pro for 30 days
-              </a>
-            </div>
+          href="#"
+          class="flex items-center justify-center px-2 py-3 w-full bg-[#ff9800] text-sm xl:text-base text-white hover:bg-[#e68900] rounded rounded-xl"
+          @click="openPremiumModal"
+        >
+          <i class="bi bi-gem mr-2"></i>
+          Try Pro for 30 days
+        </a>
+      </div>
       <div
-        class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow overflow-y-auto"
+       class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow overflow-y-auto"
       >
         <h2 class="text-sm font-semibold">Projects</h2>
         <div class="flex flex-col w-full relative">
           <div
-            v-for="project in visibleProjects"
-            :key="project.name"
-            class="relative group w-full"
-          >
+           v-for="project in visibleProjects" 
+           :key="project.name" 
+           class="relative group w-full"
+           >
             <router-link class="block p-4 rounded w-full" :to="project.link">
               {{ project.name }}
             </router-link>
@@ -68,77 +68,74 @@
             @click="toggleSeeAll"
             class="mt-2 text-[#3B82F6] hover:underline"
           >
-            {{ seeAll ? "See Less" : "See All" }}
+            {{ seeAll ? 'See Less' : 'See All' }}
           </button>
         </div>
       </div>
       <div class="px-4 py-2 border-t border-gray-200">
-              <router-link
-                  class="flex items-center px-4 py-3 w-full bg-red-500 text-sm xl:text-base text-white hover:bg-red-600 rounded-xl"
-                  to="/trash"
-              >
-                  <i class="bi bi-trash mr-2"></i>
-                  Trash
-              </router-link>
-          </div>
+        <router-link
+          class="flex items-center px-4 py-3 w-full bg-red-500 text-sm xl:text-base text-white hover:bg-red-600 rounded-xl"
+          to="/trash"
+        >
+          <i class="bi bi-trash mr-2"></i>
+          Trash
+        </router-link>
+      </div>
       <div class="mt-auto w-full">
         <ProfileMenu />
       </div>
       <premium-upgrade
-            :open="isOpenPremium"
-            @close="openPremiumModal"
-          ></premium-upgrade>
+       :open="isOpenPremium"
+        @close="openPremiumModal"
+        ></premium-upgrade>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import Dropdown from "./CustomDropdown.vue";
-import ProfileMenu from "./ProfileMenu.vue";
-import PremiumUpgrade from './PremiumUpgrade.vue';
+import { ref, computed } from 'vue'
+import Dropdown from './CustomDropdown.vue'
+import ProfileMenu from './ProfileMenu.vue'
+import PremiumUpgrade from './PremiumUpgrade.vue'
 
 const projects = [
-  { name: "Project 1", link: "/project1" },
-  { name: "Project 2", link: "/project2" },
-  { name: "Project 3", link: "/project3" },
-  { name: "Project 4", link: "/project4" },
-  { name: "Project 5", link: "/project5" },
-  { name: "Project 6", link: "/project6" },
-  { name: "Project 7", link: "/project7" },
-  { name: "Project 8", link: "/project8" },
-  { name: "Project 1", link: "/project1" },
-  { name: "Project 2", link: "/project2" },
-  { name: "Project 3", link: "/project3" },
-  { name: "Project 4", link: "/project4" },
-  { name: "Project 5", link: "/project5" },
-  { name: "Project 6", link: "/project6" },
-  { name: "Project 7", link: "/project7" },
-  { name: "Project 8", link: "/project8" },
-];
+  { name: 'Project 1', link: '/project1' },
+  { name: 'Project 2', link: '/project2' },
+  { name: 'Project 3', link: '/project3' },
+  { name: 'Project 4', link: '/project4' },
+  { name: 'Project 5', link: '/project5' },
+  { name: 'Project 6', link: '/project6' },
+  { name: 'Project 7', link: '/project7' },
+  { name: 'Project 8', link: '/project8' },
+  { name: 'Project 1', link: '/project1' },
+  { name: 'Project 2', link: '/project2' },
+  { name: 'Project 3', link: '/project3' },
+  { name: 'Project 4', link: '/project4' },
+  { name: 'Project 5', link: '/project5' },
+  { name: 'Project 6', link: '/project6' },
+  { name: 'Project 7', link: '/project7' },
+  { name: 'Project 8', link: '/project8' },
+]
 
-const seeAll = ref(false);
-const isOpenPremium = ref(false);
+const seeAll = ref(false)
+const isOpenPremium = ref(false)
 
 const visibleProjects = computed(() => {
-  return seeAll.value ? projects : projects.slice(0, 7);
-  return seeAll.value ? projects : projects.slice(0, 7);
-});
+  return seeAll.value ? projects : projects.slice(0, 7)
+})
 
 const showSeeAllButton = computed(() => {
-  return projects.length > 7;
-  return projects.length > 7;
-});
+
+  return projects.length > 7
+})
 
 const toggleSeeAll = () => {
-  seeAll.value = !seeAll.value;
-  seeAll.value = !seeAll.value;
-};
+  seeAll.value = !seeAll.value
+}
 
 const openPremiumModal = () => {
-  isOpenPremium.value = !isOpenPremium.value;
-};
-
+  isOpenPremium.value = !isOpenPremium.value
+}
 </script>
 
 <style scoped>
