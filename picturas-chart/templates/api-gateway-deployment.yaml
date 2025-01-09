@@ -20,4 +20,4 @@ spec:
             - name: RATE_LIMITER_REDIS_HOST
               value: "rate-limiter-redis"
             - name: RATE_LIMITER_REDIS_PASSWORD
-              value: "{{ index .Values "rate-limiter-redis" "auth" "password" }}"
+              value: {{ index .Values "rate-limiter-redis" "auth" "password" | quote }}
