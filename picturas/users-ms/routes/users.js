@@ -5,6 +5,7 @@ import sendEmail from '../email/sendEmail.js';
 import * as OTPAuth from 'otpauth';
 import * as User from '../controller/user';
 import * as z from '../../utils/zodDemo.js';
+import { schemaValidation } from '@picturas/filter-helper';
 
 const router = Router();
 
@@ -179,8 +180,8 @@ router.get('/:id', (req, res) => {
 });
 
 router.put('/:id/update', validateRequest({
-    body: z.object({//TODO redo ask RUI
-        bodyKey: z.number(),
+    body: schemaValidation.object({ //TODO redo ask RUI
+        bodyKey: schemaValidation.number(),
     })}), (req, res) => {
 
     User.updateUser(req.params.id, req.body)
