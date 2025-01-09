@@ -64,3 +64,4 @@ filters:
 #  - rotate-filter
 #  - saturation-filter
 #  - smart-crop-filter
+#  - watermark-filter
