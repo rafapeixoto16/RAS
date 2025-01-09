@@ -1,5 +1,5 @@
 import { Stripe } from 'stripe';
-import { getSubcriptionByEmail,  } from '../controller/subscriptions.js';
+import { addSubcription, getSubcriptionByEmail, updateSubcriptionByEmail } from '../controller/subscriptions.js';
 import { Subscription } from '../models/subscriptionModel.js';
 
 app.post('/create-subscription', async (req, res) => {
@@ -12,7 +12,7 @@ app.post('/create-subscription', async (req, res) => {
         return res.status(400).json({ error: 'Invalid request parameters' });
     }
 
-    const userData = Subscription.getSubcriptionByEmail(email); //TODO returna null?
+    const userData = Subscription.getSubcriptionByEmail(email);
 
     const user = userData || {
         premium: false,
@@ -21,7 +21,6 @@ app.post('/create-subscription', async (req, res) => {
     };
     if (!user.trialUsed) user.trialUsed = true;
 
-    //TODO post
     users[email] = user; // TODO we must store stripeId in here
 
     try {
@@ -52,6 +51,18 @@ app.post('/create-subscription', async (req, res) => {
             trial_period_days: user.trialUsed ? 0 : 7,
         });
 
+        if(!userData){
+            const userDataUpdate = {
+                email: email,
+                premium: true, //fixme verify
+                plan: interval,
+                trialUsed: true,
+                stripeId: subscription.id
+            }
+
+            Subscription.addSubcription(userDataUpdate);
+        }
+
         return res.json({ subscriptionId: subscription.id });
     } catch (err) {
         return res.status(500)
@@ -61,7 +72,9 @@ app.post('/create-subscription', async (req, res) => {
 
 app.get('/transaction-history', async (req, res) => {
     const { email } = req.query;
-    if (!email || !users[email]) {
+    const userData = Subscription.getSubcriptionByEmail(email);
+
+    if (!email || !userData) {
         return res.status(400).json({ error: 'Invalid or unknown user' });
     }
 
@@ -91,8 +104,8 @@ app.get('/transaction-history', async (req, res) => {
 
 app.get('/billing-info', async (req, res) => {
     const { email } = req.query;
-    const userData = Subscription.ge
-    if (!email || !users[email]) {
+    const userData = Subscription.getSubcriptionByEmail(email);
+    if (!email || !userData) {
         return res.status(400).json({ error: 'Invalid or unknown user' });
     }
 
@@ -145,9 +158,11 @@ app.post('/webhook', async (req, res) => {
             await stripe.subscriptions.retrieve(subscriptionId);
         const { email } = subscription.metadata;
 
-        if (users[email]) {
-            users[email] = {
-                ...users[email],
+        const userData = Subscription.getSubcriptionByEmail(email);
+
+        if (userData) {
+            const userDataUpd = {
+                ...userData,
                 premium: true,
                 plan:
                     subscription.items.data[0].price.unit_amount ===
@@ -155,6 +170,9 @@ app.post('/webhook', async (req, res) => {
                         ? 'monthly'
                         : 'yearly',
             };
+
+            Subscription.updateSubcriptionByEmail(userData.email,userDataUpd)
+
         }
     } else if (event.type === 'invoice.payment_failed') {
         const invoice = event.data.object;
@@ -164,22 +182,30 @@ app.post('/webhook', async (req, res) => {
             await stripe.subscriptions.retrieve(subscriptionId);
         const { email } = subscription.metadata;
 
-        if (users[email]) {
-            users[email] = {
-                ...users[email],
+        const userData = Subscription.getSubcriptionByEmail(email);
+
+        if (userData) {
+            const userDataUpd = {
+                ...userData,
                 premium: false,
             };
+
+            Subscription.updateSubcriptionByEmail(userData.email,userDataUpd)
         }
     } else if (event.type === 'customer.subscription.deleted') {
         const subscription = event.data.object;
         const { email } = subscription.metadata;
 
-        if (users[email]) {
-            users[email] = {
-                ...users[email],
+        const userData = Subscription.getSubcriptionByEmail(email);
+
+        if (userData) {
+            const userDataUpd= {
+                ...userData,
                 premium: false,
                 plan: 'regular',
             };
+
+            Subscription.updateSubcriptionByEmail(userData.email,userDataUpd)
         }
     }
 

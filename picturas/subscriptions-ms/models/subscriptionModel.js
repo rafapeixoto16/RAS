@@ -24,6 +24,7 @@ const subcriptionSchema = new mongoose.Schema(
             default: 'regular'
         },
         trialUsed: {type:Boolean,required:true,default: false},
+        stripeId: {type:String, required:false, unique:true},
     }
 )
 
