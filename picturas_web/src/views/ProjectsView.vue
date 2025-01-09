@@ -46,9 +46,24 @@
         >
           <template #default="{ item }">
             <div class="w-full h-full flex items-center justify-center">
-              <div class="bg-white rounded-lg shadow-lg w-full h-full max-w-4xl mx-auto transform rotate-0 relative" style="box-shadow: 1px 1px 15px rgba(0,0,0,0.1);">
-                <div class="absolute inset-0 p-8 flex items-center justify-center">
-                  <img v-if="item.imageUrl" :src="item.imageUrl" alt="Project image" class="max-w-full max-h-full object-contain" />
+              <div 
+                class="bg-white rounded-lg shadow-lg w-full h-full max-w-4xl mx-auto transform rotate-0 relative overflow-hidden" 
+                style="box-shadow: 1px 1px 15px rgba(0,0,0,0.1);">
+                <div 
+                  class="absolute inset-0 p-8 flex items-center justify-center"
+                  @mousedown="startPanning"
+                  @mouseup="stopPanning"
+                  @mousemove="panImage"
+                  @wheel="zoomImage"
+                >
+                  <img 
+                    v-if="item.imageUrl" 
+                    :src="item.imageUrl" 
+                    draggable="false"
+                    alt="Project image" 
+                    class="max-w-full max-h-full object-contain" 
+                    :style="imageStyle" 
+                  />
                   <DropZone v-else @files-dropped="handleFilesDropped" />
                 </div>
               </div>
@@ -61,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
@@ -73,6 +88,23 @@ interface Page {
 
 const pages = ref<Page[]>([{ id: 1, imageUrl: null }]);
 const currentPage = ref(0);
+const imageTransform = reactive({
+  scale: 1,
+  translateX: 0,
+  translateY: 0,
+});
+let isPanning = false;
+let startX = 0;
+let startY = 0;
+
+import { computed } from 'vue';
+
+const imageStyle = computed(() => {
+  return {
+    transform: `scale(${imageTransform.scale}) translate(${imageTransform.translateX}px, ${imageTransform.translateY}px)`,
+    transition: isPanning ? 'none' : 'transform 0.2s ease',
+  };
+});
 
 watch(() => pages.value.length, (newLength) => {
   if (currentPage.value >= newLength) {
@@ -138,7 +170,6 @@ const handleFilesDropped = async (files: File[]) => {
 
   if (pages.value[currentPage.value].imageUrl === null) {
     pages.value.splice(currentPage.value, 1, newPages[0]);
-    // Add remaining images as new pages
     if (newPages.length > 1) {
       pages.value.push(...newPages.slice(1));
     }
@@ -172,5 +203,38 @@ const downloadCurrentImage = () => {
 
 const selectTool = (tool: { name: string, icon: string, options?: any }) => {
   console.log(`Selected tool: ${tool.name}`);
+};
+
+const startPanning = (event: MouseEvent) => {
+  if (!pages.value[currentPage.value].imageUrl) return;
+  if (event.button !== 0) return;
+  isPanning = true;
+  startX = event.clientX - imageTransform.translateX;
+  startY = event.clientY - imageTransform.translateY;
+
+  window.addEventListener('mousemove', panImage);
+  window.addEventListener('mouseup', stopPanning);
+};
+
+const stopPanning = () => {
+  if (!isPanning) return;
+  isPanning = false;
+
+  window.removeEventListener('mousemove', panImage);
+  window.removeEventListener('mouseup', stopPanning);
+};
+
+const panImage = (event: MouseEvent) => {
+  if (!isPanning) return;
+  imageTransform.translateX = event.clientX - startX;
+  imageTransform.translateY = event.clientY - startY;
+};
+
+const zoomImage = (event: WheelEvent) => {
+  if (!pages.value[currentPage.value].imageUrl) return;
+  event.preventDefault();
+  const zoomFactor = 0.1;
+  const newScale = imageTransform.scale - event.deltaY * zoomFactor * 0.01;
+  imageTransform.scale = Math.min(Math.max(newScale, 0.5), 3);
 };
 </script>
