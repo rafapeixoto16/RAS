@@ -27,8 +27,8 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     alias: subscriptions-ms-db
   # Monitoring
-  - name: prometheus
-    version: 1.4.0
+  - name: kube-prometheus
+    version: 10.2.3
     repository: https://charts.bitnami.com/bitnami
     condition: production.enabled
   - name: grafana

@@ -51,6 +51,10 @@ rabbitmq:
       amqp: 5672
   persistence:
     enabled: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 
 # Rate Limiter Redis
 rate-limiter-redis:
@@ -61,6 +65,10 @@ rate-limiter-redis:
   master:
     persistence:
       enabled: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 
 # TODO mongo
 
@@ -76,6 +84,10 @@ email_port: 1025
 email_password: "email-password"
 
 # Monitoring Dependencies Configuration
+kube-prometheus:
+  prometheus:
+    enabled: true
+
 grafana:
   admin:
     password: admin
@@ -87,7 +99,7 @@ grafana:
           type: prometheus
           access: proxy
           orgId: 1
-          url: http://picturas-prometheus-server
+          url: http://prometheus-operated:9090
           version: 1
           editable: false
           isDefault: true
@@ -98,6 +110,10 @@ grafana:
             implementation: "prometheus"
           access: proxy
           orgId: 1
-          url: http://picturas-prometheus-alertmanager
+          url: http://alertmanager-operated:9093
           version: 1
           editable: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
