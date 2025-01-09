@@ -1,5 +1,5 @@
 import { createFilterHandler } from '@picturas/filter-helper';
-import {schemaValidation} from "@picturas/schema-validation";
+import { schemaValidation } from '@picturas/schema-validation';
 import sharp from 'sharp';
 
 const croppingSchema = schemaValidation.object({

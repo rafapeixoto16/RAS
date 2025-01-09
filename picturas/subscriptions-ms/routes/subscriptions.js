@@ -1,5 +1,9 @@
 import { Stripe } from 'stripe';
-import { addSubcription, getSubcriptionByEmail, updateSubcriptionByEmail } from '../controller/subscriptions.js';
+import {
+    addSubcription,
+    getSubcriptionByEmail,
+    updateSubcriptionByEmail,
+} from '../controller/subscriptions.js';
 import { Subscription } from '../models/subscriptionModel.js';
 
 app.post('/create-subscription', async (req, res) => {
@@ -51,22 +55,21 @@ app.post('/create-subscription', async (req, res) => {
             trial_period_days: user.trialUsed ? 0 : 7,
         });
 
-        if(!userData){
+        if (!userData) {
             const userDataUpdate = {
                 email: email,
                 premium: true, //fixme verify
                 plan: interval,
                 trialUsed: true,
-                stripeId: subscription.id
-            }
+                stripeId: subscription.id,
+            };
 
             Subscription.addSubcription(userDataUpdate);
         }
 
         return res.json({ subscriptionId: subscription.id });
     } catch (err) {
-        return res.status(500)
-            .json({ error: 'Failed to create subscription' });
+        return res.status(500).json({ error: 'Failed to create subscription' });
     }
 });
 
@@ -120,8 +123,8 @@ app.get('/billing-info', async (req, res) => {
             email: customer.email,
             payment_method: customer.invoice_settings.default_payment_method
                 ? await stripe.paymentMethods.retrieve(
-                    customer.invoice_settings.default_payment_method
-                )
+                      customer.invoice_settings.default_payment_method
+                  )
                 : null,
         };
 
@@ -130,8 +133,7 @@ app.get('/billing-info', async (req, res) => {
             billingInfo,
         });
     } catch (err) {
-        return res.status(500)
-            .json({ error: 'Failed to fetch billing info' });
+        return res.status(500).json({ error: 'Failed to fetch billing info' });
     }
 });
 
@@ -143,11 +145,10 @@ app.post('/webhook', async (req, res) => {
         event = stripe.webhooks.constructEvent(
             req.body,
             sig,
-            process.env.STRIPE_WEBHOOK_SECRET,
+            process.env.STRIPE_WEBHOOK_SECRET
         );
     } catch (err) {
-        return res.status(400)
-            .send(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
     if (event.type === 'invoice.payment_succeeded') {
@@ -171,7 +172,7 @@ app.post('/webhook', async (req, res) => {
                         : 'yearly',
             };
 
-            Subscription.updateSubcriptionByEmail(userData.email,userDataUpd)
+            Subscription.updateSubcriptionByEmail(userData.email, userDataUpd);
         }
     } else if (event.type === 'invoice.payment_failed') {
         const invoice = event.data.object;
@@ -189,7 +190,7 @@ app.post('/webhook', async (req, res) => {
                 premium: false,
             };
 
-            Subscription.updateSubcriptionByEmail(userData.email,userDataUpd)
+            Subscription.updateSubcriptionByEmail(userData.email, userDataUpd);
         }
     } else if (event.type === 'customer.subscription.deleted') {
         const subscription = event.data.object;
@@ -198,13 +199,13 @@ app.post('/webhook', async (req, res) => {
         const userData = Subscription.getSubcriptionByEmail(email);
 
         if (userData) {
-            const userDataUpd= {
+            const userDataUpd = {
                 ...userData,
                 premium: false,
                 plan: 'regular',
             };
 
-            Subscription.updateSubcriptionByEmail(userData.email,userDataUpd)
+            Subscription.updateSubcriptionByEmail(userData.email, userDataUpd);
         }
     }
 

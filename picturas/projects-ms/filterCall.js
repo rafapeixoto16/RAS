@@ -28,7 +28,9 @@ async function checkQueueExistsAndSend(queueName, message) {
         console.log(`Queue "${queueName}" exists. Sending message...`);
 
         // Send the message to the queue
-        const sent = channel.sendToQueue(queueName, Buffer.from(message), { persistent: true });
+        const sent = channel.sendToQueue(queueName, Buffer.from(message), {
+            persistent: true,
+        });
         if (!sent) {
             console.error('Failed to send message.');
         }
@@ -45,12 +47,16 @@ async function readFromOutputQueue() {
         console.log(`Reading messages from queue: ${FILTER_OUTPUT_QUEUE}`);
 
         // Consume messages from the output queue
-        channel.consume(FILTER_OUTPUT_QUEUE, (msg) => {
-            if (msg !== null) {
-                console.log('Received message:', msg.content.toString());
-                channel.ack(msg); // Acknowledge the message
-            }
-        }, { noAck: false });
+        channel.consume(
+            FILTER_OUTPUT_QUEUE,
+            (msg) => {
+                if (msg !== null) {
+                    console.log('Received message:', msg.content.toString());
+                    channel.ack(msg); // Acknowledge the message
+                }
+            },
+            { noAck: false }
+        );
     } catch (error) {
         console.error('Error:', error.message);
     }

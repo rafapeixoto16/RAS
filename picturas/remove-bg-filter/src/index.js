@@ -1,5 +1,5 @@
 import { createFilterHandler } from '@picturas/filter-helper';
-import {schemaValidation} from "@picturas/schema-validation";
+import { schemaValidation } from '@picturas/schema-validation';
 import { transparentBackground } from 'transparent-background';
 
 const removeBgSchema = schemaValidation.object({
