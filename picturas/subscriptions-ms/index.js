@@ -24,7 +24,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 // Routers
-app.use('/', subscriptionsRouter);
+app.use('/subcriptions', subscriptionsRouter);
 
 // 404
 app.use((req, res, next) => {
@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 
 // Error Handler
 app.use((err, req, res) => {
-    // TODO not sure if this is right, I must check
+    // TODO not sure if this is right, I must check . yes it is
     res.status(err.status || 500).send();
 });
 
