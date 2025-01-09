@@ -12,8 +12,12 @@ mv kubectl /usr/local/bin/
 curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 # Bind Ports
-ssh -o StrictHostKeyChecking=no -f -N -L 6443:127.0.0.1:6443 -L 5000:127.0.0.1:5000 $SSH_USER@$SSH_HOST -p $SSH_PORT -i private_key &
+ssh -o StrictHostKeyChecking=no -f -N -L 6443:127.0.0.1:6443 $SSH_USER@$SSH_HOST -p $SSH_PORT -i private_key &
 sleep 5
+
+# Configure docker
+docker context create my-remote --docker "host=ssh://$SSH_USER@$SSH_HOST:$SSH_PORT"
+docker context use server-remote
 
 # Config Kubernetes
 mkdir $HOME/.kube
@@ -22,7 +26,7 @@ sed -i 's/127.0.0.1:[0-9]\+/localhost:6443/g' $HOME/.kube/config
 export KUBECONFIG=$HOME/.kube/config
 
 # Build Images
-bash scripts/build-docker.sh true
+bash scripts/build-docker.sh
 
 # Helm install
 helm upgrade --install picturas ./picturas-chart -f values-production.yaml

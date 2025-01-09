@@ -13,6 +13,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: {{ .Values.registry }}web:latest
+          image: web:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 80

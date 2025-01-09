@@ -13,7 +13,8 @@ spec:
     spec:
       containers:
         - name: projects-ms
-          image: {{ .Values.registry }}projects-ms:latest
+          image: projects-ms:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000
           volumeMounts:

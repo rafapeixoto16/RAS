@@ -26,3 +26,17 @@ dependencies:
     version: 16.4.0
     repository: https://charts.bitnami.com/bitnami
     alias: subscriptions-ms-db
+  # Monitoring
+  - name: kube-prometheus
+    version: 10.2.3
+    repository: https://charts.bitnami.com/bitnami
+    condition: production.enabled
+  - name: grafana
+    version: 11.4.2
+    repository: https://charts.bitnami.com/bitnami
+    condition: production.enabled
+  - name: grafana-loki
+    version: 4.7.1
+    repository: https://charts.bitnami.com/bitnami
+    condition: production.enabled
+  # TODO Thanos + Grafana Mimir
