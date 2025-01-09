@@ -22,6 +22,13 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        emailPreferences: {
+            projectUpdates: { type: Boolean, default: true },
+            newFeatures: { type: Boolean, default: true },
+            marketing: { type: Boolean, default: true },
+            projectCollaborations: { type: Boolean, default: true },
+            comments: { type: Boolean, default: true },
+        },
     },
     { versionKey: false }
 );
@@ -47,6 +54,21 @@ userSchema.methods.comparePassword = function (candidatePassword, cb) {
         if (err) return cb(err);
         return cb(null, isMatch);
     });
+};
+
+
+userSchema.methods.updateEmailPreferences = async function (preferences) {
+    try {
+        this.emailPreferences = {
+            ...this.emailPreferences,
+            ...preferences,
+        };
+        await this.save();
+        return this.emailPreferences;
+
+    } catch (err) {
+        throw new Error("Erro ao atualizar preferências de email: " + err.message);
+    }
 };
 
 userSchema.pre('save', function (next) {

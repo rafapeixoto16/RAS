@@ -315,4 +315,38 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
     });
 });
 
+router.put('/update-email-preferences/:id', async (req, res) => {
+    const userId = req.params.id;
+    const preferences = req.body.preferences; // duvida 
+
+    // preferencias existentes
+    const validPreferences = ['projectUpdates', 'newFeatures', 'marketing', 'projectCollaborations', 'comments'];
+
+    // validacao das preferencias
+    if (!Array.isArray(preferences) || !preferences.every(pref => validPreferences.includes(pref))) {
+        return res.status(400).json({ message: 'Preferências inválidas' });
+    }
+
+    try {
+        const user = await User.getUser(userId); 
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+
+        // update das preferencias
+        user.emailPreferences = preferences; 
+        const updatedUser = await User.updateUser(userId, user); 
+
+        return res.status(200).json({
+            message: 'Preferências de email atualizadas com sucesso',
+            preferences: updatedUser.emailPreferences, 
+        });
+        
+    } catch (err) {
+        console.error(`Erro ao atualizar preferências de email: ${err.message}`);
+        return res.status(500).json({ message: 'Erro interno no servidor' });
+    }
+});
+
 export default router;
