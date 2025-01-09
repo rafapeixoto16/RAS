@@ -1,4 +1,5 @@
 registry: ""
+imagePullPolicy: Never
 
 nameOverride: ""
 fullnameOverride: ""

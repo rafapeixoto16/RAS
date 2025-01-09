@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# To use with minikube run this before building: eval $(minikube docker-env)
+
 #docker build -t web:latest -f scripts/web.Dockerfile .
 
 if [[ "$1" == "true" ]]; then
@@ -34,10 +36,10 @@ SUBPROJECTS=(
 
 for PROJECT in "${SUBPROJECTS[@]}"; do
   IMAGE_NAME="${PROJECT}:latest"
-  docker build --build-arg SUBPROJECT=${PROJECT} -t ${IMAGE_NAME} -f scripts/picturas.Dockerfile .
+  docker build --build-arg SUBPROJECT=$PROJECT -t $IMAGE_NAME -f scripts/picturas.Dockerfile .
 
   if [[ "$1" == "true" ]]; then
-    docker tag ${IMAGE_NAME} localhost:5000/${IMAGE_NAME}
-    docker push localhost:5000/${IMAGE_NAME}
+    docker tag $IMAGE_NAME localhost:5000/$IMAGE_NAME
+    docker push localhost:5000/$IMAGE_NAME
   fi
 done

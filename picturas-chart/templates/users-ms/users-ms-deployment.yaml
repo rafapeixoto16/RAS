@@ -14,6 +14,7 @@ spec:
       containers:
         - name: users-ms
           image: {{ .Values.registry }}users-ms:latest
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
           env:

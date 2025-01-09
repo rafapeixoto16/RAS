@@ -14,6 +14,7 @@ spec:
       containers:
         - name: subscriptions-ms
           image: {{ .Values.registry }}subscriptions-ms:latest
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
           env:
