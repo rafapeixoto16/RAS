@@ -73,6 +73,11 @@
         v-for="project in filteredProjects"
         :key="project.id"
         :project="project"
+        :dropdown-options="[
+          { label: 'Open in a new tab', icon: 'bi bi-box-arrow-up-right', action: () => openInNewTab(project.id) },
+          { label: 'Rename', icon: 'bi bi-pencil', action: () => renameProject(project.id) },
+          { label: 'Move to Trash', icon: 'bi bi-trash', action: () => moveToTrash(project.id) }
+        ]"
         @edit="editProject"
       />
     </div>
@@ -153,6 +158,19 @@ const filteredProjects = computed(() => {
 
 const editProject = (id: number) => {
   console.log(`Editing project with id: ${id}`);
+};
+
+const openInNewTab = (id: number) => {
+  console.log(`Opening project with id: ${id} in a new tab`);
+};
+
+const renameProject = (id: number) => {
+  console.log(`Renaming project with id: ${id}`);
+};
+
+const moveToTrash = (id: number) => {
+  console.log(`Moving project with id: ${id} to trash`);
+  projects.value = projects.value.filter((project) => project.id !== id);
 };
 
 // Drag and Drop Handlers
