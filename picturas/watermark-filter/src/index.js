@@ -8,11 +8,11 @@ import { watermarkPath, venvDir } from './utils';
 const toolName = 'watermark';
 
 if (process.env.EXPORT_SCHEMA === 'true') {
-    createFilterHandler(
+    /* createFilterHandler(
         toolName,
         schemaValidation.object({}),
         (_1, _2, _3) => {}
-    );
+    ); */
     process.exit(0);
 }
 
