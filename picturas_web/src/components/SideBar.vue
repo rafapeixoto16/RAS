@@ -37,7 +37,8 @@
                             <Dropdown
                                 placement="right"
                                 trigger="..."
-                                :options="[{ label: 'Open in a new tab', icon: 'bi bi-box-arrow-up-right' }, { label: 'Move to Trash', icon: 'bi bi-trash' }]"
+                                :options="[{ label: 'Open in a new tab', icon: 'bi bi-box-arrow-up-right' },{label: 'Rename', icon: 'bi bi-pencil'}, { label: 'Move to Trash', icon: 'bi bi-trash' }]"
+                                :menu-color="'#EFF6FF'"
                                 append-to-body
                             />
                         </div>

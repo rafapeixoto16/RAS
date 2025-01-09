@@ -25,6 +25,7 @@
               placement="right" 
               trigger="click" 
               :options="dropdownOptions" 
+              :menu-color="'#FFFFFF'"
               append-to-body 
             />
           </div>
