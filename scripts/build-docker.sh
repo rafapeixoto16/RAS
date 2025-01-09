@@ -5,11 +5,6 @@ set -e
 
 #docker build -t web:latest -f scripts/web.Dockerfile .
 
-if [[ "$1" == "true" ]]; then
-  docker tag web:latest localhost:5000/web:latest
-  docker push localhost:5000/web:latest
-fi
-
 SUBPROJECTS=(
   "api-gateway"
 #  "auto-adjust-filter"
@@ -37,9 +32,4 @@ SUBPROJECTS=(
 for PROJECT in "${SUBPROJECTS[@]}"; do
   IMAGE_NAME="${PROJECT}:latest"
   docker build --build-arg SUBPROJECT=$PROJECT -t $IMAGE_NAME -f scripts/picturas.Dockerfile .
-
-  if [[ "$1" == "true" ]]; then
-    docker tag $IMAGE_NAME localhost:5000/$IMAGE_NAME
-    docker push localhost:5000/$IMAGE_NAME
-  fi
 done
