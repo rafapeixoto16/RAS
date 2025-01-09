@@ -1,0 +1,3 @@
+[submodule "picturas/watermark-filter/picturas-watermark-tool-ms"]
+	path = picturas/watermark-filter/picturas-watermark-tool-ms
+	url = https://github.com/picturas-um/picturas-watermark-tool-ms.git

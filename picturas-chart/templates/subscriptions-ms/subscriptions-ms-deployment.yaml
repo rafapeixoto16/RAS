@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subscriptions-ms
+spec:
+  selector:
+    matchLabels:
+      name: subscriptions-ms
+  template:
+    metadata:
+      labels:
+        name: subscriptions-ms
+    spec:
+      containers:
+        - name: subscriptions-ms
+          image: {{ .Values.registry }}subscriptions-ms:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: STRIPE_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: stripe-secret
+                  key: private-key
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: stripe-secret
+                  key: webhook-secret
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq"
+            - name: RABBITMQ_QUEUE
+              value: {{ .Values.filter_output_queue | quote }}

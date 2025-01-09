@@ -7,6 +7,7 @@
     },
     "dependencies": {
         "@picturas/filter-helper": "*",
+        "@picturas/schema-validation": "file:../schema-validation",
         "tesseract.js": "^5.1.1"
     }
 }

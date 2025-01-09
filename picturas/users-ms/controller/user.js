@@ -1,4 +1,4 @@
-import * as User from '../models/userModel';
+import * as User from '../models/userModel.js';
 
 export const getUser = (id) => {
     return User.findOne({ _id: id }).exec();
@@ -20,6 +20,10 @@ export const updateUser = (id, info) => {
 export const updateUserPassword = (id, pwd) => {
     return User.updateOne({ _id: id }, pwd)
         .exec(); // excute
+};
+
+export const updateUserProfilePic = (id, profilePicUrl) => {
+    return User.updateOne({ _id: id }, { profilePic: profilePicUrl }).exec();
 };
 
 export const deleteUser = (id) => {

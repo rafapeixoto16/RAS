@@ -1,0 +1,46 @@
+{{- range .Values.filters }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ . }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ . }}
+  template:
+    metadata:
+      labels:
+        name: {{ . }}
+    spec:
+      containers:
+        - name: {{ . }}
+          image: {{ $.Values.registry }}{{ . }}:latest
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: {{ $.Values.rabbitmq.service.ports.amqp | quote }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: password
+            - name: FILTER_OUTPUT_QUEUE
+              value: {{ $.Values.filter_output_queue }}
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - mountPath: /mnt/nfs
+              name: nfs-volume
+      volumes:
+        - name: nfs-volume
+          nfs:
+            path: /
+            server: nfs
+{{- end }}

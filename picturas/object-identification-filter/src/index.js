@@ -1,4 +1,5 @@
-import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
+import { createFilterHandler } from '@picturas/filter-helper';
+import {schemaValidation} from "@picturas/schema-validation";
 import cocoSsd from '@tensorflow-models/coco-ssd';
 import tf from '@tensorflow/tfjs-node';
 
