@@ -54,7 +54,6 @@
                     label: 'Open in a new tab',
                     icon: 'bi bi-box-arrow-up-right',
                     route: project.link,
-                    target: true,
                   },
                   { label: 'Move to Trash', icon: 'bi bi-trash' },
                 ]"

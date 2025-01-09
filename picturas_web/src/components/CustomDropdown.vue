@@ -44,15 +44,16 @@
             :key="option.label"
             class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
           >
-            <router-link
+            <!-- Conditional rendering based on 'target' -->
+            <a
               v-if="option.route"
-              :to="!option.target ? option.route : undefined"
+              href="javascript:void(0)"
+              @click.prevent="openInNewTab(option)"
               class="flex items-center gap-2"
-              @click.prevent="openInNewTab(option.route)"
             >
               <i v-if="option.icon" :class="option.icon"></i>
               <span class="text-gray-700">{{ option.label }}</span>
-            </router-link>
+            </a>
             <div v-else class="flex items-center gap-2">
               <i v-if="option.icon" :class="option.icon"></i>
               <span class="text-gray-700">{{ option.label }}</span>
@@ -72,6 +73,7 @@ interface Option {
   label: string;
   icon?: string;
   route?: string;
+  target?: "_blank" | "_self";
 }
 
 interface Props {
@@ -112,10 +114,16 @@ const updateDropdownPosition = () => {
   }
 };
 
-const openInNewTab = (route) => {
-  console.log(route);
-  // Open the URL in a new tab
-  window.open(route, "_blank");
+const openInNewTab = (option: Option) => {
+  console.log(option);
+  if (option.route) {
+    const fullUrl = window.location.origin + option.route;
+    if (option.target === "_blank") {
+      window.open(fullUrl, "_blank");
+    } else {
+      window.location.href = fullUrl;
+    }
+  }
 };
 
 const handleClickOutside = (event: MouseEvent | TouchEvent) => {
