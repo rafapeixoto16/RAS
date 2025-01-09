@@ -1,6 +1,8 @@
+# General
 nameOverride: ""
 fullnameOverride: ""
 
+# Production Settings
 production:
   enabled: false
   autoscaling:
@@ -9,13 +11,35 @@ production:
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
 
+# General settings
 frontend_url: "http://localhost"
 
+filters:
+  - auto-adjust-filter
+#  - binarization-filter
+#  - borders-add-filter
+#  - brightness-filter
+#  - contrast-filter
+#  - cropping-filter
+#  - grayscale-filter
+#  - object-identification-filter
+#  - ocr-filter
+#  - person-count-filter
+#  - remove-bg-filter
+#  - resize-filter
+#  - rotate-filter
+#  - saturation-filter
+#  - smart-crop-filter
+#  - watermark-filter
+
+# Miscellaneous
 auth_jwt_secret: "auth-secret"
 refresh_jwt_secret: "refresh-secret"
 validate_jwt_secret: "validate-secret"
 
 filter_output_queue: "filters-output"
+
+# Dependencies Configuration
 
 # RabbitMQ
 rabbitmq:
@@ -51,21 +75,29 @@ email_hostname: "picturas.pt"
 email_port: 1025
 email_password: "email-password"
 
-# Filters
-filters:
-  - auto-adjust-filter
-#  - binarization-filter
-#  - borders-add-filter
-#  - brightness-filter
-#  - contrast-filter
-#  - cropping-filter
-#  - grayscale-filter
-#  - object-identification-filter
-#  - ocr-filter
-#  - person-count-filter
-#  - remove-bg-filter
-#  - resize-filter
-#  - rotate-filter
-#  - saturation-filter
-#  - smart-crop-filter
-#  - watermark-filter
+# Monitoring Dependencies Configuration
+grafana:
+  admin:
+    password: admin
+  datasources:
+    secretDefinition:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          orgId: 1
+          url: http://picturas-prometheus-server
+          version: 1
+          editable: false
+          isDefault: true
+        - name: Alertmanager
+          uid: alertmanager
+          type: alertmanager
+          jsonData:
+            implementation: "prometheus"
+          access: proxy
+          orgId: 1
+          url: http://picturas-prometheus-alertmanager
+          version: 1
+          editable: false

@@ -5,9 +5,6 @@ dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 20.6.1
-- name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 20.6.1
 - name: mongodb
   repository: https://charts.bitnami.com/bitnami
   version: 16.4.0
@@ -17,5 +14,11 @@ dependencies:
 - name: mongodb
   repository: https://charts.bitnami.com/bitnami
   version: 16.4.0
-digest: sha256:265b94a528f422326b4c461942b7cbda7f1e634d7dc0b2bae96b386bd2b5b65b
-generated: "2025-01-02T14:32:21.2030903Z"
+- name: prometheus
+  repository: https://charts.bitnami.com/bitnami
+  version: 1.4.0
+- name: grafana
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.4.2
+digest: sha256:06bb6d0f642af1c0d19a95599876c8cce3429b1a056a6d4a8b4032a63cff9d43
+generated: "2025-01-09T15:50:22.455083843Z"
