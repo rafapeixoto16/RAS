@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import CreateProject from '../views/CreateProject.vue'
 import TrashView from '../views/TrashView.vue'
 
 const router = createRouter({
@@ -49,7 +48,7 @@ const router = createRouter({
     {
       path: '/create-project',
       name: 'createproject',
-      component: CreateProject,
+      component: () => import('../views/CreateProject.vue'),
     },
     {
       path: '/trash',
