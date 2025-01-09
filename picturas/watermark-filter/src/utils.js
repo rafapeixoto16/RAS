@@ -1,5 +1,4 @@
 import { execa } from 'execa';
-import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import { dirname } from 'path';
@@ -45,13 +44,4 @@ export async function findSystemPython() {
     }
 
     return null;
-}
-
-export async function exists(filePath) {
-    try {
-        await fs.stat(filePath);
-        return true;
-    } catch (error) {
-        return false;
-    }
 }
