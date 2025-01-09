@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
         email: { type: String, required: true, unique: true, index: true },
         password: { type: String, required: true },
         username: { type: String, required: true, unique: true, index: true },
-        profilePic: { type: String, default: null }, // URL da imagem 
+        profilePic: { type: String, default: null }, // URL da imagem
         location: { type: String, required: true },
         bio: { type: String, required: false },
         refresh: { type: String, required: false },
@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        expireAt: {
+            type: Date,
+            default: Date.now,
+            index: { expires: '24h' }
+        }
     },
     { versionKey: false }
 );
@@ -34,7 +39,7 @@ function bcryptEncripter(user, next) {
     bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
         if (err) return next(err);
 
-        return bcrypt.hash(user.password, salt, function(err, hash) {
+        return bcrypt.hash(user.password, salt, function (err, hash) {
             if (err) return next(err);
             user.password = hash;
             return next();

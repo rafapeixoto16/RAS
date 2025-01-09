@@ -5,12 +5,12 @@ import sendEmail from '../email/sendEmail.js';
 import * as OTPAuth from 'otpauth';
 
 import * as User from '../controller/user.js';
-import multer from '../config/multerConfig.js';  
+import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
-import * as z from '../../utils/zodDemo.js';
+import { validateRequest } from '../../utils/zodDemo.js';
 import { v4 as uuidv4 } from 'uuid';
 import { schemaValidation } from '@picturas/filter-helper';
-const BUCKET_NAME = 'bucket-name'; // **TROCAR PELO bucket-name do MinIO**
+const BUCKET_NAME = 'bucket-name'; //TODO **TROCAR PELO bucket-name do MinIO**
 
 const router = Router();
 
@@ -33,28 +33,67 @@ router.post('/', async (req, res) => {
             const validationToken = jwt.sign(
                 filteredUser,
                 process.env.VALIDATE_JWT_SECRET,
-                { expiresIn: '24h' },
+                { expiresIn: '24h' }
             );
             sendEmail(user.email, validationToken, kinds.validateAccount);
             res.sendStatus(200);
         })
         .catch((err) => {
-            res.status(444)
-                .json({ error: 'Failed to add user' });
+            res.status(444).json({ error: 'Failed to add user' });
         });
+});
+
+router.post('/register/', async (req, res) => {
+    jwt.verify(
+        req.body.validationToken,
+        process.env.VALIDATE_JWT_SECRET,
+        (err, user) => {
+            User.getUser(user._id)
+                .then((resp) => {
+                    const filteredUser = {
+                        username: resp.username,
+                        email: resp.email,
+                        location: resp.location,
+                        bio: resp.bio,
+                        nome: resp.nome,
+                        active: true,
+                        password: resp.password,
+                        profilePic: resp.profilePic,
+                        refresh: resp.refresh,
+                        otpEnabled : false,
+                    };
+
+                    User.addUser(user._id, filteredUser);
+
+                    res.status(473)
+                })
+                .catch((_) => {
+                    res.status(404).json({
+                        error: 'Failed to active user account',
+                    });
+                });
+        }
+    ).catch((_) => {
+        User.deleteUser(user._id).catch(
+            res.status(404).json({
+                error: 'Time limit to activate account exceeded',
+            })
+        );
+        res.status(404).json({
+            error: 'Time limit to activate account exceeded',
+        });
+    });
 });
 
 router.post('/login', async (req, res) => {
     const user = User.getUserByEmail(req.body.email);
 
     if (user == null) {
-        return res.status(400)
-            .send('Cannot find user');
+        return res.status(400).send('Cannot find user');
     }
 
     if (!user.active) {
-        return res.status(401)
-            .send('User must be validated first');
+        return res.status(401).send('User must be validated first');
     }
 
     try {
@@ -67,21 +106,18 @@ router.post('/login', async (req, res) => {
             const validationToken = jwt.sign(
                 filteredUser,
                 process.env.VALIDATE_JWT_SECRET,
-                { expiresIn: '15m' },
+                { expiresIn: '15m' }
             );
 
-            res.status(200)
-                .json({
-                    validationToken,
-                    requiresOtp: user.otpEnabled,
-                });
+            res.status(200).json({
+                validationToken,
+                requiresOtp: user.otpEnabled,
+            });
         } else {
-            res.status(555)
-                .json({ error: 'Invalid Password' });
+            res.status(555).json({ error: 'Invalid Password' });
         }
     } catch {
-        res.status(445)
-            .send();
+        res.status(445).send();
     }
 });
 
@@ -121,15 +157,14 @@ router.post('/login/2', async (req, res) => {
             const accessToken = jwt.sign(
                 filteredUser,
                 process.env.AUTH_JWT_SECRET,
-                { expiresIn: '15m' },
+                { expiresIn: '15m' }
             );
 
-            const randomBytes = crypto.randomBytes(16)
-                .toString('hex');
+            const randomBytes = crypto.randomBytes(16).toString('hex');
             filteredUser.accessId = randomBytes;
             const refreshToken = jwt.sign(
                 filteredUser,
-                process.env.REFRESH_JWT_SECRET,
+                process.env.REFRESH_JWT_SECRET
             );
             user.refresh = randomBytes;
 
@@ -156,17 +191,15 @@ router.post('/passwordRecovery', async (req, res) => {
             const validationToken = jwt.sign(
                 filteredUser,
                 process.env.VALIDATE_JWT_SECRET,
-                { expiresIn: '24h' },
+                { expiresIn: '24h' }
             );
             sendEmail(user.email, validationToken, kinds.resetPassword);
             res.sendStatus(200);
         })
         .catch((err) => {
-            res.status(404)
-                .json({ error: 'Failed to find the user' });
+            res.status(404).json({ error: 'Failed to find the user' });
         });
 });
-
 
 router.get('/:id', (req, res) => {
     User.getUser(req.params.id)
@@ -176,7 +209,7 @@ router.get('/:id', (req, res) => {
                 email: resp.email,
                 location: resp.location,
                 bio: resp.bio,
-                nome: resp.nome
+                nome: resp.nome,
             };
 
             res.status.json(filteredUser);
@@ -184,23 +217,27 @@ router.get('/:id', (req, res) => {
         .catch((err) => res.sendStatus(446));
 });
 
-router.put('/:id/update', validateRequest({
-    body: schemaValidation.object({ //TODO redo ask RUI
-        bodyKey: schemaValidation.number(),
-    })}), (req, res) => {
+router.put(
+    '/:id/update',
+    validateRequest({
+        body: schemaValidation.object({
+            //TODO redo ask RUI
+            bodyKey: schemaValidation.number(),
+        }),
+    }),
+    (req, res) => {
+        User.updateUser(req.params.id, req.body)
+            .then((resp) => {
+                res.status.json(resp);
+            })
+            .catch((err) => res.sendStatus(447));
+    }
+);
 
-    User.updateUser(req.params.id, req.body)
-        .then((resp) => {
-            res.status.json(resp);
-        })
-        .catch((err) => res.sendStatus(447));
-});
-
-router.put('/:id/password', function(req, res) {
+router.put('/:id/password', function (req, res) {
     User.updateUserPassword(req.params.id, req.body.password)
         .then((data) => {
-            res.status(201)
-                .json(data);
+            res.status(201).json(data);
         })
         .catch((erro) => {
             res.sendStatus(448);
@@ -301,18 +338,43 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
     };
 
     // enviar imagem pro bucket S3 do MinIO
-    minioClient.putObject(BUCKET_NAME, profilePicName, req.file.buffer, metaData, (err, etag) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to upload image to MinIO', details: err });
+    minioClient.putObject(
+        BUCKET_NAME,
+        profilePicName,
+        req.file.buffer,
+        metaData,
+        (err, etag) => {
+            if (err) {
+                return res
+                    .status(500)
+                    .json({
+                        error: 'Failed to upload image to MinIO',
+                        details: err,
+                    });
+            }
+
+            const imageUrl = `https://${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
+
+            // update no user
+            User.updateUserProfilePic(id, imageUrl)
+                .then(() =>
+                    res
+                        .status(200)
+                        .json({
+                            message: 'Profile picture updated successfully',
+                            imageUrl,
+                        })
+                )
+                .catch((err) =>
+                    res
+                        .status(500)
+                        .json({
+                            error: 'Failed to update user profile picture',
+                            details: err,
+                        })
+                );
         }
-
-        const imageUrl = `https://${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
-
-        // update no user
-        User.updateUserProfilePic(id, imageUrl)
-            .then(() => res.status(200).json({ message: 'Profile picture updated successfully', imageUrl }))
-            .catch((err) => res.status(500).json({ error: 'Failed to update user profile picture', details: err }));
-    });
+    );
 });
 
 export default router;

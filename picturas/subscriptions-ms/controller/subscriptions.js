@@ -1,12 +1,11 @@
-import {Subscription} from '../models/subscriptionModel.js';
+import { Subscription } from '../models/subscriptionModel.js';
 
 export const getSubcriptionByEmail = (email) => {
     return Subscription.findOne({ email: email }).exec();
 };
 
 export const getSubcriptionById = (id) => {
-    return Subscription.findOne({ _id: id })
-        .exec();
+    return Subscription.findOne({ _id: id }).exec();
 };
 
 export const addSubcription = (u) => {

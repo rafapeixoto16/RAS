@@ -4,13 +4,15 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const vars = {
-    'validateAccount': {
+    validateAccount: {
         title: 'Confirm your Account Creation',
-        description: 'Please click the button below to confirm your email address.',
+        description:
+            'Please click the button below to confirm your email address.',
     },
-    'resetPassword': {
+    resetPassword: {
         title: 'Reset Password',
-        description: 'We received a request to reset your password. Click the button below to create a new password.',
+        description:
+            'We received a request to reset your password. Click the button below to create a new password.',
     },
 };
 

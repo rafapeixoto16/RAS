@@ -14,20 +14,17 @@ const subcriptionSchema = new mongoose.Schema( //TODO verify
     },
     { versionKey: false }
 );*/
-const subcriptionSchema = new mongoose.Schema(
-    {
-        email: { type: String, unique: true, required: true },
-        premium: { type: Boolean, required: true, default: false },
-        plan: {
-            type: String,
-            enum : ['regular','monthly','yearly'],
-            default: 'regular'
-        },
-        trialUsed: {type:Boolean,required:true,default: false},
-        stripeId: {type:String, required:false, unique:true},
-    }
-)
-
+const subcriptionSchema = new mongoose.Schema({
+    email: { type: String, unique: true, required: true },
+    premium: { type: Boolean, required: true, default: false },
+    plan: {
+        type: String,
+        enum: ['regular', 'monthly', 'yearly'],
+        default: 'regular',
+    },
+    trialUsed: { type: Boolean, required: true, default: false },
+    stripeId: { type: String, required: false, unique: true },
+});
 
 const Subscription = mongoose.model('subscription', subcriptionSchema);
 export { Subscription };

@@ -1,6 +1,6 @@
 import amqp from 'amqplib';
 import { readFileSync, writeFileSync } from 'node:fs';
-import {toJsonSchema} from "@picturas/schema-validation";
+import { toJsonSchema } from '@picturas/schema-validation';
 
 export function createFilterHandler(filterName, paramsSchema, imageHandler) {
     if (process.env.EXPORT_SCHEMA === 'true') {
@@ -25,15 +25,8 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
 
     async function processMessage(message) {
         const content = JSON.parse(message.content.toString());
-        const {
-            messageId,
-            parameters,
-        } = content;
-        const {
-            inputImageURI,
-            outputImageURI,
-            ...args
-        } = parameters;
+        const { messageId, parameters } = content;
+        const { inputImageURI, outputImageURI, ...args } = parameters;
 
         let processingTime = 0;
         let data = {};
@@ -45,27 +38,34 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
             data = validatedParams.errors;
         } else {
             try {
-
-                const inputFormat = inputImageURI.split('.')
-                    .pop();
+                const inputFormat = inputImageURI.split('.').pop();
                 const imageBuffer = await readFileSync(inputImageURI);
 
                 const start = Date.now();
                 const result = await imageHandler(
                     imageBuffer,
                     inputFormat,
-                    validatedParams.data,
+                    validatedParams.data
                 );
                 const end = Date.now();
                 processingTime = (end - start) / 1000;
 
-                let output,
-                    outputFormat;
+                let output, outputFormat;
 
                 if (Array.isArray(result)) {
                     [output, outputFormat] = result;
 
-                    if (!['png', 'jpg', 'jpeg', 'bmp', 'webp', 'tiff', 'json'].includes(outputFormat)) {
+                    if (
+                        ![
+                            'png',
+                            'jpg',
+                            'jpeg',
+                            'bmp',
+                            'webp',
+                            'tiff',
+                            'json',
+                        ].includes(outputFormat)
+                    ) {
                         throw new Error('Invalid output format provided');
                     }
                 } else {
@@ -74,8 +74,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
                 }
 
                 const kind = outputFormat === 'json' ? 'text' : 'image';
-                const outputPath = inputImageURI.split('.')
-                    .first();
+                const outputPath = inputImageURI.split('.').first();
                 const uploadedImageURI = `${outputPath}.${outputFormat}`;
 
                 await writeFileSync(uploadedImageURI, output);
@@ -93,8 +92,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
         return {
             messageId: `completion-${messageId}`,
             correlationId: messageId,
-            timestamp: Date.now()
-                .toString(),
+            timestamp: Date.now().toString(),
             status: error ? 'error' : 'success',
             [error ? 'error' : 'output']: data,
             metadata: {
@@ -105,7 +103,9 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
     }
 
     (async () => {
-        const connection = await amqp.connect(`amqp://${process.env.RABBITMQ_USERNAME}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`);
+        const connection = await amqp.connect(
+            `amqp://${process.env.RABBITMQ_USERNAME}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`
+        );
         const channel = await connection.createChannel();
 
         await channel.assertQueue(inputQueue, { durable: true });
@@ -116,9 +116,13 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
                 const content = JSON.parse(message.content.toString());
                 const result = await processMessage(content);
 
-                channel.sendToQueue(outputQueue, Buffer.from(JSON.stringify(result)), {
-                    persistent: true,
-                });
+                channel.sendToQueue(
+                    outputQueue,
+                    Buffer.from(JSON.stringify(result)),
+                    {
+                        persistent: true,
+                    }
+                );
 
                 channel.ack(message);
             }

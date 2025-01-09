@@ -1,14 +1,14 @@
 {
-  "name": "@picturas/watermark-filter",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "install": "node src/install.js",
-    "start": "node src/index.js"
-  },
-  "dependencies": {
-    "@picturas/filter-helper": "file:../filter-helper",
-    "@picturas/schema-validation": "file:../schema-validation",
-    "execa": "^9.5.2"
-  }
+    "name": "@picturas/watermark-filter",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "install": "node src/install.js",
+        "start": "node src/index.js"
+    },
+    "dependencies": {
+        "@picturas/filter-helper": "file:../filter-helper",
+        "@picturas/schema-validation": "file:../schema-validation",
+        "execa": "^9.5.2"
+    }
 }
