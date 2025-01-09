@@ -7,10 +7,10 @@ import * as OTPAuth from 'otpauth';
 import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';  
 import minioClient from '../config/minioClient.js';
-import * as z from '../../utils/zodDemo.js';
+import { validateRequest } from '../../utils/zodDemo.js';
 import { v4 as uuidv4 } from 'uuid';
 import { schemaValidation } from '@picturas/filter-helper';
-const BUCKET_NAME = 'bucket-name'; // **TROCAR PELO bucket-name do MinIO**
+const BUCKET_NAME = 'bucket-name'; //TODO **TROCAR PELO bucket-name do MinIO**
 
 const router = Router();
 
