@@ -1,11 +1,13 @@
 /* eslint no-console: 0 */
 
-import socketIo from 'socket.io';
+import { Server as SocketIo } from 'socket.io';
+import { createServer } from 'node:http';
 import amqp from 'amqplib';
 
 const port = 3000;
 
-const io = socketIo();
+const server = createServer();
+const io = new SocketIo(server);
 
 io.on('connection', (socket) => {
     console.log('A user connected');
@@ -36,6 +38,6 @@ amqp.connect(process.env.RABBITMQ_URL, (connErr, conn) => {
     });
 });
 
-io.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });

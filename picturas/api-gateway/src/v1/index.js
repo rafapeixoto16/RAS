@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as filtersRouter from './filters';
+import filtersRouter from './filters.js';
 
 const router = Router();
 

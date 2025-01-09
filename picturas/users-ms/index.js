@@ -1,7 +1,6 @@
 /* eslint no-console: 0 */
 
 import express from 'express';
-const { createError } = express;
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import usersRouter from './routes/users.js';
@@ -28,8 +27,8 @@ app.use(express.json());
 app.use('/users', usersRouter);
 
 // 404
-app.use((req, res, next) => {
-    next(createError(404));
+app.use((req, res) => {
+    res.sendStatus(404);
 });
 
 // Error Handler
