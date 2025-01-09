@@ -23,9 +23,15 @@ spec:
                   name: auth-jwt-secret
                   key: token-secret
             - name: REFRESH_JWT_SECRET
-              value: {{ .Values.refresh_jwt_secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: refresh-jwt-secret
+                  key: token-secret
             - name: VALIDATE_JWT_SECRET
-              value: {{ .Values.validate_jwt_secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: validate-jwt-secret
+                  key: token-secret
             - name: FRONTEND_URL
               value: {{ .Values.frontend_url }}
             - name: EMAIL_HOSTNAME
