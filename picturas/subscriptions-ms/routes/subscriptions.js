@@ -21,7 +21,7 @@ app.post('/create-subscription', async (req, res) => {
     };
     if (!user.trialUsed) user.trialUsed = true;
 
-    users[email] = user; // TODO we must store stripeId in here
+    //users[email] = user; // TODO we must store stripeId in here
 
     try {
         const customer = await stripe.customers.create({
@@ -172,7 +172,6 @@ app.post('/webhook', async (req, res) => {
             };
 
             Subscription.updateSubcriptionByEmail(userData.email,userDataUpd)
-
         }
     } else if (event.type === 'invoice.payment_failed') {
         const invoice = event.data.object;
