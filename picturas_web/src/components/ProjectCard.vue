@@ -15,8 +15,9 @@
           @click="$emit('edit', project.id)"
           class="px-2 py-1 sm:px-3 sm:py-1 bg-blue-500 text-white text-xs sm:text-sm rounded-full hover:bg-blue-600 transition-colors duration-300"
         >
-          <i class="bi bi-pencil"></i>
+          <i class="bi bi-three-dots"></i>
         </button>
+        
       </div>
     </div>
   </div>

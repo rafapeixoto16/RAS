@@ -6,7 +6,7 @@
           <input 
             v-model="searchQuery" 
             type="text" 
-            placeholder="Search for trashed items..." 
+            placeholder="Search for trashed projects..." 
             class="w-full bg-white text-gray-800 font-medium py-2 sm:py-3 px-4 pr-12 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm sm:text-base"
           />
           <div class="absolute inset-y-0 right-0 flex items-center pr-6 pointer-events-none">
@@ -56,12 +56,12 @@
   
   const restoreItem = (id: number) => {
     console.log(`Restoring item with id: ${id}`);
-    trashItems.value = trashItems.value.filter(item => item.id !== id); // Remove the item from the trash
+    trashItems.value = trashItems.value.filter(item => item.id !== id); 
   };
   
   const deletePermanently = (id: number) => {
     console.log(`Deleting item with id: ${id} permanently`);
-    trashItems.value = trashItems.value.filter(item => item.id !== id); // Remove the item permanently
+    trashItems.value = trashItems.value.filter(item => item.id !== id); 
   };
   </script>
   

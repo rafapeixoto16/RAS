@@ -72,7 +72,7 @@
             to="/trash"
             @click="closeMenu"
           >
-            <i class="bi bi-trash3 mr-2"></i>
+            <i class="bi bi-trash mr-2"></i>
             Trash
           </router-link>
         </div>
