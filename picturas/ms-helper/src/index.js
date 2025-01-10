@@ -1,0 +1,70 @@
+import express from 'express';
+import Prometheus from 'prom-client';
+import ResponseTime from 'response-time';
+
+const port = 9091;
+const app = express();
+
+export function promMiddleware(requestDurationBuckets = [0.1, 0.5, 1, 1.5]) {
+    const labels = ['route', 'method', 'status'];
+
+    const requestCount = new Prometheus.Counter({
+        name: 'http_requests_total',
+        help: 'Counter for total requests received',
+        labels,
+    });
+    const requestDuration = new Prometheus.Histogram({
+        name: 'http_request_duration_seconds',
+        help: 'Duration of HTTP requests in seconds',
+        labels,
+        requestDurationBuckets,
+    });
+
+    const middleware = ResponseTime((req, res, time) => {
+        const {
+            originalUrl,
+            method,
+        } = req;
+        const status = `${Math.floor(res.statusCode / 100)}XX`;
+        const labels = {
+            route: originalUrl,
+            method,
+            status,
+        };
+
+        requestCount.inc(labels);
+        requestDuration.observe(labels, time / 1000);
+    });
+
+    Prometheus.collectDefaultMetrics({
+        prefix: options.prefix,
+    });
+
+    return middleware;
+}
+
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', Prometheus.register.contentType);
+    return res.end(await Prometheus.register.metrics());
+});
+
+app.get('/healthz', (req, res) => {
+    res.status(200)
+        .send('I am healthy');
+});
+
+app.get('/liveness', (req, res) => {
+    res.status(200)
+        .send('I am alive');
+});
+
+app.get('/readiness', (req, res) => {
+    res.status(200)
+        .send('I am ready');
+});
+
+export function startPLServer() {
+    app.listen(port, () => {
+        console.log('Prometheus Metrics and Probes ready');
+    });
+}
