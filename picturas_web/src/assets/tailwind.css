@@ -35,4 +35,8 @@
   .hover\:bg-azure-radiance-500:hover {
     background-color: var(--azure-radiance-500);
   }
+
+  .hover\:bg-azure-radiance-700:hover {
+    background-color: var(--azure-radiance-700);
+  }
   

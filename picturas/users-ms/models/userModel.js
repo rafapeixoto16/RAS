@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        expireAt: {
+            type: Date,
+            default: Date.now,
+            index: { expires: '24h' }
+        }
     },
     { versionKey: false }
 );

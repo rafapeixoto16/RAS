@@ -50,8 +50,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
                 const end = Date.now();
                 processingTime = (end - start) / 1000;
 
-                let output;
-                let outputFormat;
+                let output, outputFormat;
 
                 if (Array.isArray(result)) {
                     [output, outputFormat] = result;

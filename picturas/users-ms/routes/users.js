@@ -8,7 +8,13 @@ import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
 
-const BUCKET_NAME = 'bucket-name'; // **TROCAR PELO bucket-name do MinIO**
+import * as User from '../controller/user.js';
+import multer from '../config/multerConfig.js';
+import minioClient from '../config/minioClient.js';
+import { validateRequest } from '../../utils/zodDemo.js';
+import { v4 as uuidv4 } from 'uuid';
+import { schemaValidation } from '@picturas/filter-helper';
+const BUCKET_NAME = 'bucket-name'; //TODO **TROCAR PELO bucket-name do MinIO**
 
 const router = Router();
 
@@ -39,6 +45,48 @@ router.post('/', async (req, res) => {
         .catch((err) => {
             res.status(444).json({ error: 'Failed to add user' });
         });
+});
+
+router.post('/register/', async (req, res) => {
+    jwt.verify(
+        req.body.validationToken,
+        process.env.VALIDATE_JWT_SECRET,
+        (err, user) => {
+            User.getUser(user._id)
+                .then((resp) => {
+                    const filteredUser = {
+                        username: resp.username,
+                        email: resp.email,
+                        location: resp.location,
+                        bio: resp.bio,
+                        nome: resp.nome,
+                        active: true,
+                        password: resp.password,
+                        profilePic: resp.profilePic,
+                        refresh: resp.refresh,
+                        otpEnabled : false,
+                    };
+
+                    User.addUser(user._id, filteredUser);
+
+                    res.status(473)
+                })
+                .catch((_) => {
+                    res.status(404).json({
+                        error: 'Failed to active user account',
+                    });
+                });
+        }
+    ).catch((_) => {
+        User.deleteUser(user._id).catch(
+            res.status(404).json({
+                error: 'Time limit to activate account exceeded',
+            })
+        );
+        res.status(404).json({
+            error: 'Time limit to activate account exceeded',
+        });
+    });
 });
 
 router.post('/login', async (req, res) => {
@@ -157,18 +205,38 @@ router.post('/passwordRecovery', async (req, res) => {
         });
 });
 
-// TODO what about validating the user (ps: being done in the gateway, but must be checked), but that is the work of another issue
 router.get('/:id', (req, res) => {
     User.getUser(req.params.id)
-        .then((resp) => res.status.json(resp)) // TODO what about filtering it's data??
+        .then((resp) => {
+            const filteredUser = {
+                username: resp.username,
+                email: resp.email,
+                location: resp.location,
+                bio: resp.bio,
+                nome: resp.nome,
+            };
+
+            res.status.json(filteredUser);
+        })
         .catch((err) => res.sendStatus(446));
 });
 
-router.put('/:id/update', (req, res) => {
-    User.updateUser(req.params.id, req.body) // TODO what about filtering input data and using zod validation??
-        .then((resp) => res.status.json(resp))
-        .catch((err) => res.sendStatus(447));
-});
+router.put(
+    '/:id/update',
+    validateRequest({
+        body: schemaValidation.object({
+            //TODO redo ask RUI
+            bodyKey: schemaValidation.number(),
+        }),
+    }),
+    (req, res) => {
+        User.updateUser(req.params.id, req.body)
+            .then((resp) => {
+                res.status.json(resp);
+            })
+            .catch((err) => res.sendStatus(447));
+    }
+);
 
 router.put('/:id/password', function (req, res) {
     User.updateUserPassword(req.params.id, req.body.password)
@@ -201,7 +269,7 @@ router.post('/:id/otp', (req, res) => {
 
     User.updateUser(userInfo._id, userInfo)
         .then((_) => res.json({ totp: totp.toString() }))
-        .catch((_) => res.status(447)); // TODO what about correcting the status codes?
+        .catch((_) => res.status(488));
 });
 
 router.delete('/:id/otp', (req, res) => {
@@ -281,10 +349,12 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
         metaData,
         (err, etag) => {
             if (err) {
-                return res.status(500).json({
-                    error: 'Failed to upload image to MinIO',
-                    details: err,
-                });
+                return res
+                    .status(500)
+                    .json({
+                        error: 'Failed to upload image to MinIO',
+                        details: err,
+                    });
             }
 
             const imageUrl = `https://${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
@@ -292,16 +362,20 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
             // update no user
             User.updateUserProfilePic(id, imageUrl)
                 .then(() =>
-                    res.status(200).json({
-                        message: 'Profile picture updated successfully',
-                        imageUrl,
-                    })
+                    res
+                        .status(200)
+                        .json({
+                            message: 'Profile picture updated successfully',
+                            imageUrl,
+                        })
                 )
                 .catch((err) =>
-                    res.status(500).json({
-                        error: 'Failed to update user profile picture',
-                        details: err,
-                    })
+                    res
+                        .status(500)
+                        .json({
+                            error: 'Failed to update user profile picture',
+                            details: err,
+                        })
                 );
         }
     );

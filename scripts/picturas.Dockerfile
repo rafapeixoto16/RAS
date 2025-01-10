@@ -1,9 +1,8 @@
-FROM python:3.13-bookworm
+FROM alpine:3.21.2
+
+RUN apk add nodejs npm python3
 
 WORKDIR /app
-
-RUN apt update
-RUN apt install nodejs npm ffmpeg libsm6 libxext6 -y
 
 COPY picturas/ ./
 

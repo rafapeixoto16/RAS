@@ -13,11 +13,12 @@ spec:
     spec:
       containers:
         - name: ws-gateway
-          image: {{ .Values.registry }}ws-gateway:latest
+          image: ws-gateway:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000
           env:
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq"
             - name: RABBITMQ_QUEUE
-              value: "{{ .Values.filter_queue_name }}"
+              value: {{ .Values.filter_queue_name | quote }}
