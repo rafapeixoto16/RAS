@@ -3,14 +3,15 @@
 import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
-import usersRouter from './routes/users.js';
+import projectRouter from './routes/projectRoutes';
+import toolRouter from './routes/toolRoutes';
 
 const { createError } = express;
 
 const app = express();
 const port = 3000;
 
-const mongoBD = 'mongodb://127.0.0.1/users'; // TODO USER ENV
+const mongoBD = 'mongodb://127.0.0.1/projects';
 mongoose.connect(mongoBD);
 
 const db = mongoose.connection;
@@ -26,11 +27,12 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 // Routers
-app.use('/users', usersRouter);
+app.use('/project', projectRouter);
+app.use('/tool', toolRouter);
 
 // 404
-app.use((req, res) => {
-    res.sendStatus(404);
+app.use((req, res, next) => {
+    next(createError(404));
 });
 
 // Error Handler
@@ -43,5 +45,3 @@ app.use((err, req, res) => {
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
-
-app.listen(3000);

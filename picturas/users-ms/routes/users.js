@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import sendEmail from '../email/sendEmail.js';
 import * as OTPAuth from 'otpauth';
+import { v4 as uuidv4 } from 'uuid';
+import sendEmail from '../email/sendEmail.js';
+import * as User from '../controller/user.js';
+import multer from '../config/multerConfig.js';
+import minioClient from '../config/minioClient.js';
 
 import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';
