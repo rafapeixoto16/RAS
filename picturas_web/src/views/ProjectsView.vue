@@ -25,12 +25,16 @@
           <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4 hidden md:block">Tools</h3>
           <div class="flex md:flex-col space-x-4 md:space-x-0 md:space-y-4">
             <ToolButton 
-              v-for="tool in tools" 
+              v-for="(tool, index) in tools" 
               :key="tool.name" 
               :name="tool.name" 
               :icon="tool.icon" 
               :options="tool.options"
-              @click="selectTool(tool)" 
+              :showMenu="activeTool === tool.name"
+              :menuPosition="getToolMenuPosition(index)"
+              @click="selectTool(tool.name)"
+              @apply="applyTool"
+              @cancel="cancelTool"
             />
           </div>
         </div>
@@ -86,6 +90,7 @@ import { ref, reactive, watch, computed } from 'vue';
 import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
+import type { Tool } from '@/components/ToolButton.vue';
 
 interface Page {
   id: number;
@@ -117,46 +122,48 @@ watch(() => pages.value.length, (newLength) => {
   }
 });
 
-const tools = [
+const tools: Tool[] = [
   { 
     name: 'Resize', 
     icon: 'bi-arrows-angle-expand', 
     options: {
-      width: { label: 'Width', value: 800, unit: 'px' },
-      height: { label: 'Height', value: 600, unit: 'px' }
+      width: { label: 'Width', value: 800, type: 'number', min: 1, max: 4000, step: 1 },
+      height: { label: 'Height', value: 600, type: 'number', min: 1, max: 4000, step: 1 }
     }
   },
   { 
     name: 'Crop', 
     icon: 'bi-crop',
     options: {
-      aspect: { label: 'Aspect Ratio', value: '16:9' }
+      aspect: { label: 'Aspect Ratio', value: '16:9', type: 'select', choices: ['16:9', '4:3', '1:1', 'Free'] }
     }
   },
   { 
     name: 'Rotate', 
     icon: 'bi-arrow-clockwise',
     options: {
-      angle: { label: 'Angle', value: 90, unit: '°' }
+      angle: { label: 'Angle', value: 90, type: 'number', min: -180, max: 180, step: 1 }
     }
   },
   { 
     name: 'Filters', 
     icon: 'bi-filter',
     options: {
-      brightness: { label: 'Brightness', value: 100, unit: '%' },
-      contrast: { label: 'Contrast', value: 100, unit: '%' }
+      brightness: { label: 'Brightness', value: 100, type: 'number', min: 0, max: 200, step: 1 },
+      contrast: { label: 'Contrast', value: 100, type: 'number', min: 0, max: 200, step: 1 }
     }
   },
   { 
     name: 'Adjust', 
     icon: 'bi-sliders',
     options: {
-      saturation: { label: 'Saturation', value: 100, unit: '%' },
-      exposure: { label: 'Exposure', value: 0, unit: 'EV' }
+      saturation: { label: 'Saturation', value: 100, type: 'number', min: 0, max: 200, step: 1 },
+      exposure: { label: 'Exposure', value: 0, type: 'number', min: -100, max: 100, step: 1 }
     }
   },
 ];
+
+const activeTool = ref<string | null>(null);
 
 const addNewPage = () => {
   pages.value.push({ id: Date.now(), imageUrl: null });
@@ -206,8 +213,28 @@ const downloadCurrentImage = () => {
   }
 };
 
-const selectTool = (tool: { name: string, icon: string, options?: any }) => {
-  console.log(`Selected tool: ${tool.name}`);
+const selectTool = (toolName: string) => {
+  if (activeTool.value === toolName) {
+    activeTool.value = null;
+  } else {
+    activeTool.value = toolName;
+  }
+};
+
+const applyTool = (tool: Tool) => {
+  console.log(`Applying ${tool.name} with options:`, tool.options);
+  activeTool.value = null;
+};
+
+const cancelTool = () => {
+  activeTool.value = null;
+};
+
+const getToolMenuPosition = (index: number): 'top' | 'center' | 'bottom' => {
+  const totalTools = tools.length;
+  if (index < totalTools / 3) return 'top';
+  if (index >= totalTools * 2 / 3) return 'bottom';
+  return 'center';
 };
 
 const startPanning = (event: MouseEvent | TouchEvent) => {

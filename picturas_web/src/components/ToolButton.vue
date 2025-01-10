@@ -8,49 +8,49 @@
       <span class="text-xs font-medium md:block hidden">{{ name }}</span>
     </button>
     
-    <div 
-      class="absolute left-full ml-2 p-3 bg-white shadow-lg rounded-lg hidden group-hover:md:block z-50 min-w-[200px]"
-      style="transform: translateY(-25%)"
-    >
-      <div class="relative">
-        <div class="absolute left-[-8px] top-[50%] transform -translate-y-1/2 w-0 h-0 border-t-[8px] border-t-transparent border-r-[8px] border-r-white border-b-[8px] border-b-transparent"></div>
-        
-        <h4 class="font-medium text-gray-900 mb-2">{{ name }}</h4>
-        <div v-if="options" class="space-y-2">
-          <div v-for="(option, key) in options" :key="key" class="flex items-center justify-between">
-            <span class="text-sm text-gray-600">{{ option.label }}:</span>
-            <span class="text-sm font-medium">{{ option.value }}{{ option.unit }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ToolMenu
+      v-if="showMenu && options"
+      :tool="{ name, icon, options }"
+      :position="menuPosition"
+      @apply="$emit('apply', $event)"
+      @cancel="$emit('cancel')"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-interface Option {
+import { defineProps, defineEmits } from 'vue';
+import ToolMenu from './ToolMenu.vue';
+
+interface ToolOption {
   label: string;
   value: number | string;
-  unit?: string;
+  type: 'number' | 'select';
+  min?: number;
+  max?: number;
+  step?: number;
+  choices?: string[];
+}
+
+export interface Tool {
+  name: string;
+  icon: string;
+  options?: Record<string, ToolOption>;
 }
 
 interface Props {
   name: string;
   icon: string;
-  options?: Record<string, Option>;
+  options?: Record<string, ToolOption>;
+  showMenu: boolean;
+  menuPosition: 'top' | 'center' | 'bottom';
 }
 
 defineProps<Props>();
 
 defineEmits<{
   (e: 'click'): void;
+  (e: 'apply', tool: Tool): void;
+  (e: 'cancel'): void;
 }>();
 </script>
-
-<style scoped>
-@media (min-width: 768px) {
-  .group:hover .hidden {
-    display: block;
-  }
-}
-</style>
