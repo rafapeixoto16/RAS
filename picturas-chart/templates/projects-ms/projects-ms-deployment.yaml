@@ -21,7 +21,6 @@ spec:
             - mountPath: /mnt/nfs
               name: nfs-volume
       volumes:
-        - name: nfs-volume
-          nfs:
-            path: /
-            server: nfs
+        - name: nfs-volume # Simulated with hostPath (single node)
+          hostPath:
+            path: /tmp/picturas
