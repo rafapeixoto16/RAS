@@ -124,9 +124,9 @@ s3_port: 9000 # static from dev
 s3_username: "s3-username" # access
 s3_password: "s3-password" # secret
 
-# By default, it is no-reply@{{ email_hostname }}
-email_hostname: "picturas.pt"
+email_hostname: "mailhog-node"
 email_port: 1025
+email_email: "no-reply@picturas.pt"
 email_password: "email-password"
 
 # Monitoring Dependencies Configuration

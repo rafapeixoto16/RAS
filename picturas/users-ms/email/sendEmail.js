@@ -31,7 +31,7 @@ export default function sendEmail(email, token, kind) {
         port: process.env.EMAIL_PORT,
         secure: false,
         auth: {
-            user: `no-reply@${process.env.EMAIL_HOSTNAME}`,
+            user: process.env.EMAIL_EMAIL,
             pass: process.env.EMAIL_PASSWORD,
         },
     });
@@ -44,7 +44,7 @@ export default function sendEmail(email, token, kind) {
     });
 
     transporter.sendMail({
-        from: `no-reply@${process.env.EMAIL_HOSTNAME}`,
+        from: process.env.EMAIL_EMAIL,
         to: email,
         subject: 'Picturas',
         html: content,

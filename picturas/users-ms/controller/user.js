@@ -1,4 +1,4 @@
-import * as Project from '../models/userModel.js';
+import User from '../models/userModel.js';
 
 export const getUser = (id) => {
     return User.findOne({ _id: id }).exec();
@@ -13,15 +13,15 @@ export const addUser = (u) => {
 };
 
 export const updateUser = (id, info) => {
-    return User.updateOne({ _id: id }, info).exec();
+    return User.findOneAndUpdate({ _id: id }, info).exec();
 };
 
 export const updateUserPassword = (id, pwd) => {
-    return User.updateOne({ _id: id }, pwd).exec(); // excute
+    return User.findOneAndUpdate({ _id: id }, pwd).exec(); // excute
 };
 
 export const updateUserProfilePic = (id, profilePicUrl) => {
-    return User.updateOne({ _id: id }, { profilePic: profilePicUrl }).exec();
+    return User.findOneAndUpdate({ _id: id }, { profilePic: profilePicUrl }).exec();
 };
 
 export const deleteUser = (id) => {

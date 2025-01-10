@@ -4,7 +4,7 @@ import {
     getSubcriptionByEmail,
     updateSubcriptionByEmail,
 } from '../controller/subscriptions.js';
-import { Subscription } from '../models/subscriptionModel.js';
+import Subscription from '../models/subscriptionModel.js';
 
 app.post('/create-subscription', async (req, res) => {
     const { interval, paymentMethodId, email } = req.body;

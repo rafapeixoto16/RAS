@@ -39,6 +39,11 @@ spec:
               value: {{ .Values.email_hostname }}
             - name: EMAIL_PORT
               value: {{ .Values.email_port | quote }}
+            - name: EMAIL_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: email-secret
+                  key: username
             - name: EMAIL_PASSWORD
               valueFrom:
                 secretKeyRef:
