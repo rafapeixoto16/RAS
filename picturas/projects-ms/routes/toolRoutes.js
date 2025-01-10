@@ -6,9 +6,9 @@ import {
     getTool,
     updateTool,
     toolSchema,
-} from '../controller/tool';
+} from '../controller/tool.js';
 import { validateRequest } from '@picturas/schema-validation';
-import { queryToolSchema } from '../models/queryTool';
+import { queryToolSchema } from '../models/queryTool.js';
 
 const router = Router();
 router.use(validateRequest({

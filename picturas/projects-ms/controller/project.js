@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import * as Project from '../models/projectModel';
-import { buildPagination, buildSort, buildQuery } from '../models/queryProject';
+import * as Project from '../models/projectModel.js';
+import { buildPagination, buildSort, buildQuery } from '../models/queryProject.js';
 
 export const projectSchema = z.object({
     name: z.string().min(1, 'Name is required'),

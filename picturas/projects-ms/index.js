@@ -3,8 +3,8 @@
 import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
-import projectRouter from './routes/projectRoutes';
-import toolRouter from './routes/toolRoutes';
+import projectRouter from './routes/projectRoutes.js';
+import toolRouter from './routes/toolRoutes.js';
 
 const { createError } = express;
 

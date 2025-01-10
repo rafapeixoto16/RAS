@@ -6,15 +6,16 @@
         "start": "node index.js"
     },
     "dependencies": {
+        "@picturas/schema-validation": "file:../schema-validation",
         "bcrypt": "^5.1.1",
         "express": "^4.21.2",
         "jsonwebtoken": "^9.0.2",
+        "minio": "^8.0.3",
         "mongoose": "^8.9.3",
         "morgan": "^1.10.0",
+        "multer": "^1.4.5-lts.1",
         "nodemailer": "^6.9.16",
         "otpauth": "^9.3.6",
-        "multer": "^1.4.5-lts.1",
-        "minio": "^8.0.3",
         "uuid": "^8.3.2"
     }
 }
