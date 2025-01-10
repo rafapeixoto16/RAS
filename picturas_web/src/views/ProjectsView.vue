@@ -1,28 +1,10 @@
 <template>
-  <div class="flex h-screen bg-gray-100">
-    <aside class="w-20 bg-white border-r border-gray-200 shadow-md overflow-y-auto">
-      <div class="flex flex-col items-center py-6 space-y-6">
-        <div class="w-full px-2">
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4">Tools</h3>
-          <div class="space-y-4">
-            <ToolButton 
-              v-for="tool in tools" 
-              :key="tool.name" 
-              :name="tool.name" 
-              :icon="tool.icon" 
-              :options="tool.options"
-              @click="selectTool(tool)" 
-            />
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <main class="flex-1 overflow-hidden">
-      <header class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 class="text-2xl font-bold text-gray-900">Projects</h1>
-          <div class="flex items-center gap-4">
+  <div class="flex flex-col h-screen bg-gray-100">
+    <header class="bg-white shadow-sm z-0">
+      <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-[10%] sm:mb-0">Projects</h1>
+          <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
             <span class="text-sm text-gray-500">Page {{ currentPage + 1 }} of {{ pages.length }}</span>
             <div class="flex space-x-2">
               <button @click="deleteCurrentPage" class="p-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
@@ -34,49 +16,73 @@
             </div>
           </div>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <div class="h-[calc(100vh-4rem)] overflow-hidden bg-gray-100 p-8">
-        <Carousel 
-          v-model="currentPage" 
-          :items="pages" 
-          :canAddPage="true" 
-          @add-page="addNewPage" 
-          class="h-full"
-        >
-          <template #default="{ item }">
-            <div class="w-full h-full flex items-center justify-center">
-              <div 
-                class="bg-white rounded-lg shadow-lg w-full h-full max-w-4xl mx-auto transform rotate-0 relative overflow-hidden" 
-                style="box-shadow: 1px 1px 15px rgba(0,0,0,0.1);">
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+      <aside class="w-full md:w-20 bg-white border-b md:border-r border-gray-200 shadow-md overflow-x-auto md:overflow-y-auto flex-shrink-0">
+        <div class="flex md:flex-col items-center py-4 md:py-6 px-4 md:px-2 space-x-4 md:space-x-0 md:space-y-6">
+          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4 hidden md:block">Tools</h3>
+          <div class="flex md:flex-col space-x-4 md:space-x-0 md:space-y-4">
+            <ToolButton 
+              v-for="tool in tools" 
+              :key="tool.name" 
+              :name="tool.name" 
+              :icon="tool.icon" 
+              :options="tool.options"
+              @click="selectTool(tool)" 
+            />
+          </div>
+        </div>
+      </aside>
+
+      <main class="flex-1 overflow-hidden relative">
+        <div class="absolute inset-0 overflow-hidden">
+          <Carousel 
+            v-model="currentPage" 
+            :items="pages" 
+            :canAddPage="true" 
+            @add-page="addNewPage" 
+            class="h-full"
+          >
+            <template #default="{ item }">
+              <div class="w-full h-full flex items-center justify-center p-4">
                 <div 
-                  class="absolute inset-0 p-8 flex items-center justify-center"
-                  @mousedown="startPanning"
-                  @mouseup="stopPanning"
-                  @mousemove="panImage"
-                  @wheel="zoomImage"
+                  class="bg-white rounded-lg shadow-lg w-full h-full max-w-4xl mx-auto transform rotate-0 relative overflow-hidden" 
+                  style="box-shadow: 1px 1px 15px rgba(0,0,0,0.1);"
                 >
-                  <img 
-                    v-if="item.imageUrl" 
-                    :src="item.imageUrl" 
-                    draggable="false"
-                    alt="Project image" 
-                    class="max-w-full max-h-full object-contain" 
-                    :style="imageStyle" 
-                  />
-                  <DropZone v-else @files-dropped="handleFilesDropped" />
+                  <div 
+                    class="absolute inset-0 flex items-center justify-center"
+                    @mousedown="startPanning"
+                    @mouseup="stopPanning"
+                    @mousemove="panImage"
+                    @touchstart="startPanning"
+                    @touchend="stopPanning"
+                    @touchmove="panImage"
+                    @wheel="zoomImage"
+                  >
+                    <img 
+                      v-if="item.imageUrl" 
+                      :src="item.imageUrl" 
+                      draggable="false"
+                      alt="Project image" 
+                      class="max-w-full max-h-full object-contain" 
+                      :style="imageStyle" 
+                    />
+                    <DropZone v-else @files-dropped="handleFilesDropped" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </template>
-        </Carousel>
-      </div>
-    </main>
+            </template>
+          </Carousel>
+        </div>
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
 import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
@@ -96,8 +102,7 @@ const imageTransform = reactive({
 let isPanning = false;
 let startX = 0;
 let startY = 0;
-
-import { computed } from 'vue';
+let lastPinchDistance: number | null = null;
 
 const imageStyle = computed(() => {
   return {
@@ -205,15 +210,23 @@ const selectTool = (tool: { name: string, icon: string, options?: any }) => {
   console.log(`Selected tool: ${tool.name}`);
 };
 
-const startPanning = (event: MouseEvent) => {
+const startPanning = (event: MouseEvent | TouchEvent) => {
   if (!pages.value[currentPage.value].imageUrl) return;
-  if (event.button !== 0) return;
   isPanning = true;
-  startX = event.clientX - imageTransform.translateX;
-  startY = event.clientY - imageTransform.translateY;
+  
+  if (event instanceof MouseEvent) {
+    if (event.button !== 0) return;
+    startX = event.clientX - imageTransform.translateX;
+    startY = event.clientY - imageTransform.translateY;
+  } else if (event instanceof TouchEvent) {
+    startX = event.touches[0].clientX - imageTransform.translateX;
+    startY = event.touches[0].clientY - imageTransform.translateY;
+  }
 
-  window.addEventListener('mousemove', panImage);
-  window.addEventListener('mouseup', stopPanning);
+  if (event instanceof MouseEvent) {
+    window.addEventListener('mousemove', panImage);
+    window.addEventListener('mouseup', stopPanning);
+  }
 };
 
 const stopPanning = () => {
@@ -224,17 +237,70 @@ const stopPanning = () => {
   window.removeEventListener('mouseup', stopPanning);
 };
 
-const panImage = (event: MouseEvent) => {
+const panImage = (event: MouseEvent | TouchEvent) => {
   if (!isPanning) return;
-  imageTransform.translateX = event.clientX - startX;
-  imageTransform.translateY = event.clientY - startY;
+  
+  let clientX, clientY;
+  
+  if (event instanceof MouseEvent) {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  } else if (event instanceof TouchEvent) {
+    clientX = event.touches[0].clientX;
+    clientY = event.touches[0].clientY;
+    event.preventDefault();
+  }
+
+  if (clientX !== undefined && clientY !== undefined) {
+    imageTransform.translateX = clientX - startX;
+    imageTransform.translateY = clientY - startY;
+  }
 };
 
-const zoomImage = (event: WheelEvent) => {
+const zoomImage = (event: WheelEvent | TouchEvent) => {
   if (!pages.value[currentPage.value].imageUrl) return;
-  event.preventDefault();
-  const zoomFactor = 0.1;
-  const newScale = imageTransform.scale - event.deltaY * zoomFactor * 0.01;
-  imageTransform.scale = Math.min(Math.max(newScale, 0.5), 3);
+  
+  if (event instanceof WheelEvent) {
+    event.preventDefault();
+    const zoomFactor = 0.1;
+    const newScale = imageTransform.scale - event.deltaY * zoomFactor * 0.01;
+    imageTransform.scale = Math.min(Math.max(newScale, 0.5), 3);
+  } else if (event instanceof TouchEvent && event.touches.length === 2) {
+    const touch1 = event.touches[0];
+    const touch2 = event.touches[1];
+    const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+    
+    if (lastPinchDistance) {
+      const diff = dist - lastPinchDistance;
+      const zoomFactor = 0.01;
+      const newScale = imageTransform.scale + diff * zoomFactor;
+      imageTransform.scale = Math.min(Math.max(newScale, 0.5), 3);
+    }
+    
+    lastPinchDistance = dist;
+  }
 };
 </script>
+
+<style scoped>
+@media (max-width: 768px) {
+  .md\:w-20 {
+    width: 100%;
+    height: auto;
+  }
+  
+  .md\:flex-col {
+    flex-direction: row;
+  }
+  
+  .md\:space-y-6 {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  
+  .md\:space-x-0 {
+    margin-right: 1rem;
+    margin-left: 1rem;
+  }
+}
+</style>
