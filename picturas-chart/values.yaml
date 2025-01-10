@@ -43,6 +43,7 @@ filter_output_queue: "filters-output"
 
 # RabbitMQ
 rabbitmq:
+  nameOverride: rabbitmq
   auth:
     username: "rabbitmq-user"
     password: "rabbitmq-password"
@@ -58,6 +59,7 @@ rabbitmq:
 
 # Rate Limiter Redis
 rate-limiter-redis:
+  nameOverride: rate-limiter-redis
   architecture: standalone
   auth:
     enabled: yes
@@ -118,7 +120,7 @@ grafana:
           type: loki
           access: proxy
           orgId: 1
-          url: http://picturas-grafana-loki-gateway
+          url: http://grafana-loki-gateway
           version: 1
           editable: false
   metrics:
@@ -127,6 +129,7 @@ grafana:
       enabled: true
 
 grafana-loki:
+  fullnameOverride: grafana-loki
   promtail:
     enabled: true
   metrics:
