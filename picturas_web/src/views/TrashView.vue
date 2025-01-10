@@ -15,16 +15,13 @@
           </svg>
         </div>
       </div>
-  </div>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4 overflow-visible">
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4 overflow-visible">
       <ProjectCard 
         v-for="item in filteredTrash" 
         :key="item.id" 
         :project="item"
-        :dropdown-options="[
-          { label: 'Restore', icon: 'bi bi-arrow-clockwise', action: () => restoreItem(item.id) },
-          { label: 'Delete Permanently', icon: 'bi bi-trash', action: () => deletePermanently(item.id) }
-        ]"
+        :dropdown-options="lgOnlyDropdownOptions(item)"
       />
     </div>
   </div>
@@ -33,6 +30,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import ProjectCard from '@/components/ProjectCard.vue';
+import MobileProjectOptions from '@/components/MobileProjectOptions.vue';
 
 interface TrashItem {
   id: number;
@@ -49,12 +47,28 @@ const trashItems = ref<TrashItem[]>([
 ]);
 
 const searchQuery = ref('');
+const isLargeScreen = ref(window.innerWidth >= 1024); // `lg` breakpoint in Tailwind (1024px)
+
+// Update the `isLargeScreen` value on window resize
+window.addEventListener('resize', () => {
+  isLargeScreen.value = window.innerWidth >= 1024;
+});
 
 const filteredTrash = computed(() => {
   return trashItems.value.filter(item => 
     item.title.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
+
+const lgOnlyDropdownOptions = (item: TrashItem) => {
+  if (isLargeScreen.value) {
+    return [
+      { label: 'Restore', icon: 'bi bi-arrow-clockwise', action: () => restoreItem(item.id) },
+      { label: 'Delete Permanently', icon: 'bi bi-trash', action: () => deletePermanently(item.id) }
+    ];
+  }
+  return []; // No dropdown options for mobile
+};
 
 const restoreItem = (id: number) => {
   console.log(`Restoring item with id: ${id}`);

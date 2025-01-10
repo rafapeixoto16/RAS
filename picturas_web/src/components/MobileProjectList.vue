@@ -29,6 +29,7 @@
         :project-id="selectedProjectId || 0"
         @close="closeOptionsMenu"
         @open-new-tab="openInNewTab"
+        @rename="renameProject"
         @move-to-trash="moveToTrash"
       />
     </div>
@@ -84,6 +85,11 @@
   
   const moveToTrash = (projectId: number) => {
     console.log(`Moving project ${projectId} to trash`);
+    closeOptionsMenu();
+  };
+
+  const renameProject = (projectId: number) => {
+    console.log(`Renaming project ${projectId}`);
     closeOptionsMenu();
   };
   </script>
