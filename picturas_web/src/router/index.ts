@@ -48,8 +48,12 @@ const router = createRouter({
       path: '/create-project',
       name: 'createproject',
       component: () => import('../views/CreateProject.vue'),
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/Error404View.vue'),
     }
-
   ],
 })
 

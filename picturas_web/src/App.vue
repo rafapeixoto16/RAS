@@ -1,3 +1,31 @@
+<template>
+  <div class="bg-white flex min-h-screen relative">
+    <Sidebar 
+      v-if="!isFullWidthRoute"
+      class="hidden md:block fixed h-full" 
+    />
+    
+    <MobileNav 
+      v-if="!isFullWidthRoute"
+      v-model:is-open="isMobileMenuOpen" 
+    />
+
+    <div 
+      :class="{
+        'md:ml-[16.6667%]': !isFullWidthRoute,
+        'ml-0 w-full': isFullWidthRoute
+      }" 
+      class="flex-1 transition-all duration-300 flex-col w-full"
+    >
+      <div class="min-h-screen-app">
+        <RouterView />
+      </div>
+
+      <Footer />
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { RouterView, useRoute } from 'vue-router'
 import Sidebar from './components/SideBar.vue'
@@ -6,41 +34,10 @@ import Footer from './components/Footer.vue'
 import { ref, computed } from 'vue'
 
 const route = useRoute()
-const hideSidebarRoutes = ['/login', '/register', '/profile', '/settings', '/forgot-password']
-const showSidebar = computed(() => !hideSidebarRoutes.includes(route.path))
 const isMobileMenuOpen = ref(false)
+
+const isFullWidthRoute = computed(() => {
+  const fullWidthRoutes = ['/login', '/register', '/profile', '/settings', '/forgot-password']
+  return fullWidthRoutes.includes(route.path) || route.name === 'NotFound'
+})
 </script>
-
-<template>
-  <div class="bg-white flex min-h-screen relative">
-    <!-- Desktop Sidebar -->
-    <Sidebar 
-      v-if="showSidebar" 
-      class="hidden md:block fixed h-full" 
-    />
-    
-    <!-- Mobile Navigation -->
-    <MobileNav 
-      v-if="showSidebar"
-      v-model:is-open="isMobileMenuOpen" 
-    />
-
-    <!-- Main Content -->
-    <div 
-      :class="{
-        'md:ml-[16.6667%]': showSidebar,
-        'ml-0 w-full': !showSidebar
-      }" 
-      class="flex-1 transition-all duration-300 flex-col w-full"
-    >
-    <div class="min-h-screen-app" >
-      <RouterView  />
-    </div>
-
-    <!-- Footer -->
-      <Footer />
-    </div>
-
- 
-  </div>
-</template>
