@@ -6,8 +6,8 @@ import {
     deleteProject,
     getProject,
     projectSchema,
-} from '../controller/project';
-import { queryProjectSchema } from '../models/queryProject';
+} from '../controller/project.js';
+import { queryProjectSchema } from '../models/queryProject.js';
 import { validateRequest } from '@picturas/schema-validation';
 
 const router = Router();

@@ -7,7 +7,7 @@ docker build -t web:latest -f scripts/web.Dockerfile .
 
 SUBPROJECTS=(
   "api-gateway"
-#  "auto-adjust-filter"
+  "auto-adjust-filter"
 #  "binarization-filter"
 #  "borders-add-filter"
 #  "brightness-filter"
@@ -22,7 +22,7 @@ SUBPROJECTS=(
 #  "resize-filter"
 #  "rotate-filter"
 #  "saturation-filter"
-  "smart-crop-filter"
+#  "smart-crop-filter"
   "subscriptions-ms"
   "users-ms"
 #  "watermark-filter"

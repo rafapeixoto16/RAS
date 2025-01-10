@@ -23,6 +23,6 @@ const toolSchema = new mongoose.Schema(
     { versionKey: false }
 );
 
-const Tool = mongoose.model('project', toolSchema);
+const Tool = mongoose.model('tool', toolSchema);
 
 export default Tool;

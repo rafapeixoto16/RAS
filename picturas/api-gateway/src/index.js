@@ -1,8 +1,10 @@
-import express, { createError } from 'express';
+/* eslint no-console: 0 */
+
+import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import * as v1Router from './v1';
-import rateLimiterMiddleware from './utils/limiter';
+import v1Router from './v1/index.js';
+import rateLimiterMiddleware from './utils/limiter.js';
 
 const app = express();
 const port = 3000;
@@ -17,18 +19,16 @@ app.use(rateLimiterMiddleware);
 app.use('/v1', v1Router);
 
 // 404
-app.use((req, res, next) => {
-    next(createError(404));
+app.use((req, res) => {
+    res.sendStatus(401);
 });
 
 // Error Handler
 app.use((err, req, res) => {
-    // TODO not sure if this is right, I must check
     res.status(err.status || 500).send();
 });
 
 // Listen
 app.listen(port, () => {
-    // eslint-disable-next-line no-console
     console.log(`Server started on port ${port}`);
 });

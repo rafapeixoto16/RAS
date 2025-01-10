@@ -2,18 +2,13 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import * as OTPAuth from 'otpauth';
-import { v4 as uuidv4 } from 'uuid';
 import sendEmail from '../email/sendEmail.js';
-import * as User from '../controller/user.js';
-import multer from '../config/multerConfig.js';
-import minioClient from '../config/minioClient.js';
 
 import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
-import { validateRequest } from '../../utils/zodDemo.js';
 import { v4 as uuidv4 } from 'uuid';
-import { schemaValidation } from '@picturas/filter-helper';
+import { schemaValidation, validateRequest } from '@picturas/schema-validation';
 const BUCKET_NAME = 'bucket-name'; //TODO **TROCAR PELO bucket-name do MinIO**
 
 const router = Router();
@@ -357,7 +352,7 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
                     });
             }
 
-            const imageUrl = `https://${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
+            const imageUrl = `http://${process.env.S3_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
 
             // update no user
             User.updateUserProfilePic(id, imageUrl)

@@ -19,7 +19,7 @@ spec:
             - containerPort: 3000
           env:
             - name: RATE_LIMITER_REDIS_HOST
-              value: "rate-limiter-redis"
+              value: "rate-limiter-redis-master"
             - name: RATE_LIMITER_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:

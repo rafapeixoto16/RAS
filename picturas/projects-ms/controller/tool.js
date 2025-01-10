@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import * as Tool from '../models/toolModel';
-import { buildPagination, buildSort, buildQuery } from '../models/queryTool';
+import * as Tool from '../models/toolModel.js';
+import { buildPagination, buildSort, buildQuery } from '../models/queryTool.js';
 
 // Zod schema for validating tool data
 export const toolSchema = z.object({
