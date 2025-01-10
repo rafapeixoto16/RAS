@@ -24,7 +24,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 // Routers
-app.use('/users', usersRouter);
+app.use('/', usersRouter);
 
 // 404
 app.use((req, res) => {

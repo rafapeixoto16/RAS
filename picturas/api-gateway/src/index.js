@@ -20,7 +20,7 @@ app.use('/v1', v1Router);
 
 // 404
 app.use((req, res) => {
-    res.sendStatus(401);
+    res.sendStatus(404);
 });
 
 // Error Handler

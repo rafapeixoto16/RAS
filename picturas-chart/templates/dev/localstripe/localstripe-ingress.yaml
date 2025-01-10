@@ -3,13 +3,13 @@ kind: Ingress
 metadata:
   name: localstripe
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
     - http:
         paths:
-          - path: /localstripe
-            pathType: Prefix
+          - path: /localstripe(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: localstripe
