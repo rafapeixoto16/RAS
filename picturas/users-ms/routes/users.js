@@ -352,7 +352,7 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
                     });
             }
 
-            const imageUrl = `https://${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
+            const imageUrl = `http://${process.env.S3_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
 
             // update no user
             User.updateUserProfilePic(id, imageUrl)

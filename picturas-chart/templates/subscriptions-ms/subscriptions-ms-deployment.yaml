@@ -28,7 +28,33 @@ spec:
                 secretKeyRef:
                   name: stripe-secret
                   key: webhook-secret
-            - name: RABBITMQ_URL
-              value: "amqp://rabbitmq"
-            - name: RABBITMQ_QUEUE
-              value: {{ .Values.filter_output_queue | quote }}
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: {{ $.Values.rabbitmq.service.ports.amqp | quote }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: password
+            - name: FILTER_OUTPUT_QUEUE
+              value: {{ $.Values.filter_output_queue }}
+            - name: SUBS_DB_HOST
+              value: 'subscriptions-ms-db'
+            - name: SUBS_DB_PORT
+              value: {{ index .Values "subscriptions-ms-db" "containerPorts" "mongodb" | quote }}
+            - name: SUBS_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: subscriptions-ms-db-secret
+                  key: username
+            - name: SUBS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: subscriptions-ms-db-secret
+                  key: password

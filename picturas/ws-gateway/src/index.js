@@ -16,7 +16,8 @@ io.on('connection', (socket) => {
     });
 });
 
-amqp.connect(process.env.RABBITMQ_URL, (connErr, conn) => {
+amqp.connect(`amqp://${process.env.RABBITMQ_USERNAME}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`
+    , (connErr, conn) => {
     if (connErr) throw connErr;
 
     conn.createChannel((chanErr, channel) => {

@@ -5,12 +5,10 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 import usersRouter from './routes/users.js';
 
-const { createError } = express;
-
 const app = express();
 const port = 3000;
 
-const mongoBD = 'mongodb://127.0.0.1/users'; // TODO USER ENV
+const mongoBD = `mongodb://${process.env.USERS_DB_USERNAME}:${process.env.USERS_DB_PASSWORD}@${process.env.USERS_DB_HOST}:${process.env.USERS_DB_PORT}/users?authSource=admin`;
 mongoose.connect(mongoBD);
 
 const db = mongoose.connection;
@@ -35,7 +33,6 @@ app.use((req, res) => {
 
 // Error Handler
 app.use((err, req, res) => {
-    // TODO not sure if this is right, I must check
     res.status(err.status || 500).send();
 });
 
@@ -43,5 +40,3 @@ app.use((err, req, res) => {
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
-
-app.listen(3000);

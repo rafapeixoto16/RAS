@@ -6,12 +6,10 @@ import mongoose from 'mongoose';
 import projectRouter from './routes/projectRoutes.js';
 import toolRouter from './routes/toolRoutes.js';
 
-const { createError } = express;
-
 const app = express();
 const port = 3000;
 
-const mongoBD = 'mongodb://127.0.0.1/projects';
+const mongoBD = `mongodb://${process.env.PROJ_DB_USERNAME}:${process.env.PROJ_DB_PASSWORD}@${process.env.PROJ_DB_HOST}:${process.env.PROJ_DB_PORT}/projects?authSource=admin&authMechanism=SCRAM-SHA-256`;
 mongoose.connect(mongoBD);
 
 const db = mongoose.connection;
@@ -31,13 +29,12 @@ app.use('/project', projectRouter);
 app.use('/tool', toolRouter);
 
 // 404
-app.use((req, res, next) => {
-    next(createError(404));
+app.use((req, res) => {
+    res.sendStatus(404);
 });
 
 // Error Handler
 app.use((err, req, res) => {
-    // TODO not sure if this is right, I must check
     res.status(err.status || 500).send();
 });
 

@@ -25,7 +25,6 @@ app.use((req, res) => {
 
 // Error Handler
 app.use((err, req, res) => {
-    // TODO not sure if this is right, I must check
     res.status(err.status || 500).send();
 });
 
