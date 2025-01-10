@@ -5,21 +5,19 @@ import {
     getProjects,
     deleteProject,
     getProject,
-    validateSchema,
     projectSchema,
 } from '../controller/project';
 import { queryProjectSchema } from '../models/queryProject';
+import { validateRequest } from '@picturas/schema-validation';
 
 const router = Router();
+router.use(validateRequest({
+    body: projectSchema,
+    query: queryProjectSchema,
+}))
 
 router.post('/', async (req, res) => {
     const { body } = req;
-
-    // validate the body against the schema
-    const validation = validateSchema(projectSchema, body);
-    if (validation.code !== 0) {
-        return res.status(400).json(validation.errors);
-    }
 
     try {
         const project = await addProject(body);
@@ -45,10 +43,6 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
     const { query } = req;
-    const validation = validateSchema(queryProjectSchema, query);
-    if (validation.code !== 0) {
-        return res.status(400).json(validation.errors);
-    }
 
     try {
         const projects = await getProjects(query);
@@ -65,12 +59,6 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { body } = req;
 
-    // validate the body against the schema
-    const validation = validateSchema(queryProjectSchema, body);
-    if (validation.code !== 0) {
-        return res.status(400).json(validation.errors);
-    }
-
     try {
         const project = await updateProject(id, body);
         if (!project) {
@@ -84,6 +72,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
+
     try {
         const project = await deleteProject(id);
         if (!project) {

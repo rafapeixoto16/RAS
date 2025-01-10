@@ -10,21 +10,6 @@ export const toolSchema = z.object({
     project_id: z.string().uuid('Invalid project ID'),
 });
 
-// returns 0 if validation is successful, otherwise -1 and an array of errors
-export function validateSchema(schema, data) {
-    const result = schema.safeParse(data);
-    if (!result.success) {
-        return {
-            code: -1,
-            errors: result.error.issues.map((issue) => issue.message),
-        };
-    }
-    return {
-        code: 0,
-        data: result.data,
-    };
-}
-
 export const getTool = (id) => {
     return Tool.findOne({ _id: id }).exec();
 };

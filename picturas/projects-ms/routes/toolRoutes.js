@@ -5,20 +5,19 @@ import {
     deleteTool,
     getTool,
     updateTool,
-    validateSchema,
     toolSchema,
 } from '../controller/tool';
+import { validateRequest } from '@picturas/schema-validation';
 import { queryToolSchema } from '../models/queryTool';
 
 const router = Router();
+router.use(validateRequest({
+    body: toolSchema,
+    query: queryToolSchema,
+}))
 
 router.post('/', async (req, res) => {
     const { body } = req;
-
-    const validation = validateSchema(toolSchema, body);
-    if (validation.code !== 0) {
-        return res.status(400).json(validation.errors);
-    }
 
     try {
         const tool = await addTool(body);
@@ -45,11 +44,6 @@ router.get('/:id', async (req, res) => {
 router.get('/', async (req, res) => {
     const { query } = req;
 
-    const validation = validateSchema(queryToolSchema, query);
-    if (validation.code !== 0) {
-        return res.status(400).json(validation.errors);
-    }
-
     try {
         const tools = await getTools(query);
         return res.status(200).json(tools);
@@ -61,11 +55,6 @@ router.get('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { body } = req;
-
-    const validation = validateSchema(queryToolSchema, body);
-    if (validation.code !== 0) {
-        return res.status(400).json(validation.errors);
-    }
 
     try {
         const tool = await updateTool(id, body);
@@ -80,6 +69,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
+
     try {
         const tool = await deleteTool(id);
         if (!tool) {

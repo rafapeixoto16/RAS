@@ -7,21 +7,6 @@ export const projectSchema = z.object({
     user_id: z.string().uuid('Invalid user ID'), // Assuming user_id is stored as a UUID (adjust as needed if using ObjectId)
 });
 
-// returns 0 if validation is successful, otherwise -1 and an array of errors
-export function validateSchema(schema, data) {
-    const result = schema.safeParse(data);
-    if (!result.success) {
-        return {
-            code: -1,
-            errors: result.error.issues.map((issue) => issue.message),
-        };
-    }
-    return {
-        code: 0,
-        data: result.data,
-    };
-}
-
 export const getProject = (id) => {
     return Project.findOne({ _id: id }).exec();
 };
