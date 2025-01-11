@@ -6,7 +6,7 @@
         </span>
         <transition name="dropdown">
             <Teleport v-if="appendToBody && isOpen" to="body">
-                <div :style="dropdownStyle" class="absolute bg-blue-50 shadow-md rounded mt-2 border border-gray-200 z-50 text-gray-700" ref="dropdownElement">
+                <div :style="dropdownStyle" class="absolute shadow-md rounded mt-2 border border-gray-200 z-50 text-gray-700" ref="dropdownElement">
                     <ul>
                         <li 
                             v-for="option in options" 
@@ -25,7 +25,7 @@
                     </ul>
                 </div>
             </Teleport>
-            <div v-else-if="isOpen" class="absolute bg-[#F5F7FA] shadow-md rounded mt-2 border border-gray-200 z-50" ref="dropdownElement">
+            <div v-else-if="isOpen" class="absolute shadow-md rounded mt-2 border border-gray-200 z-50" ref="dropdownElement">
                 <ul>
                     <li 
                         v-for="option in options" 
@@ -63,6 +63,7 @@ interface Props {
     options: Option[];
     isIcon?: boolean;
     appendToBody?: boolean;
+    menuColor?: string;  // Add a new prop for menu color
 }
 
 const props = defineProps<Props>();
@@ -72,6 +73,7 @@ const trigger = props.trigger;
 const options = props.options;
 const isIcon = props.isIcon;
 const appendToBody = props.appendToBody;
+const menuColor = props.menuColor || "#F5F7FA"; // Default to a light color if no menuColor prop is passed
 
 const isOpen = ref(false);
 const triggerElement = ref<HTMLElement | null>(null);
@@ -91,6 +93,7 @@ const updateDropdownPosition = () => {
         dropdownStyle.value = {
             top: `${rect.bottom + window.scrollY}px`,
             left: `${rect.left + window.scrollX}px`,
+            backgroundColor: menuColor, // Apply the background color from the prop
         };
     }
 };

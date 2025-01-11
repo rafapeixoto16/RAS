@@ -1,5 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '../views/HomeView.vue';
+
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import TrashView from '../views/TrashView.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,6 +51,11 @@ const router = createRouter({
       path: '/create-project',
       name: 'createproject',
       component: () => import('../views/CreateProject.vue'),
+    },
+    {
+      path: '/trash',
+      name: 'Trash',
+      component: () => import('../views/TrashView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
