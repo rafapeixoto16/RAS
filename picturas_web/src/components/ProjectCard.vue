@@ -80,7 +80,7 @@ const props = defineProps<{
 const mode = props.mode;
 
 // Emits
-defineEmits<{
+const emit = defineEmits<{
   (e: 'edit', id: number): void;
   (e: 'open-new-tab', id: number): void;
   (e: 'rename', id: number): void;
@@ -106,14 +106,14 @@ const closeMobileOptions = () => {
 const getDropdownOptions = computed(() => {
   if (mode === 'default') {
     return [
-      { label: 'Open in New Tab', icon: 'bi-box-arrow-up-right', action: () => $emit('open-new-tab', project.id) },
-      { label: 'Rename', icon: 'bi-pencil', action: () => $emit('rename', props.project.id) },
-      { label: 'Move to Trash', icon: 'bi-trash', action: () => $emit('move-to-trash', props.project.id) },
+      { label: 'Open in New Tab', icon: 'bi-box-arrow-up-right', action: () => emit('open-new-tab', props.project.id) },
+      { label: 'Rename', icon: 'bi-pencil', action: () => emit('rename', props.project.id) },
+      { label: 'Move to Trash', icon: 'bi-trash', action: () => emit('move-to-trash', props.project.id) },
     ];
   } else if (mode === 'trash') {
     return [
-      { label: 'Restore', icon: 'bi-arrow-counterclockwise', action: () => $emit('restore', props.project.id) },
-      { label: 'Remove Permanently', icon: 'bi-trash-fill', action: () => $emit('remove-permanently', props.project.id) },
+      { label: 'Restore', icon: 'bi-arrow-counterclockwise', action: () => emit('restore', props.project.id) },
+      { label: 'Remove Permanently', icon: 'bi-trash-fill', action: () => emit('remove-permanently', props.project.id) },
     ];
   }
   return [];
@@ -132,8 +132,4 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', updateScreenSize);
 });
-
-function $emit(arg0: string, id: any): any {
-  throw new Error('Function not implemented.');
-}
 </script>

@@ -1,7 +1,5 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import TrashView from '../views/TrashView.vue'
 
 
 const router = createRouter({
@@ -48,6 +46,11 @@ const router = createRouter({
       component: () => import('../views/ForgotPasswordView.vue'),
     },
     {
+      path: '/validateAccount/:token',
+      name: 'validate-account',
+      component: () => import('../views/ValidateAccountView.vue'), 
+    },
+    {
       path: '/create-project',
       name: 'createproject',
       component: () => import('../views/ProjectsView.vue'),
@@ -61,6 +64,11 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('../views/Error404View.vue'),
+    },
+    {
+      path: '/registration-success/:email',
+      name: 'registration-success',
+      component: () => import('../views/RegisterSuccessView.vue')
     }
   ],
 })

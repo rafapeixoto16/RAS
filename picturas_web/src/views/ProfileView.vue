@@ -132,6 +132,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import { updateProfile, updateProfilePic } from '@/api/mutations/updateProfile';
 
 interface User {
   username: string;
@@ -146,7 +147,7 @@ const user = ref<User>({
   username: 'johndoe',
   email: 'john.doe@example.com',
   fullName: 'John Doe',
-  avatarUrl: '', // Avatar inicial vazio
+  avatarUrl: '',
   location: 'New York, USA',
   bio: 'Passionate photographer and digital artist',
 });
@@ -188,24 +189,35 @@ const saveChanges = () => {
   showConfirmationModal.value = true;
 };
 
-const confirmChanges = () => {
-  originalUser.value = { ...user.value };
-  isEditing.value = false;
-  showConfirmationModal.value = false;
+const confirmChanges = async () => {
+  try {
+    const updatedData = {
+      fullName: user.value.fullName,
+      location: user.value.location,
+      bio: user.value.bio,
+    };
+    await updateProfile(updatedData);
+    originalUser.value = { ...user.value };
+    isEditing.value = false;
+    showConfirmationModal.value = false;
+  } catch (error) {
+    console.error('Error updating profile:', error);
+  }
 };
 
 const cancelChanges = () => {
   showConfirmationModal.value = false;
 };
 
-const handleAvatarUpload = (event: Event) => {
+const handleAvatarUpload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      user.value.avatarUrl = reader.result as string;
-    };
-    reader.readAsDataURL(file);
+    try {
+      const result = await updateProfilePic(file);
+      user.value.avatarUrl = result.avatarUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+    }
   }
 };
 

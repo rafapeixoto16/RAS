@@ -37,7 +37,15 @@ const route = useRoute()
 const isMobileMenuOpen = ref(false)
 
 const isFullWidthRoute = computed(() => {
-  const fullWidthRoutes = ['/login', '/register', '/profile', '/settings', '/forgot-password']
+  const fullWidthRoutes = [
+    '/login', 
+    '/register', 
+    '/profile', 
+    '/settings', 
+    '/forgot-password', 
+    '/validateAccount/:token', 
+    '/registration-success/:email'
+  ]
   return fullWidthRoutes.includes(route.path) || route.name === 'NotFound'
 })
 </script>
