@@ -56,7 +56,7 @@ const router = createRouter({
       path: '/trash',
       name: 'Trash',
       component: () => import('../views/TrashView.vue'),
-    }.
+    },
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
