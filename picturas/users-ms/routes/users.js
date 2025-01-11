@@ -10,7 +10,7 @@ import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
 import {v4 as uuidv4} from 'uuid';
 import {schemaValidation, validateRequest} from '@picturas/schema-validation';
-import {getUserByEmail} from "../controller/user.js";
+import {requiresAuth} from "@picturas/ms-helper";
 
 const BUCKET_NAME = 'bucket-name'; //TODO **TROCAR PELO bucket-name do MinIO**
 const SALT_WORK_FACTOR = 10;
@@ -145,7 +145,6 @@ router.post('/login/2', validateRequest({
         req.body.validationToken,
         process.env.VALIDATE_JWT_SECRET,
         async (err, user) => {
-            console.error("SILVES 1")
             if (err) return res.sendStatus(403);
             if (user.kind !== kinds.login2phase) return res.sendStatus(403);
 
@@ -283,7 +282,6 @@ router.post('/token', validateRequest({
             return;
         }
 
-        // TODO what about a function to generate these tokens to avoid code duplication and errors?
         const filteredUser = {
             _id: userInfo._id,
             username: userInfo.username,
@@ -297,28 +295,19 @@ router.post('/token', validateRequest({
     });
 });
 
-router.delete('/logout', validateRequest({
-    body: schemaValidation.object({
-        refreshToken: schemaValidation.string()
-    }),
-}), (req, res) => {
-    jwt.verify(req.body.refreshToken, process.env.REFRESH_JWT_SECRET, async(err, user) => {
-        if (err) return res.sendStatus(403);
-        const userInfo = await User.getUser(user._id);
+// Requires Auth from now on
+router.use(requiresAuth);
 
-        if (!userInfo) return res.sendStatus(404);
+router.delete('/logout', async (req, res) => {
+    const userInfo = await User.getUser(req.user._id);
 
-        if (user.accessId !== userInfo.refresh) {
-            res.sendStatus(401);
-            return;
-        }
+    if (!userInfo) return res.sendStatus(404);
 
-        userInfo.refresh = null;
+    userInfo.refresh = null;
 
-        User.updateUser(userInfo._id, userInfo)
-            .then((resp) => res.sendStatus(200))
-            .catch((err) => res.sendStatus(400));
-    });
+    User.updateUser(userInfo._id, userInfo)
+        .then((resp) => res.sendStatus(200))
+        .catch((err) => res.sendStatus(400));
 });
 
 router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
