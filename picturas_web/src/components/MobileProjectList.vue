@@ -26,6 +26,7 @@
       </button>
       <MobileProjectOptions
         v-if="showOptionsMenu"
+        mode = "default"
         :project-id="selectedProjectId || 0"
         @close="closeOptionsMenu"
         @open-new-tab="openInNewTab"
