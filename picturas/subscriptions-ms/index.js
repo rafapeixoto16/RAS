@@ -3,7 +3,8 @@
 import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
-import subscriptionsRouter from './routes/subscriptions';
+import subscriptionsRouter from './routes/subscriptions.js';
+import {useGatewayAuth} from "@picturas/ms-helper";
 
 const app = express();
 const port = 3000; //TODO
@@ -23,8 +24,11 @@ db.once('open', () => {
 app.use(morgan('dev'));
 app.use(express.json());
 
+// Auth from Gateway
+app.use(useGatewayAuth);
+
 // Routers
-app.use('/subcriptions', subscriptionsRouter);
+app.use('/', subscriptionsRouter);
 
 // 404
 app.use((req, res) => {

@@ -3,11 +3,13 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "start": "node src/index.js"
+        "start": "node index.js"
     },
     "dependencies": {
+        "@picturas/ms-helper": "file:../ms-helper",
         "amqplib": "^0.10.5",
         "express": "^4.21.2",
+        "mongoose": "^8.9.4",
         "morgan": "^1.10.0",
         "stripe": "^17.5.0"
     }
