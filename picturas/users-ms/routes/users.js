@@ -155,13 +155,15 @@ router.post('/login/2', validateRequest({
             const userInfo = userInfoData._doc;
 
             if (userInfo.otpEnabled) {
+                if (!req.body.code) return res.sendStatus(482);
+
                 const totp = new OTPAuth.TOTP({
                     issuer,
                     label: userInfo.username,
                     algorithm: 'SHA1',
                     digits: 6,
                     period: 30,
-                    secret: userInfo.otpSecret,
+                    secret: OTPAuth.Secret.fromBase32(userInfo.otpSecret),
                 });
                 const val = totp.validate({
                     token: req.body.code,
@@ -210,6 +212,7 @@ router.post('/passwordRecovery', validateRequest({
 }), (req, res) => {
     User.getUserByEmail(req.body.email)
         .then((user) => {
+            if (!user) return res.sendStatus(404);
             if (user.active) res.sendStatus(401);
 
             const filteredUser = {
@@ -249,6 +252,8 @@ router.post('/passwordRecovery/2', validateRequest({
 
             User.getUser(user._id)
                 .then(async (resp) => {
+                    if (!resp) return res.sendStatus(404);
+
                     const filteredUser = {
                         ...resp._doc,
                         password: await bcrypt.hash(req.body.password, SALT_WORK_FACTOR),
@@ -299,26 +304,24 @@ router.post('/token', validateRequest({
 router.use(requiresAuth);
 
 router.delete('/logout', async (req, res) => {
-    const userInfo = await User.getUser(req.user._id);
+    User.getUser(req.user._id).then(userInfo => {
+        if (!userInfo) return res.sendStatus(404);
 
-    if (!userInfo) return res.sendStatus(404);
+        userInfo.refresh = null;
 
-    userInfo.refresh = null;
-
-    User.updateUser(userInfo._id, userInfo)
-        .then((resp) => res.sendStatus(200))
+        User.updateUser(userInfo._id, userInfo)
+            .then((resp) => res.sendStatus(200))
+            .catch((err) => res.sendStatus(400));
+    })
         .catch((err) => res.sendStatus(400));
 });
 
-router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
-    const {id} = req.params;
-
-    // verificar se o arquivo foi enviado
+// UNTESTED
+router.put('/profilePic', multer.single('profilePic'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({error: 'No file uploaded'});
     }
 
-    // nome unico pra imagem
     const extensionName = path.extname(req.file.name);
     const profilePicName = `${uuidv4()}.${extensionName}`;
 
@@ -326,7 +329,6 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
         'Content-Type': req.file.mimetype,
     };
 
-    // enviar imagem pro bucket S3 do MinIO
     minioClient.putObject(
         BUCKET_NAME,
         profilePicName,
@@ -345,7 +347,7 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
             const imageUrl = `http://${process.env.S3_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
 
             // update no user
-            User.updateUserProfilePic(id, imageUrl)
+            User.updateUserProfilePic(req.user._id, imageUrl)
                 .then(() =>
                     res
                         .status(200)
@@ -366,9 +368,11 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
     );
 });
 
-router.get('/:id', (req, res) => {
-    User.getUser(req.params.id)
+router.get('/', (req, res) => {
+    User.getUser(req.user._id)
         .then((resp) => {
+            if (!resp) return res.sendStatus(404);
+
             const filteredUser = {
                 username: resp.username,
                 email: resp.email,
@@ -377,72 +381,78 @@ router.get('/:id', (req, res) => {
                 name: resp.name,
             };
 
-            res.status.json(filteredUser);
+            res.status(200).json(filteredUser);
         })
-        .catch((err) => res.sendStatus(466));
+        .catch((_) => res.sendStatus(466));
 });
 
 router.put(
-    '/:id/update',
+    '/',
     validateRequest({
         body: schemaValidation.object({
-            //TODO redo ask RUI
-            bodyKey: schemaValidation.number(),
+            name: schemaValidation.string().min(1).optional(),
+            location: schemaValidation.string().optional(),
+            bio: schemaValidation.string().optional(),
         }),
     }),
     (req, res) => {
-        User.updateUser(req.params.id, req.body)
-            .then((resp) => {
-                res.status.json(resp);
-            })
+        User.updateUser(req.user._id, req.body)
+            .then((_) => res.sendStatus(200))
             .catch((err) => res.sendStatus(447));
     }
 );
 
-router.put('/:id/password', async function (req, res) {
-    User.updateUserPassword(req.params.id, await bcrypt.hash(req.body.password, SALT_WORK_FACTOR))
-        .then((data) => {
-            res.status(201).json(data);
-        })
-        .catch((erro) => {
-            res.sendStatus(448);
+router.put('/password',
+    validateRequest({
+        body: schemaValidation.object({
+            password: schemaValidation.string(),
+        }),
+    }), async function (req, res) {
+        User.updateUserPassword(req.user._id, await bcrypt.hash(req.body.password, SALT_WORK_FACTOR))
+            .then((data) => res.sendStatus(201))
+            .catch((_) => res.sendStatus(448));
+    }
+);
+
+router.post('/otp', (req, res) => {
+    User.getUser(req.user._id).then(userInfo => {
+        if (!userInfo) return res.sendStatus(404);
+        if (userInfo.otpEnabled) return res.sendStatus(401);
+
+        const secret = new OTPAuth.Secret({size: 20});
+
+        const totp = new OTPAuth.TOTP({
+            issuer,
+            label: userInfo.username,
+            algorithm: 'SHA1',
+            digits: 6,
+            period: 30,
+            secret,
         });
+
+        userInfo.otpEnabled = true;
+        userInfo.otpSecret = secret.base32;
+
+        User.updateUser(userInfo._id, userInfo)
+            .then((_) => res.json({totp: totp.toString()}))
+            .catch((_) => res.status(488).send());
+    })
+        .catch((_) => res.status(488).send());
 });
 
-router.post('/:id/otp', (req, res) => {
-    const userInfo = User.getUser(req.query.id);
+router.delete('/otp', (req, res) => {
+    User.getUser(req.user._id).then(userInfo => {
+        if (!userInfo) return res.sendStatus(404);
+        if (!userInfo.otpEnabled) return res.sendStatus(401);
 
-    if (userInfo.otpEnabled) return res.sendStatus(401);
+        userInfo.otpEnabled = false;
+        userInfo.otpSecret = null;
 
-    const secret = new OTPAuth.Secret({size: 20});
-
-    const totp = new OTPAuth.TOTP({
-        issuer,
-        label: userInfo.username,
-        algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret,
-    });
-
-    userInfo.otpEnabled = true;
-    userInfo.otpSecret = secret;
-
-    User.updateUser(userInfo._id, userInfo)
-        .then((_) => res.json({totp: totp.toString()}))
-        .catch((_) => res.status(488));
-});
-
-router.delete('/:id/otp', (req, res) => {
-    const userInfo = User.getUser(req.query.id);
-
-    if (!userInfo.otpEnabled) return res.sendStatus(401);
-
-    userInfo.otpEnabled = false;
-
-    User.updateUser(userInfo._id, userInfo)
-        .then((_) => res.sendStatus(200))
-        .catch((_) => res.status(447));
+        User.updateUser(userInfo._id, userInfo)
+            .then((_) => res.sendStatus(200))
+            .catch((_) => res.sendStatus(447));
+    })
+        .catch((_) => res.sendStatus(447));
 });
 
 export default router;
