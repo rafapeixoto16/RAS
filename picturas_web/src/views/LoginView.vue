@@ -40,12 +40,12 @@
         </div>
         <form @submit.prevent="handleLogin" class="space-y-6 backdrop-blur-sm bg-white bg-opacity-50 p-8 rounded-xl shadow-lg border border-white border-opacity-20">
           <div class="space-y-2">
-            <label for="username" class="block text-sm font-medium text-blue-700">Username</label>
+            <label for="email" class="block text-sm font-medium text-blue-700">Email</label>
             <input 
-              id="username"
-              v-model="username"
+              id="email"
+              v-model="email"
               type="text"
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
             />
           </div>
@@ -79,8 +79,7 @@
             />
           </div>
           <button 
-            type="submit" 
-            @click.prevent="showTwoFactorInput ? handleTwoFactorLogin : handleLogin"
+            type="submit"
             class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg"
           >
             {{ showTwoFactorInput ? 'Verify' : 'Sign In' }}
@@ -110,9 +109,11 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { login, loginSecondFactor } from '@/api';
+import { useAuthStore } from '@/stores/authStore';
 
+const authStore = useAuthStore()
 const router = useRouter();
-const username = ref('');
+const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
 const twoFactorCode = ref('');
@@ -127,14 +128,12 @@ const toggleShowPassword = () => {
 const handleLogin = async () => {
   try {
     errorMessage.value = '';
-    const response = await login({ username: username.value, password: password.value });
-    if (response.twoFactorRequired) {
+    const response = await login({ email: email.value, password: password.value });
+    if (response.requiresOtp) {
+      loginJwt.value = response.validationToken;
       showTwoFactorInput.value = true;
-      loginJwt.value = response.jwt;
-    } else if (response.accountValidationRequired) {
-      router.push({ name: 'validate-account', params: { token: response.validationToken } });
     } else {
-      router.push('/dashboard');
+      router.push('/');
     }
   } catch (error) {
     console.error('Login error:', error);
@@ -146,11 +145,8 @@ const handleTwoFactorLogin = async () => {
   try {
     errorMessage.value = '';
     const response = await loginSecondFactor(loginJwt.value, twoFactorCode.value);
-    if (response.accountValidationRequired) {
-      router.push({ name: 'validate-account', params: { token: response.validationToken } });
-    } else {
-      router.push('/dashboard');
-    }
+    authStore.setTokens(response.accessToken, response.refreshToken);
+    router.push('/');
   } catch (error) {
     console.error('Two-factor login error:', error);
     errorMessage.value = 'Invalid two-factor code. Please try again.';
