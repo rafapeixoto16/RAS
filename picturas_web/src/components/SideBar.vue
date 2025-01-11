@@ -12,13 +12,14 @@
                   <i class="bi bi-plus mr-2 fs-5"></i>
                   Create a Project
               </router-link>
-              <router-link
-                  class="flex items-center justify-center px-2 py-3 w-full bg-[#ff9800] text-sm xl:text-base text-white hover:bg-[#e68900] rounded rounded-xl"
-                  to="/upgrade"
+              <a
+                href="#"
+                class="flex items-center justify-center px-2 py-3 w-full bg-[#ff9800] text-sm xl:text-base text-white hover:bg-[#e68900] rounded rounded-xl"
+                @click="openPremiumModal"
               >
-                  <i class="bi bi-gem mr-2"></i>
-                  Upgrade To Premium
-              </router-link>
+                <i class="bi bi-gem mr-2"></i>
+                Try Pro for 30 days
+              </a>
           </div>
           <div class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow overflow-y-auto">
               <h2 class="text-sm font-semibold">Projects</h2>
@@ -64,6 +65,10 @@
           <div class="mt-auto w-full">
               <ProfileMenu />
           </div>
+          <premium-upgrade
+            :open="isOpenPremium"
+            @close="openPremiumModal"
+          ></premium-upgrade>
       </div>
   </div>
 </template>
@@ -72,6 +77,7 @@
 import { ref, computed } from 'vue';
 import Dropdown from './CustomDropdown.vue'
 import ProfileMenu from './ProfileMenu.vue';
+import PremiumUpgrade from './PremiumUpgrade.vue';
 
 const projects = [
   { name: 'Project 1', link: '/project1' },
@@ -93,6 +99,7 @@ const projects = [
 ];
 
 const seeAll = ref(false);
+const isOpenPremium = ref(false);
 
 const visibleProjects = computed(() => {
   return seeAll.value ? projects : projects.slice(0, 7);
@@ -105,6 +112,11 @@ const showSeeAllButton = computed(() => {
 const toggleSeeAll = () => {
   seeAll.value = !seeAll.value;
 };
+
+const openPremiumModal = () => {
+  isOpenPremium.value = !isOpenPremium.value;
+};
+
 </script>
 
 <style scoped>
