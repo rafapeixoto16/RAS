@@ -10,6 +10,6 @@ router.use('/filters', filtersRouter);
 router.use(checkAuthToken); // Auth
 
 // Proxy to microservices
-router.use('/users', proxyAuthRequest('http://users-ms:3000')); // TODO endpoint though environments
+router.use('/user', proxyAuthRequest('http://users-ms:3000')); // TODO endpoint though environments
 
 export default router;
