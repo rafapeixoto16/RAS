@@ -18,10 +18,10 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            - name: STRIPE_ENDPOINT
-              value: localstripe
-            - name: STRIPE_ENDPOINT_PORT
-              value: '8420'
+#            - name: STRIPE_ENDPOINT
+#              value: localstripe
+#            - name: STRIPE_ENDPOINT_PORT
+#              value: '8420'
             - name: STRIPE_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:

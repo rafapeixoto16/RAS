@@ -9,7 +9,8 @@ const subcriptionSchema = new mongoose.Schema({
             default: 'regular',
         },
         trialUsed: {type: Boolean, required: true, default: false},
-        stripeId: {type: String, required: false, unique: true, index: true},
+        stripeId: {type: String, required: true, unique: true, index: true},
+        subscriptionId:{type: String, default: null}
     },
     {versionKey: false});
 

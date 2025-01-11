@@ -1,29 +1,11 @@
-import {Stripe} from 'stripe';
+// based on https://docs.stripe.com/billing/subscriptions/build-subscriptions
+// and https://docs.stripe.com/payments/accept-a-payment-deferred?type=subscription
+
+import {stripe, INTERVALS, PLANS, stripeProductInfo, TRIAL_DAYS} from '../config/stripe.js';
 import * as Subscription from '../controller/subscriptions.js';
 import {Router} from 'express';
 import {requiresAuth} from "@picturas/ms-helper";
-
-const BASE_PRICE = 999;
-
-const PLANS = {
-    monthly: {
-        amount: BASE_PRICE,
-        interval: 'month',
-    },
-    yearly: {
-        amount: BASE_PRICE * 12 * 0.83,
-        interval: 'year',
-    }, // 17% discount for yearly
-};
-
-const stripeConf = {};
-
-if (process.env.STRIPE_ENDPOINT) {
-    stripeConf['host'] = process.env.STRIPE_ENDPOINT;
-    stripeConf['port'] = process.env.STRIPE_ENDPOINT_PORT;
-}
-
-const stripe = Stripe(process.env.STRIPE_PRIVATE_KEY, stripeConf);
+import {schemaValidation, validateRequest} from '@picturas/schema-validation';
 
 const router = new Router();
 
@@ -42,6 +24,7 @@ const webhookInvoicePaymentSucceeded = async (req, res, invoice, subscriptionId)
     const userDataUpd = {
         ...userData,
         premium: true,
+        trialUSed: true,
         plan:
             subscription.items.data[0].price.unit_amount ===
             PLANS.monthly.amount
@@ -121,7 +104,16 @@ router.post('/webhook', async (req, res) => {
 });
 
 // Requires Auth from now on
-router.use(requiresAuth);
+// TODO
+//router.use(requiresAuth);
+router.use((req,res,next) => {
+    req.user = {
+        'name': 'demo',
+        'email': 'demo@demo.com',
+        '_id': '64d0d02167d49b2512345678'
+    };
+    next();
+});
 
 router.get('/', async (req, res) => {
     Subscription.getSubcriptionByUserId(req.user._id).then(userData => {
@@ -141,24 +133,20 @@ router.get('/', async (req, res) => {
     }).catch(_ => {
         res.sendStatus(500);
     });
-})
+});
 
-router.post('/subscribe', async (req, res) => {
-    const {interval, paymentMethodId} = req.body;
+router.post('/subscribe', validateRequest({
+    body: schemaValidation.object({
+        interval: schemaValidation.enum(INTERVALS)
+    })
+}), async (req, res) => {
     const userId = req.user._id;
 
-    if (
-        !userId ||
-        !['monthly', 'yearly'].includes(interval) ||
-        !paymentMethodId
-    ) {
-        return res.status(400).json({error: 'Invalid request parameters'});
-    }
-
     try {
-        const userData = await Subscription.getSubcriptionByUserId(userId);
+        const subData = await Subscription.getSubcriptionByUserId(userId);
 
-        const user = userData || {
+        let sub = subData || {
+            userId,
             premium: false,
             plan: 'regular',
             trialUsed: false,
@@ -166,57 +154,78 @@ router.post('/subscribe', async (req, res) => {
 
         let customerId;
 
-        if (userData) {
-            customerId = userData.stripeId;
+        if (subData) {
+            if (subData.subscriptionId) return res.sendStatus(400);
+
+            customerId = subData.stripeId;
         } else {
             const customer = await stripe.customers.create({
                 email: req.user.email,
-                metadata: {userId},
-                invoice_settings: {default_payment_method: paymentMethodId},
+                metadata: {userId}
             });
 
-            customerId = customer.id;
+            customerId = sub.stripeId = customer.id;
+
+            sub = await Subscription.addSubcription(sub);
         }
 
-        const subscription = await stripe.subscriptions.create({
+        const subscriptionData = {
             customer: customerId,
-            items: [
-                {
-                    price_data: {
-                        currency: 'usd',
-                        product_data: {
-                            name: `${
-                                interval.charAt(0).toUpperCase() +
-                                interval.slice(1)
-                            } Plan`,
-                        },
-                        unit_amount: PLANS[interval].amount,
-                        recurring: {interval: PLANS[interval].interval},
-                    },
-                },
-            ],
+            items: [{
+                price: stripeProductInfo[req.body.interval]
+            }],
             metadata: {userId},
-            trial_period_days: user.trialUsed ? 0 : 7,
-        });
 
-        if (!userData) {
-            const userDataUpdate = {
-                userId: userId,
-                premium: false,
-                plan: 'regular',
-                trialUsed: false,
-                stripeId: subscription.id,
-            };
+            payment_behavior: 'default_incomplete',
+            payment_settings: { save_default_payment_method: 'on_subscription' },
+            expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
+        };
 
-            await Subscription.addSubcription(userDataUpdate);
+        if (!sub.trialUsed) {
+            subscriptionData.trial_period_days = TRIAL_DAYS;
         }
 
-        return res.json({subscriptionId: subscription.id});
+        const subscription = await stripe.subscriptions.create(subscriptionData);
+
+        sub.subscriptionId = subscription.id;
+        await Subscription.updateSubcription(sub._id, sub);
+
+        if (subscription.pending_setup_intent !== null) {
+            res.send({
+                type: 'setup',
+                clientSecret: subscription.pending_setup_intent.client_secret,
+            });
+        } else {
+            res.send({
+                type: 'payment',
+                clientSecret: subscription.latest_invoice.payment_intent.client_secret,
+            });
+        }
     } catch (err) {
+        console.error(err)
         return res.status(500).json({error: 'Failed to create subscription'});
     }
 });
 
+router.delete('/cancelSubscription', async (req, res) => {
+    try {
+        const data = await Subscription.getSubcriptionByUserId(req.user._id)
+
+        if(!data) return res.sendStatus(404);
+
+        const deletedSubscription = await stripe.subscriptions.del(data.subscriptionId);
+
+        data.subscriptionId = null;
+
+        await Subscription.updateSubcriptionByUserId(req.user._id,data)
+
+        res.send(deletedSubscription);
+    }catch (_){
+        res.sendStatus(567);
+    }
+});
+
+// TESTING
 router.get('/transactionHistory', async (req, res) => {
     try {
         const userId = req.user._id;
@@ -246,6 +255,7 @@ router.get('/transactionHistory', async (req, res) => {
     }
 });
 
+// TESTING
 router.get('/billingInfo', async (req, res) => {
     try {
         const userId = req.user._id;
