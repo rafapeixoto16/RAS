@@ -25,7 +25,14 @@ const kinds = {
 
 const issuer = 'Picturas - Stolen from UMinho Students Work';
 
-router.post('/register', async (req, res) => {
+router.post('/register', validateRequest({
+    body: schemaValidation.object({
+        name: schemaValidation.string(),
+        email: schemaValidation.string().email(),
+        password: schemaValidation.string(),
+        username: schemaValidation.string()
+    }),
+}), async (req, res) => {
     req.body.password = await bcrypt.hash(req.body.password, SALT_WORK_FACTOR);
 
     User.addUser(req.body)
@@ -49,7 +56,11 @@ router.post('/register', async (req, res) => {
         });
 });
 
-router.post('/register/2', async (req, res) => {
+router.post('/register/2', validateRequest({
+    body: schemaValidation.object({
+        validationToken: schemaValidation.string()
+    }),
+}), async (req, res) => {
     jwt.verify(
         req.body.validationToken,
         process.env.VALIDATE_JWT_SECRET,
@@ -81,7 +92,12 @@ router.post('/register/2', async (req, res) => {
     );
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', validateRequest({
+    body: schemaValidation.object({
+        email: schemaValidation.string().email(),
+        password: schemaValidation.string()
+    }),
+}), async (req, res) => {
     try {
         const userDoc = await User.getUserByEmail(req.body.email);
 
@@ -119,7 +135,12 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post('/login/2', async (req, res) => {
+router.post('/login/2', validateRequest({
+    body: schemaValidation.object({
+        validationToken: schemaValidation.string(),
+        code: schemaValidation.string().length(6).regex(/^\d+$/).optional()
+    }),
+}), async (req, res) => {
     jwt.verify(
         req.body.validationToken,
         process.env.VALIDATE_JWT_SECRET,
@@ -130,7 +151,7 @@ router.post('/login/2', async (req, res) => {
 
             const userInfoData = await User.getUser(user._id);
 
-            if(!userInfoData) res.sendStatus(441);
+            if (!userInfoData) res.sendStatus(441);
 
             const userInfo = userInfoData._doc;
 
@@ -183,7 +204,11 @@ router.post('/login/2', async (req, res) => {
     );
 });
 
-router.post('/passwordRecovery', (req, res) => {
+router.post('/passwordRecovery', validateRequest({
+    body: schemaValidation.object({
+        email: schemaValidation.string().email()
+    }),
+}), (req, res) => {
     User.getUserByEmail(req.body.email)
         .then((user) => {
             if (user.active) res.sendStatus(401);
@@ -198,6 +223,7 @@ router.post('/passwordRecovery', (req, res) => {
                 process.env.VALIDATE_JWT_SECRET,
                 {expiresIn: '24h'}
             );
+
             sendEmail(user.email, validationToken, kinds.resetPassword);
             res.sendStatus(200);
         })
@@ -206,7 +232,11 @@ router.post('/passwordRecovery', (req, res) => {
         });
 });
 
-router.post('/passwordRecovery/2', async (req, res) => {
+router.post('/passwordRecovery/2', validateRequest({
+    body: schemaValidation.object({
+        validationToken: schemaValidation.string()
+    }),
+}), (req, res) => {
     jwt.verify(
         req.body.validationToken,
         process.env.VALIDATE_JWT_SECRET,
@@ -225,7 +255,7 @@ router.post('/passwordRecovery/2', async (req, res) => {
                         password: await bcrypt.hash(req.body.password, SALT_WORK_FACTOR),
                     };
 
-                    User.updateUser(user._id, filteredUser);
+                    await User.updateUser(user._id, filteredUser);
 
                     res.status(200).send()
                 }).catch((_) => {
@@ -237,41 +267,54 @@ router.post('/passwordRecovery/2', async (req, res) => {
     );
 });
 
-router.post('/token', (req, res) => {
-    const refreshToken = req.body.token;
-    if (refreshToken == null) return res.sendStatus(401);
-
-    jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET, (err, user) => {
+router.post('/token', validateRequest({
+    body: schemaValidation.object({
+        refreshToken: schemaValidation.string()
+    }),
+}), (req, res) => {
+    jwt.verify(req.body.refreshToken, process.env.REFRESH_JWT_SECRET, async (err, user) => {
         if (err) return res.sendStatus(403);
-        const userInfo = User.getUser(refreshToken._id);
+        const userInfo = await User.getUser(user._id);
 
-        if (refreshToken.accessId !== userInfo.refresh) {
+        if (!userInfo) return res.sendStatus(404);
+
+        if (user.accessId !== userInfo.refresh) {
             res.sendStatus(401);
             return;
         }
 
-        const accessToken = jwt.sign(user.name, process.env.AUTH_JWT_SECRET, {
+        // TODO what about a function to generate these tokens to avoid code duplication and errors?
+        const filteredUser = {
+            _id: userInfo._id,
+            username: userInfo.username,
+            email: userInfo.email,
+        };
+
+        const accessToken = jwt.sign(filteredUser, process.env.AUTH_JWT_SECRET, {
             expiresIn: '15m',
         });
-        res.json({accessToken});
+        res.json({accessToken}).send();
     });
 });
 
-router.delete('/logout', (req, res) => {
-    const refreshToken = req.body.token;
-
-    if (refreshToken == null) return res.sendStatus(401);
-
-    jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET, (err, user) => {
+router.delete('/logout', validateRequest({
+    body: schemaValidation.object({
+        refreshToken: schemaValidation.string()
+    }),
+}), (req, res) => {
+    jwt.verify(req.body.refreshToken, process.env.REFRESH_JWT_SECRET, async(err, user) => {
         if (err) return res.sendStatus(403);
-        const userInfo = User.getUser(refreshToken._id);
+        const userInfo = await User.getUser(user._id);
 
-        if (refreshToken.accessId !== userInfo.refresh) {
+        if (!userInfo) return res.sendStatus(404);
+
+        if (user.accessId !== userInfo.refresh) {
             res.sendStatus(401);
             return;
         }
 
-        userInfo.accessId = null;
+        userInfo.refresh = null;
+
         User.updateUser(userInfo._id, userInfo)
             .then((resp) => res.sendStatus(200))
             .catch((err) => res.sendStatus(400));
