@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-ms
+spec:
+  selector:
+    matchLabels:
+      name: users-ms
+  template:
+    metadata:
+      labels:
+        name: users-ms
+    spec:
+      containers:
+        - name: users-ms
+          image: users-ms:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: AUTH_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-jwt-secret
+                  key: token-secret
+            - name: REFRESH_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: refresh-jwt-secret
+                  key: token-secret
+            - name: VALIDATE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: validate-jwt-secret
+                  key: token-secret
+            - name: FRONTEND_URL
+              value: {{ .Values.frontend_url }}
+            - name: EMAIL_HOSTNAME
+              value: {{ .Values.email_hostname }}
+            - name: EMAIL_PORT
+              value: {{ .Values.email_port | quote }}
+            - name: EMAIL_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: email-secret
+                  key: username
+            - name: EMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: email-secret
+                  key: password
+            - name: USERS_DB_HOST
+              value: 'users-ms-db'
+            - name: USERS_DB_PORT
+              value: {{ index .Values "users-ms-db" "containerPorts" "mongodb" | quote }}
+            - name: USERS_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: users-ms-db-secret
+                  key: username
+            - name: USERS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: users-ms-db-secret
+                  key: password
+            - name: S3_ENDPOINT
+              value: {{ .Values.s3_endpoint }}
+            - name: S3_PORT
+              value: {{ .Values.s3_port | quote }}
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secret
+                  key: username
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secret
+                  key: password

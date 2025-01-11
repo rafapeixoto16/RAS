@@ -41,8 +41,9 @@
         <!-- Avatar and Info Section -->
         <div class="flex flex-col md:flex-row md:gap-12 lg:gap-240">
           <!-- Avatar and Upload Section -->
-          <div class="w-full md:w-1/4 flex justify-center mb-8 md:mb-100 flex-col items-center mt-[-70px] relative">
-            <!-- Avatar -->
+          <div 
+            class="w-full md:w-1/4 flex justify-center items-center mb-8 md:mb-0 relative"
+          >
             <div class="relative group">
               <div
                 v-if="!user.avatarUrl"
@@ -74,9 +75,13 @@
           </div>
 
           <!-- Info Section -->
-          <div class="w-full md:w-3/4">
+          <div class="w-full md:w-3/4 mt-4 sm:mt-0">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-              <div v-for="(item, index) in userInfoItems" :key="index" class="flex flex-col space-y-2">
+              <div
+                v-for="(item, index) in userInfoItems"
+                :key="index"
+                class="flex flex-col space-y-2"
+              >
                 <label class="text-gray-600 text-base sm:text-lg font-medium">{{ item.label }}</label>
                 <input
                   v-if="isEditing && item.editable"
@@ -90,7 +95,10 @@
                 >
                   {{ item.value }}
                 </div>
-                <div v-if="index < userInfoItems.length - 1" class="border-b border-gray-100 mt-4"></div>
+                <div
+                  v-if="index < userInfoItems.length - 1"
+                  class="border-b border-gray-100 mt-4"
+                ></div>
               </div>
             </div>
           </div>
@@ -118,6 +126,7 @@
     @cancel="cancelChanges"
   />
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';

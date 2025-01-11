@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ws-gateway
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/ws(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: ws-gateway
+                port:
+                  number: 3000

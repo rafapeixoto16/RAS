@@ -1,12 +1,10 @@
 import { Router } from 'express';
-import * as filtersRouter from './filters';
+import filtersRouter from './filters.js';
+import proxy from 'express-http-proxy'
 
 const router = Router();
 
-router.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
+router.use('/users', proxy('http://users-ms:3000'));
 router.use('/filters', filtersRouter);
 
 export default router;

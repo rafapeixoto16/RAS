@@ -1,6 +1,8 @@
+
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import TrashView from '../views/TrashView.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,8 +56,12 @@ const router = createRouter({
       path: '/trash',
       name: 'Trash',
       component: () => import('../views/TrashView.vue'),
+    }.
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/Error404View.vue'),
     }
-
   ],
 })
 

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailhog
+spec:
+  selector:
+    matchLabels:
+      name: mailhog
+  template:
+    metadata:
+      labels:
+        name: mailhog
+    spec:
+      containers:
+        - name: mailhog
+          image: mailhog/mailhog:latest
+          ports:
+            - containerPort: 1025
+            - containerPort: 8025
+          env:
+            - name: MH_HOSTNAME
+              value: {{ .Values.email_hostname }}
+            - name: MH_UI_WEB_PATH
+              value: mailhog

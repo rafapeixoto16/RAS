@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: localstripe
+spec:
+  selector:
+    matchLabels:
+      name: localstripe
+  template:
+    metadata:
+      labels:
+        name: localstripe
+    spec:
+      containers:
+        - name: localstripe
+          image: adrienverge/localstripe:latest
+          ports:
+            - containerPort: 8420
+          lifecycle:
+            postStart:
+              exec:
+                command: [ "/bin/sh", "-c", "sleep 10 && curl localhost:8420/_config/webhooks/webhook1 -d url=http://subscriptions-ms:3000/webhook -d secret={{ .Values.stripe_webhook_secret }}" ]

@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mailhog
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /mailhog
+            pathType: Prefix
+            backend:
+              service:
+                name: mailhog-cluster
+                port:
+                  number: 8025

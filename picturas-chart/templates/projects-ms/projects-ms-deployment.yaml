@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projects-ms
+spec:
+  selector:
+    matchLabels:
+      name: projects-ms
+  template:
+    metadata:
+      labels:
+        name: projects-ms
+    spec:
+      containers:
+        - name: projects-ms
+          image: projects-ms:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: {{ $.Values.rabbitmq.service.ports.amqp | quote }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: password
+            - name: FILTER_OUTPUT_QUEUE
+              value: {{ $.Values.filter_output_queue }}
+            - name: PROJ_DB_HOST
+              value: 'projects-ms-db'
+            - name: PROJ_DB_PORT
+              value: {{ index .Values "projects-ms-db" "containerPorts" "mongodb" | quote }}
+            - name: PROJ_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: projects-ms-db-secret
+                  key: username
+            - name: PROJ_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: projects-ms-db-secret
+                  key: password
+          volumeMounts:
+            - mountPath: /mnt/nfs
+              name: nfs-volume
+      volumes:
+        - name: nfs-volume # Simulated with hostPath (single node)
+          hostPath:
+            path: /tmp/picturas
