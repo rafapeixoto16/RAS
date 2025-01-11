@@ -21,7 +21,11 @@
         v-for="item in filteredTrash" 
         :key="item.id" 
         :project="item"
+      
         :dropdown-options="lgOnlyDropdownOptions(item)"
+        mode="trash"
+        @restore="restoreItem"
+        @remove-permanently="deletePermanently"
       />
     </div>
   </div>

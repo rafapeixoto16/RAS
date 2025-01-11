@@ -73,11 +73,11 @@
         v-for="project in filteredProjects"
         :key="project.id"
         :project="project"
-        :dropdown-options="[
-          { label: 'Open in a new tab', icon: 'bi bi-box-arrow-up-right', action: () => openInNewTab(project.id) },
-          { label: 'Rename', icon: 'bi bi-pencil', action: () => renameProject(project.id) },
-          { label: 'Move to Trash', icon: 'bi bi-trash', action: () => moveToTrash(project.id) }
-        ]"
+        :dropdown-options="[]"
+        mode="default"
+        @open-new-tab="openInNewTab"
+        @rename="renameProject"
+        @move-to-trash="moveToTrash"
         @edit="editProject"
       />
     </div>
