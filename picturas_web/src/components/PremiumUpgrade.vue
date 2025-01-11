@@ -16,37 +16,29 @@
             <DialogPanel
               class="relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl">
               <div class="bg-white px-6 pt-5 pb-6">
-                <div class="flex flex-col sm:flex-row items-center">
-                  <!-- Left Content -->
-                  <div class="sm:w-2/3 text-center sm:text-left">
-                    <h3 class="text-xl font-semibold text-gray-900">
-                      Try Pro Features Free for 30 Days
-                    </h3>
-                    <p class="mt-2 text-sm text-gray-500">
-                      Unlock access to premium features including:
-                    </p>
-                    <ul class="mt-4 space-y-2 text-sm text-gray-700">
-                      <li class="flex items-start" v-for="feature in premiumFeatures" :key="feature.text">
-                        <i class="bi bi-check2 text-[#3B82F6] mr-2"></i>
-                        {{ feature.text }}
-                      </li>
-                    </ul>
-                    <p class="mt-4 text-xs text-gray-500">
-                      Cancel anytime. We’ll remind you 7 days before your trial
-                      ends.
-                    </p>
-                  </div>
+                <div class="flex flex-col sm:flex-row items-center relative">
+  <!-- Left Content -->
+  <div class="sm:w-2/3 text-center sm:text-left relative z-10">
+    <h3 class="text-xl font-semibold text-azure-radiance-950" style="display: flex;margin-top: 10px;">
+      Try Pro Features Free for 30 Days
+    </h3>
+    <p class="mt-2 text-sm text-azure-radiance-950" style="display: flex;">
+      Unlock access to premium features including:
+    </p>
+    <ul class="mt-4 space-y-2 text-sm text-gray-700">
+      <li class="flex items-start" v-for="feature in premiumFeatures" :key="feature.text">
+        <i class="bi bi-check2 text-[#3B82F6] mr-2" style="font-size: x-large;"></i>
+        {{ feature.text }}
+      </li>
+    </ul>
+    <p class="mt-4 text-xs text-azure-radiance-950">
+      Cancel anytime. We’ll remind you 7 days before your trial ends.
+    </p>
+  </div>
 
-                  <!-- Right Image -->
-                  <div class="mt-6 sm:mt-0 sm:ml-6 sm:w-1/3" style="margin-left: 0px; width: 50%;">
-                    <img :src="imagePremium" alt="Trial Illustration" class="w-full h-auto rounded-lg" style="
-                        margin: 24px;
-                        position: relative;
-                        padding: 0px;
-                        top: -3rem;
-                      " />
-                  </div>
-                </div>
+  <!-- Background Image -->
+  <div class="absolute inset-0 bg-cover bg-center" :style="{ backgroundImage: 'url(' + imagePremium + ')' }"></div>
+</div>
               </div>
 
               <!-- Footer Actions -->

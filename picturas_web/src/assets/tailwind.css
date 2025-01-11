@@ -19,24 +19,144 @@
     --azure-radiance-950: #172e54;
   }
   
-  /* Utility classes (optional) */
+  /* Text color classes */
+  .text-azure-radiance-50 {
+    color: var(--azure-radiance-50);
+  }
+  .text-azure-radiance-100 {
+    color: var(--azure-radiance-100);
+  }
+  .text-azure-radiance-200 {
+    color: var(--azure-radiance-200);
+  }
+  .text-azure-radiance-300 {
+    color: var(--azure-radiance-300);
+  }
+  .text-azure-radiance-400 {
+    color: var(--azure-radiance-400);
+  }
   .text-azure-radiance-500 {
     color: var(--azure-radiance-500);
   }
+  .text-azure-radiance-600 {
+    color: var(--azure-radiance-600);
+  }
+  .text-azure-radiance-700 {
+    color: var(--azure-radiance-700);
+  }
+  .text-azure-radiance-800 {
+    color: var(--azure-radiance-800);
+  }
+  .text-azure-radiance-900 {
+    color: var(--azure-radiance-900);
+  }
+  .text-azure-radiance-950 {
+    color: var(--azure-radiance-950);
+  }
   
+  /* Background color classes */
+  .bg-azure-radiance-50 {
+    background-color: var(--azure-radiance-50);
+  }
+  .bg-azure-radiance-100 {
+    background-color: var(--azure-radiance-100);
+  }
+  .bg-azure-radiance-200 {
+    background-color: var(--azure-radiance-200);
+  }
+  .bg-azure-radiance-300 {
+    background-color: var(--azure-radiance-300);
+  }
+  .bg-azure-radiance-400 {
+    background-color: var(--azure-radiance-400);
+  }
   .bg-azure-radiance-500 {
     background-color: var(--azure-radiance-500);
   }
+  .bg-azure-radiance-600 {
+    background-color: var(--azure-radiance-600);
+  }
+  .bg-azure-radiance-700 {
+    background-color: var(--azure-radiance-700);
+  }
+  .bg-azure-radiance-800 {
+    background-color: var(--azure-radiance-800);
+  }
+  .bg-azure-radiance-900 {
+    background-color: var(--azure-radiance-900);
+  }
+  .bg-azure-radiance-950 {
+    background-color: var(--azure-radiance-950);
+  }
   
+  /* Border color classes */
+  .border-azure-radiance-50 {
+    border-color: var(--azure-radiance-50);
+  }
+  .border-azure-radiance-100 {
+    border-color: var(--azure-radiance-100);
+  }
+  .border-azure-radiance-200 {
+    border-color: var(--azure-radiance-200);
+  }
+  .border-azure-radiance-300 {
+    border-color: var(--azure-radiance-300);
+  }
+  .border-azure-radiance-400 {
+    border-color: var(--azure-radiance-400);
+  }
   .border-azure-radiance-500 {
     border-color: var(--azure-radiance-500);
   }
+  .border-azure-radiance-600 {
+    border-color: var(--azure-radiance-600);
+  }
+  .border-azure-radiance-700 {
+    border-color: var(--azure-radiance-700);
+  }
+  .border-azure-radiance-800 {
+    border-color: var(--azure-radiance-800);
+  }
+  .border-azure-radiance-900 {
+    border-color: var(--azure-radiance-900);
+  }
+  .border-azure-radiance-950 {
+    border-color: var(--azure-radiance-950);
+  }
   
+  /* Hover background color classes */
+  .hover\:bg-azure-radiance-50:hover {
+    background-color: var(--azure-radiance-50);
+  }
+  .hover\:bg-azure-radiance-100:hover {
+    background-color: var(--azure-radiance-100);
+  }
+  .hover\:bg-azure-radiance-200:hover {
+    background-color: var(--azure-radiance-200);
+  }
+  .hover\:bg-azure-radiance-300:hover {
+    background-color: var(--azure-radiance-300);
+  }
+  .hover\:bg-azure-radiance-400:hover {
+    background-color: var(--azure-radiance-400);
+  }
   .hover\:bg-azure-radiance-500:hover {
     background-color: var(--azure-radiance-500);
   }
-
+  .hover\:bg-azure-radiance-600:hover {
+    background-color: var(--azure-radiance-600);
+  }
   .hover\:bg-azure-radiance-700:hover {
     background-color: var(--azure-radiance-700);
   }
+  .hover\:bg-azure-radiance-800:hover {
+    background-color: var(--azure-radiance-800);
+  }
+  .hover\:bg-azure-radiance-900:hover {
+    background-color: var(--azure-radiance-900);
+  }
+  .hover\:bg-azure-radiance-950:hover {
+    background-color: var(--azure-radiance-950);
+  }
+  
   
