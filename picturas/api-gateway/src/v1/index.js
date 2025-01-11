@@ -1,12 +1,15 @@
 import { Router } from 'express';
-import * as filtersRouter from './filters';
+import filtersRouter from './filters.js';
+import {checkAuthToken} from "../auth/auth.js";
+import proxyAuthRequest from "../utils/proxy.js";
 
 const router = Router();
 
-router.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
 router.use('/filters', filtersRouter);
+
+router.use(checkAuthToken); // Auth
+
+// Proxy to microservices
+router.use('/user', proxyAuthRequest('http://users-ms:3000')); // TODO endpoint though environments
 
 export default router;

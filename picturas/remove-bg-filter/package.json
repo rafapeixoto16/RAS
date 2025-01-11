@@ -7,6 +7,7 @@
     },
     "dependencies": {
         "@picturas/filter-helper": "file:../filter-helper",
+        "@picturas/schema-validation": "file:../schema-validation",
         "transparent-background": "^1.5.0"
     }
 }

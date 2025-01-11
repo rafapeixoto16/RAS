@@ -1,14 +1,19 @@
-import { Router } from 'express';
+import {Router} from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import sendEmail from '../email/sendEmail.js';
 import * as OTPAuth from 'otpauth';
-import * as User from '../controller/user.js';
-import multer from '../config/multerConfig.js';  
-import minioClient from '../config/minioClient.js';  
-import { v4 as uuidv4 } from 'uuid';
+import sendEmail from '../email/sendEmail.js';
+import crypto from 'node:crypto';
 
-const BUCKET_NAME = 'bucket-name'; // **TROCAR PELO bucket-name do MinIO**
+import * as User from '../controller/user.js';
+import multer from '../config/multerConfig.js';
+import minioClient from '../config/minioClient.js';
+import {v4 as uuidv4} from 'uuid';
+import {schemaValidation, validateRequest} from '@picturas/schema-validation';
+import {requiresAuth} from "@picturas/ms-helper";
+
+const BUCKET_NAME = 'bucket-name'; //TODO **TROCAR PELO bucket-name do MinIO**
+const SALT_WORK_FACTOR = 10;
 
 const router = Router();
 
@@ -20,7 +25,16 @@ const kinds = {
 
 const issuer = 'Picturas - Stolen from UMinho Students Work';
 
-router.post('/', async (req, res) => {
+router.post('/register', validateRequest({
+    body: schemaValidation.object({
+        name: schemaValidation.string(),
+        email: schemaValidation.string().email(),
+        password: schemaValidation.string(),
+        username: schemaValidation.string()
+    }),
+}), async (req, res) => {
+    req.body.password = await bcrypt.hash(req.body.password, SALT_WORK_FACTOR);
+
     User.addUser(req.body)
         .then((user) => {
             const filteredUser = {
@@ -31,31 +45,72 @@ router.post('/', async (req, res) => {
             const validationToken = jwt.sign(
                 filteredUser,
                 process.env.VALIDATE_JWT_SECRET,
-                { expiresIn: '24h' },
+                {expiresIn: '24h'}
             );
+
             sendEmail(user.email, validationToken, kinds.validateAccount);
             res.sendStatus(200);
         })
         .catch((err) => {
-            res.status(444)
-                .json({ error: 'Failed to add user' });
+            res.status(444).json({error: 'Failed to add user'});
         });
 });
 
-router.post('/login', async (req, res) => {
-    const user = User.getUserByEmail(req.body.email);
+router.post('/register/2', validateRequest({
+    body: schemaValidation.object({
+        validationToken: schemaValidation.string()
+    }),
+}), async (req, res) => {
+    jwt.verify(
+        req.body.validationToken,
+        process.env.VALIDATE_JWT_SECRET,
+        (err, user) => {
+            if (err || user.kind !== kinds.validateAccount) {
+                res.status(404).json({
+                    error: 'Time limit to activate account exceeded',
+                });
+                return;
+            }
 
-    if (user == null) {
-        return res.status(400)
-            .send('Cannot find user');
-    }
+            User.getUser(user._id)
+                .then((resp) => {
+                    const filteredUser = {
+                        ...resp._doc,
+                        active: true,
+                        expireAt: null
+                    };
 
-    if (!user.active) {
-        return res.status(401)
-            .send('User must be validated first');
-    }
+                    User.updateUser(user._id, filteredUser);
 
+                    res.status(200).send()
+                }).catch((_) => {
+                res.status(404).json({
+                    error: 'Failed to active user account',
+                });
+            });
+        }
+    );
+});
+
+router.post('/login', validateRequest({
+    body: schemaValidation.object({
+        email: schemaValidation.string().email(),
+        password: schemaValidation.string()
+    }),
+}), async (req, res) => {
     try {
+        const userDoc = await User.getUserByEmail(req.body.email);
+
+        if (!userDoc) {
+            return res.status(400).send('Cannot find user');
+        }
+
+        const user = userDoc._doc;
+
+        if (!user.active) {
+            return res.status(401).send('User must be validated first');
+        }
+
         if (await bcrypt.compare(req.body.password, user.password)) {
             const filteredUser = {
                 _id: user._id,
@@ -65,42 +120,50 @@ router.post('/login', async (req, res) => {
             const validationToken = jwt.sign(
                 filteredUser,
                 process.env.VALIDATE_JWT_SECRET,
-                { expiresIn: '15m' },
+                {expiresIn: '15m'}
             );
 
-            res.status(200)
-                .json({
-                    validationToken,
-                    requiresOtp: user.otpEnabled,
-                });
+            res.status(200).json({
+                validationToken,
+                requiresOtp: user.otpEnabled,
+            });
         } else {
-            res.status(555)
-                .json({ error: 'Invalid Password' });
+            res.status(555).json({error: 'Invalid Password'});
         }
     } catch {
-        res.status(445)
-            .send();
+        res.status(445).send();
     }
 });
 
-router.post('/login/2', async (req, res) => {
+router.post('/login/2', validateRequest({
+    body: schemaValidation.object({
+        validationToken: schemaValidation.string(),
+        code: schemaValidation.string().length(6).regex(/^\d+$/).optional()
+    }),
+}), async (req, res) => {
     jwt.verify(
         req.body.validationToken,
         process.env.VALIDATE_JWT_SECRET,
-        (err, user) => {
+        async (err, user) => {
             if (err) return res.sendStatus(403);
             if (user.kind !== kinds.login2phase) return res.sendStatus(403);
 
-            const userInfo = User.getUser(user._id);
+            const userInfoData = await User.getUser(user._id);
+
+            if (!userInfoData) res.sendStatus(441);
+
+            const userInfo = userInfoData._doc;
 
             if (userInfo.otpEnabled) {
+                if (!req.body.code) return res.sendStatus(482);
+
                 const totp = new OTPAuth.TOTP({
                     issuer,
                     label: userInfo.username,
                     algorithm: 'SHA1',
                     digits: 6,
                     period: 30,
-                    secret: userInfo.otpSecret,
+                    secret: OTPAuth.Secret.fromBase32(userInfo.otpSecret),
                 });
                 const val = totp.validate({
                     token: req.body.code,
@@ -119,15 +182,14 @@ router.post('/login/2', async (req, res) => {
             const accessToken = jwt.sign(
                 filteredUser,
                 process.env.AUTH_JWT_SECRET,
-                { expiresIn: '15m' },
+                {expiresIn: '15m'}
             );
 
-            const randomBytes = crypto.randomBytes(16)
-                .toString('hex');
+            const randomBytes = crypto.randomBytes(16).toString('hex');
             filteredUser.accessId = randomBytes;
             const refreshToken = jwt.sign(
                 filteredUser,
-                process.env.REFRESH_JWT_SECRET,
+                process.env.REFRESH_JWT_SECRET
             );
             user.refresh = randomBytes;
 
@@ -143,9 +205,16 @@ router.post('/login/2', async (req, res) => {
     );
 });
 
-router.post('/passwordRecovery', async (req, res) => {
-    await User.findUserByEmail(req.body.email)
+router.post('/passwordRecovery', validateRequest({
+    body: schemaValidation.object({
+        email: schemaValidation.string().email()
+    }),
+}), (req, res) => {
+    User.getUserByEmail(req.body.email)
         .then((user) => {
+            if (!user) return res.sendStatus(404);
+            if (user.active) res.sendStatus(401);
+
             const filteredUser = {
                 _id: user._id,
                 kind: kinds.resetPassword,
@@ -154,127 +223,105 @@ router.post('/passwordRecovery', async (req, res) => {
             const validationToken = jwt.sign(
                 filteredUser,
                 process.env.VALIDATE_JWT_SECRET,
-                { expiresIn: '24h' },
+                {expiresIn: '24h'}
             );
+
             sendEmail(user.email, validationToken, kinds.resetPassword);
             res.sendStatus(200);
         })
         .catch((err) => {
-            res.status(404)
-                .json({ error: 'Failed to find the user' });
+            res.status(404).json({error: 'Failed to find the user'});
         });
 });
 
-// TODO what about validating the user (ps: being done in the gateway, but must be checked), but that is the work of another issue
-router.get('/:id', (req, res) => {
-    User.getUser(req.params.id)
-        .then((resp) => res.status.json(resp)) // TODO what about filtering it's data??
-        .catch((err) => res.sendStatus(446));
+router.post('/passwordRecovery/2', validateRequest({
+    body: schemaValidation.object({
+        validationToken: schemaValidation.string()
+    }),
+}), (req, res) => {
+    jwt.verify(
+        req.body.validationToken,
+        process.env.VALIDATE_JWT_SECRET,
+        (err, user) => {
+            if (err || user.kind !== kinds.resetPassword) {
+                res.status(404).json({
+                    error: 'Time limit to activate account exceeded',
+                });
+                return;
+            }
+
+            User.getUser(user._id)
+                .then(async (resp) => {
+                    if (!resp) return res.sendStatus(404);
+
+                    const filteredUser = {
+                        ...resp._doc,
+                        password: await bcrypt.hash(req.body.password, SALT_WORK_FACTOR),
+                    };
+
+                    await User.updateUser(user._id, filteredUser);
+
+                    res.status(200).send()
+                }).catch((_) => {
+                res.status(404).json({
+                    error: 'Failed to active user account',
+                });
+            });
+        }
+    );
 });
 
-router.put('/:id/update', (req, res) => {
-    User.updateUser(req.params.id, req.body) // TODO what about filtering input data and using zod validation??
-        .then((resp) => res.status.json(resp))
-        .catch((err) => res.sendStatus(447));
-});
-
-router.put('/:id/password', function(req, res) {
-    User.updateUserPassword(req.params.id, req.body.password)
-        .then((data) => {
-            res.status(201)
-                .json(data);
-        })
-        .catch((erro) => {
-            res.sendStatus(448);
-        });
-});
-
-router.post('/:id/otp', (req, res) => {
-    const userInfo = User.getUser(req.query.id);
-
-    if (userInfo.otpEnabled) return res.sendStatus(401);
-
-    const secret = new OTPAuth.Secret({ size: 20 });
-
-    const totp = new OTPAuth.TOTP({
-        issuer,
-        label: userInfo.username,
-        algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret,
-    });
-
-    userInfo.otpEnabled = true;
-    userInfo.otpSecret = secret;
-
-    User.updateUser(userInfo._id, userInfo)
-        .then((_) => res.json({ totp: totp.toString() }))
-        .catch((_) => res.status(447)); // TODO what about correcting the status codes?
-});
-
-router.delete('/:id/otp', (req, res) => {
-    const userInfo = User.getUser(req.query.id);
-
-    if (!userInfo.otpEnabled) return res.sendStatus(401);
-
-    userInfo.otpEnabled = false;
-
-    User.updateUser(userInfo._id, userInfo)
-        .then((_) => res.sendStatus(200))
-        .catch((_) => res.status(447));
-});
-
-router.post('/token', (req, res) => {
-    const refreshToken = req.body.token;
-    if (refreshToken == null) return res.sendStatus(401);
-
-    jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET, (err, user) => {
+router.post('/token', validateRequest({
+    body: schemaValidation.object({
+        refreshToken: schemaValidation.string()
+    }),
+}), (req, res) => {
+    jwt.verify(req.body.refreshToken, process.env.REFRESH_JWT_SECRET, async (err, user) => {
         if (err) return res.sendStatus(403);
-        const userInfo = User.getUser(refreshToken._id);
+        const userInfo = await User.getUser(user._id);
 
-        if (refreshToken.accessId !== userInfo.refresh) {
+        if (!userInfo) return res.sendStatus(404);
+
+        if (user.accessId !== userInfo.refresh) {
             res.sendStatus(401);
             return;
         }
 
-        const accessToken = jwt.sign(user.name, process.env.AUTH_JWT_SECRET, {
+        const filteredUser = {
+            _id: userInfo._id,
+            username: userInfo.username,
+            email: userInfo.email,
+        };
+
+        const accessToken = jwt.sign(filteredUser, process.env.AUTH_JWT_SECRET, {
             expiresIn: '15m',
         });
-        res.json({ accessToken });
+        res.json({accessToken}).send();
     });
 });
 
-router.delete('/logout', (req, res) => {
-    const refreshToken = req.body.token;
+// Requires Auth from now on
+router.use(requiresAuth);
 
-    if (refreshToken == null) return res.sendStatus(401);
+router.delete('/logout', async (req, res) => {
+    User.getUser(req.user._id).then(userInfo => {
+        if (!userInfo) return res.sendStatus(404);
 
-    jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
-        const userInfo = User.getUser(refreshToken._id);
+        userInfo.refresh = null;
 
-        if (refreshToken.accessId !== userInfo.refresh) {
-            res.sendStatus(401);
-            return;
-        }
-
-        userInfo.accessId = null;
         User.updateUser(userInfo._id, userInfo)
             .then((resp) => res.sendStatus(200))
             .catch((err) => res.sendStatus(400));
-    });
+    })
+        .catch((err) => res.sendStatus(400));
 });
 
-router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
-    const { id } = req.params;
-
-    // verificar se o arquivo foi enviado
+// UNTESTED
+router.put('/profilePic', multer.single('profilePic'), (req, res) => {
     if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
+        return res.status(400).json({error: 'No file uploaded'});
     }
 
-    // nome unico pra imagem
     const extensionName = path.extname(req.file.name);
     const profilePicName = `${uuidv4()}.${extensionName}`;
 
@@ -282,19 +329,130 @@ router.put('/:id/profilePic', multer.single('profilePic'), (req, res) => {
         'Content-Type': req.file.mimetype,
     };
 
-    // enviar imagem pro bucket S3 do MinIO
-    minioClient.putObject(BUCKET_NAME, profilePicName, req.file.buffer, metaData, (err, etag) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to upload image to MinIO', details: err });
+    minioClient.putObject(
+        BUCKET_NAME,
+        profilePicName,
+        req.file.buffer,
+        metaData,
+        (err, etag) => {
+            if (err) {
+                return res
+                    .status(500)
+                    .json({
+                        error: 'Failed to upload image to MinIO',
+                        details: err,
+                    });
+            }
+
+            const imageUrl = `http://${process.env.S3_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
+
+            // update no user
+            User.updateUserProfilePic(req.user._id, imageUrl)
+                .then(() =>
+                    res
+                        .status(200)
+                        .json({
+                            message: 'Profile picture updated successfully',
+                            imageUrl,
+                        })
+                )
+                .catch((err) =>
+                    res
+                        .status(500)
+                        .json({
+                            error: 'Failed to update user profile picture',
+                            details: err,
+                        })
+                );
         }
+    );
+});
 
-        const imageUrl = `https://${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
+router.get('/', (req, res) => {
+    User.getUser(req.user._id)
+        .then((resp) => {
+            if (!resp) return res.sendStatus(404);
 
-        // update no user
-        User.updateUserProfilePic(id, imageUrl)
-            .then(() => res.status(200).json({ message: 'Profile picture updated successfully', imageUrl }))
-            .catch((err) => res.status(500).json({ error: 'Failed to update user profile picture', details: err }));
-    });
+            const filteredUser = {
+                username: resp.username,
+                email: resp.email,
+                location: resp.location,
+                bio: resp.bio,
+                name: resp.name,
+            };
+
+            res.status(200).json(filteredUser);
+        })
+        .catch((_) => res.sendStatus(466));
+});
+
+router.put(
+    '/',
+    validateRequest({
+        body: schemaValidation.object({
+            name: schemaValidation.string().min(1).optional(),
+            location: schemaValidation.string().optional(),
+            bio: schemaValidation.string().optional(),
+        }),
+    }),
+    (req, res) => {
+        User.updateUser(req.user._id, req.body)
+            .then((_) => res.sendStatus(200))
+            .catch((err) => res.sendStatus(447));
+    }
+);
+
+router.put('/password',
+    validateRequest({
+        body: schemaValidation.object({
+            password: schemaValidation.string(),
+        }),
+    }), async function (req, res) {
+        User.updateUserPassword(req.user._id, await bcrypt.hash(req.body.password, SALT_WORK_FACTOR))
+            .then((data) => res.sendStatus(201))
+            .catch((_) => res.sendStatus(448));
+    }
+);
+
+router.post('/otp', (req, res) => {
+    User.getUser(req.user._id).then(userInfo => {
+        if (!userInfo) return res.sendStatus(404);
+        if (userInfo.otpEnabled) return res.sendStatus(401);
+
+        const secret = new OTPAuth.Secret({size: 20});
+
+        const totp = new OTPAuth.TOTP({
+            issuer,
+            label: userInfo.username,
+            algorithm: 'SHA1',
+            digits: 6,
+            period: 30,
+            secret,
+        });
+
+        userInfo.otpEnabled = true;
+        userInfo.otpSecret = secret.base32;
+
+        User.updateUser(userInfo._id, userInfo)
+            .then((_) => res.json({totp: totp.toString()}))
+            .catch((_) => res.status(488).send());
+    })
+        .catch((_) => res.status(488).send());
+});
+
+router.delete('/otp', (req, res) => {
+    User.getUser(req.user._id).then(userInfo => {
+        if (!userInfo) return res.sendStatus(404);
+        if (!userInfo.otpEnabled) return res.sendStatus(401);
+
+        userInfo.otpEnabled = false;
+        userInfo.otpSecret = null;
+
+        User.updateUser(userInfo._id, userInfo)
+            .then((_) => res.sendStatus(200))
+            .catch((_) => res.sendStatus(447));
+    })
+        .catch((_) => res.sendStatus(447));
 });
 
 export default router;

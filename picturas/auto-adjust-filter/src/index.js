@@ -1,4 +1,5 @@
-import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
+import { createFilterHandler } from '@picturas/filter-helper';
+import { schemaValidation } from '@picturas/schema-validation';
 import sharp from 'sharp';
 
 // Permitir ao utilizador melhorar a imagem de forma rápida e eficaz,

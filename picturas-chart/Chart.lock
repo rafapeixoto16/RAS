@@ -5,9 +5,6 @@ dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 20.6.1
-- name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 20.6.1
 - name: mongodb
   repository: https://charts.bitnami.com/bitnami
   version: 16.4.0
@@ -17,5 +14,14 @@ dependencies:
 - name: mongodb
   repository: https://charts.bitnami.com/bitnami
   version: 16.4.0
-digest: sha256:265b94a528f422326b4c461942b7cbda7f1e634d7dc0b2bae96b386bd2b5b65b
-generated: "2025-01-02T14:32:21.2030903Z"
+- name: kube-prometheus
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.2.3
+- name: grafana
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.4.2
+- name: grafana-loki
+  repository: https://charts.bitnami.com/bitnami
+  version: 4.7.1
+digest: sha256:7a25d51bea7b829eacd16f319ad547ed06d36e8e6d672382f382115c139bf714
+generated: "2025-01-09T20:34:50.927582528Z"

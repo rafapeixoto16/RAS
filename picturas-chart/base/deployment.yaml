@@ -2,19 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: EXAMPLE
-  labels:
-    app: EXAMPLE
 spec:
   selector:
     matchLabels:
-      app: EXAMPLE
+      name: EXAMPLE
   template:
     metadata:
       labels:
-        app: EXAMPLE
+        name: EXAMPLE
     spec:
       containers:
         - name: EXAMPLE
-          image: { { .Values.registry } }EXAMPLE:latest
+          image: EXAMPLE:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000

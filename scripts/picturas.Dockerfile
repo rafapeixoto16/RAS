@@ -1,9 +1,8 @@
-FROM node:lts
+FROM alpine:3.21.2
+
+RUN apk add nodejs npm python3
 
 WORKDIR /app
-
-RUN apt update
-RUN apt install python3.11-venv ffmpeg libsm6 libxext6 -y
 
 COPY picturas/ ./
 

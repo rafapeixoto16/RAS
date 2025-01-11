@@ -1,4 +1,5 @@
-import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
+import { createFilterHandler } from '@picturas/filter-helper';
+import { schemaValidation } from '@picturas/schema-validation';
 import { createWorker, createScheduler } from 'tesseract.js';
 
 const ocrSchema = schemaValidation.object({

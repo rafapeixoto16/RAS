@@ -71,6 +71,11 @@
         v-for="project in filteredProjects"
         :key="project.id"
         :project="project"
+        :dropdown-options="[]"
+        mode="default"
+        @open-new-tab="openInNewTab"
+        @rename="renameProject"
+        @move-to-trash="moveToTrash"
         @edit="editProject"
       />
     </div>
@@ -153,6 +158,20 @@ const editProject = (id: number) => {
   console.log(`Editing project with id: ${id}`);
 };
 
+const openInNewTab = (id: number) => {
+  console.log(`Opening project with id: ${id} in a new tab`);
+};
+
+const renameProject = (id: number) => {
+  console.log(`Renaming project with id: ${id}`);
+};
+
+const moveToTrash = (id: number) => {
+  console.log(`Moving project with id: ${id} to trash`);
+  projects.value = projects.value.filter((project) => project.id !== id);
+};
+
+// Drag and Drop Handlers
 const onDragOver = () => {
   isDragging.value = true;
 };

@@ -1,4 +1,5 @@
-import { createFilterHandler, schemaValidation } from '@picturas/filter-helper';
+import { createFilterHandler } from '@picturas/filter-helper';
+import { schemaValidation } from '@picturas/schema-validation';
 import sharp from 'sharp';
 
 const resizeSchema = schemaValidation.object({

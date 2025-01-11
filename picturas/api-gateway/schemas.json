@@ -1,0 +1,26 @@
+{
+  "autoAdjust": {
+    "$ref": "#/definitions/autoAdjust",
+    "definitions": {
+      "autoAdjust": {
+        "type": "object",
+        "properties": {
+          "brightness": {
+            "type": "number",
+            "default": 1.2
+          },
+          "contrast": {
+            "type": "number",
+            "default": 10
+          },
+          "saturation": {
+            "type": "number",
+            "default": 1.3
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}
