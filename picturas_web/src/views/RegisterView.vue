@@ -18,7 +18,17 @@
           <h1 class="text-4xl font-bold text-blue-600 mb-2">Join Us</h1>
           <p class="text-blue-500">Create an account to start your creative journey</p>
         </div>
-        <form @submit.prevent="register" class="space-y-6 backdrop-blur-sm bg-white bg-opacity-50 p-8 rounded-xl shadow-lg border border-white border-opacity-20">
+        <form @submit.prevent="handleRegister" class="space-y-6 backdrop-blur-sm bg-white bg-opacity-50 p-8 rounded-xl shadow-lg border border-white border-opacity-20">
+          <div class="space-y-2">
+            <label for="name" class="block text-sm font-medium text-blue-700">Name</label>
+            <input 
+              id="name"
+              v-model="name"
+              type="text"
+              placeholder="Enter your name"
+              class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+            />
+          </div>
           <div class="space-y-2">
             <label for="username" class="block text-sm font-medium text-blue-700">Username</label>
             <input 
@@ -100,11 +110,9 @@
       <div class="absolute inset-0 z-20">
         <div class="grid grid-cols-4 grid-rows-4 gap-2 h-full">
           <div 
-            v-for="(image, index) in mosaicImages" 
+            v-for="(image) in mosaicImages" 
             :key="image.id"
             class="relative overflow-hidden cursor-pointer group"
-            @mouseenter="activateImage(index)"
-            @mouseleave="deactivateImage(index)"
           >
             <img 
               :src="image.imageUrl" 
@@ -126,7 +134,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { register } from '@/api';
 
+const router = useRouter();
+const name = ref('');
 const username = ref('');
 const email = ref('');
 const password = ref('');
@@ -142,8 +154,23 @@ const toggleShowConfirmPassword = () => {
   showConfirmPassword.value = !showConfirmPassword.value;
 };
 
-const register = () => {
-  console.log('Registering:', username.value, email.value, password.value, confirmPassword.value);
+const handleRegister = async () => {
+  if (password.value !== confirmPassword.value) {
+    console.error('Passwords do not match');
+    return;
+  }
+
+  try {
+    await register({
+      name: name.value,
+      username: username.value,
+      email: email.value,
+      password: password.value
+    });
+    router.push({ path: `/registration-success/${email.value}` });
+  } catch (error) {
+    console.error('Registration error:', error);
+  }
 };
 
 const mosaicImages = [
@@ -164,14 +191,6 @@ const mosaicImages = [
  { id: 15, title: 'Forest Path in Spring', imageUrl: 'https://picsum.photos/id/324/800/600' },
  { id: 16, title: 'Airport Silhouette', imageUrl: 'https://picsum.photos/id/331/800/600' },
 ];
-
-const activateImage = (index: number) => {
-  console.log('Image activated:', mosaicImages[index].title);
-};
-
-const deactivateImage = (index: number) => {
-  console.log('Image deactivated:', mosaicImages[index].title);
-};
 </script>
 
 <style scoped>

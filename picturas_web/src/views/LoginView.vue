@@ -38,14 +38,14 @@
           <h1 class="text-4xl font-bold text-blue-600 mb-2">Welcome Back</h1>
           <p class="text-blue-500">Sign in to continue your creative journey</p>
         </div>
-        <form @submit.prevent="login" class="space-y-6 backdrop-blur-sm bg-white bg-opacity-50 p-8 rounded-xl shadow-lg border border-white border-opacity-20">
+        <form @submit.prevent="handleLogin" class="space-y-6 backdrop-blur-sm bg-white bg-opacity-50 p-8 rounded-xl shadow-lg border border-white border-opacity-20">
           <div class="space-y-2">
-            <label for="username" class="block text-sm font-medium text-blue-700">Username</label>
+            <label for="email" class="block text-sm font-medium text-blue-700">Email</label>
             <input 
-              id="username"
-              v-model="username"
+              id="email"
+              v-model="email"
               type="text"
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
             />
           </div>
@@ -69,18 +69,21 @@
             </div>
           </div>
           <button 
-            type="submit" 
+            type="submit"
             class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg"
           >
             Sign In
           </button>
+          <div v-if="errorMessage" class="mt-4 text-red-600 text-center">
+            {{ errorMessage }}
+          </div>
         </form>
         <div class="mt-6 flex items-center justify-between">
-            <div class="text-sm">
+          <div class="text-sm">
             <router-link to="/forgot-password" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline">
               Forgot Password?
             </router-link>
-            </div>
+          </div>
           <div class="text-sm">
             <router-link to="/register" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline">
               Create an account
@@ -90,21 +93,60 @@
       </div>
     </div>
   </div>
+  <TwoFactorModal 
+    v-if="showTwoFactorModal"
+    @close="showTwoFactorModal = false"
+    @verify="handleTwoFactorVerification"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { login, loginSecondFactor } from '@/api';
+import { useAuthStore } from '@/stores/authStore';
 
-const username = ref('');
+const authStore = useAuthStore()
+const router = useRouter();
+const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
+const showTwoFactorModal = ref(false);
+const loginJwt = ref('');
+const errorMessage = ref('');
 
 const toggleShowPassword = () => {
   showPassword.value = !showPassword.value;
 };
 
-const login = () => {
-  console.log('Logging in:', username.value, password.value);
+const handleLogin = async () => {
+  try {
+    errorMessage.value = '';
+    const response = await login({ email: email.value, password: password.value });
+    if (response.requiresOtp) {
+      loginJwt.value = response.validationToken;
+      showTwoFactorModal.value = true;
+    } else {
+      const finalResponse = await loginSecondFactor(response.validationToken);
+      authStore.setTokens(finalResponse.accessToken, finalResponse.refreshToken);
+      router.push('/');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    errorMessage.value = 'Invalid username or password. Please try again.';
+  }
+};
+
+const handleTwoFactorVerification = async (twoFactorCode: string) => {
+  try {
+    errorMessage.value = '';
+    const response = await loginSecondFactor(loginJwt.value, twoFactorCode);
+    authStore.setTokens(response.accessToken, response.refreshToken);
+    router.push('/');
+  } catch (error) {
+    console.error('Two-factor login error:', error);
+    errorMessage.value = 'Invalid two-factor code. Please try again.';
+  }
 };
 
 const carouselImages = [

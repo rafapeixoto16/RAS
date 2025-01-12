@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import ProjectCard from '@/components/ProjectCard.vue';
-import MobileProjectOptions from '@/components/MobileProjectOptions.vue';
+defineEmits(['restore', 'delete-permanently']);
 
 interface TrashItem {
   id: number;
@@ -45,16 +45,15 @@ interface TrashItem {
 }
 
 const trashItems = ref<TrashItem[]>([
-  { id: 1, title: 'Old Design Mockups', imageUrl: 'https://picsum.photos/id/100/800/600', deletedAt: '2 days ago' , lastEdited: '2 days ago'  },
-  { id: 2, title: 'Unused Presentation', imageUrl: 'https://picsum.photos/id/200/800/600', deletedAt: '1 week ago', lastEdited: '2 days ago'},
-  { id: 3, title: 'Expired Reports', imageUrl: 'https://picsum.photos/id/300/800/600', deletedAt: '3 days ago' , lastEdited: '2 days ago' },
-  { id: 4, title: 'Outdated Resources', imageUrl: 'https://picsum.photos/id/400/800/600', deletedAt: '5 days ago' , lastEdited: '2 days ago' },
+  { id: 1, title: 'Old Design Mockups', imageUrl: 'https://picsum.photos/id/100/800/600', deletedAt: '2 days ago', lastEdited: '3 days ago' },
+  { id: 2, title: 'Unused Presentation', imageUrl: 'https://picsum.photos/id/200/800/600', deletedAt: '1 week ago', lastEdited: '2 weeks ago' },
+  { id: 3, title: 'Expired Reports', imageUrl: 'https://picsum.photos/id/300/800/600', deletedAt: '3 days ago', lastEdited: '4 days ago' },
+  { id: 4, title: 'Outdated Resources', imageUrl: 'https://picsum.photos/id/400/800/600', deletedAt: '5 days ago', lastEdited: '6 days ago' },
 ]);
 
 const searchQuery = ref('');
-const isLargeScreen = ref(window.innerWidth >= 1024); // `lg` breakpoint in Tailwind (1024px)
+const isLargeScreen = ref(window.innerWidth >= 1024);
 
-// Update the `isLargeScreen` value on window resize
 window.addEventListener('resize', () => {
   isLargeScreen.value = window.innerWidth >= 1024;
 });
@@ -72,7 +71,7 @@ const lgOnlyDropdownOptions = (item: TrashItem) => {
       { label: 'Delete Permanently', icon: 'bi bi-trash', action: () => deletePermanently(item.id) }
     ];
   }
-  return []; // No dropdown options for mobile
+  return [];
 };
 
 const restoreItem = (id: number) => {
