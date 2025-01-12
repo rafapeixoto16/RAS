@@ -14,7 +14,6 @@
       </div>
 
       <div class="space-y-4">
-        <!-- Display options based on mode -->
         <template v-if="mode === 'default'">
           <button 
             @click="$emit('open-new-tab', props.projectId)"
@@ -65,10 +64,10 @@ import { ref, onMounted } from 'vue';
 
 const props = defineProps<{
   projectId: number;
-  mode: 'default' | 'trash'; // Add mode prop
+  mode: 'default' | 'trash';
 }>();
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'close'): void;
   (e: 'open-new-tab', id: number): void;
   (e: 'rename', id: number): void;

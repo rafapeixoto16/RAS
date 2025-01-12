@@ -52,9 +52,8 @@ const trashItems = ref<TrashItem[]>([
 ]);
 
 const searchQuery = ref('');
-const isLargeScreen = ref(window.innerWidth >= 1024); // `lg` breakpoint in Tailwind (1024px)
+const isLargeScreen = ref(window.innerWidth >= 1024);
 
-// Update the `isLargeScreen` value on window resize
 window.addEventListener('resize', () => {
   isLargeScreen.value = window.innerWidth >= 1024;
 });
@@ -72,7 +71,7 @@ const lgOnlyDropdownOptions = (item: TrashItem) => {
       { label: 'Delete Permanently', icon: 'bi bi-trash', action: () => deletePermanently(item.id) }
     ];
   }
-  return []; // No dropdown options for mobile
+  return [];
 };
 
 const restoreItem = (id: number) => {

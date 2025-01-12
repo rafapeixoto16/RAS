@@ -20,7 +20,6 @@
           project.lastEdited
         }}</span>
         <div v-if="isLargeScreen" class="relative">
-          <!-- Dropdown for Large Screens -->
           <button
             @click="$emit('edit', project.id)"
             class="px-2 py-1 sm:px-3 sm:py-1 bg-blue-500 text-white text-xs sm:text-sm rounded-full hover:bg-blue-600 transition-colors duration-300"
@@ -44,7 +43,6 @@
           </div>
         </div>
         <div v-else>
-          <!-- Mobile Project Options Trigger -->
           <button
             @click="openMobileOptions(project.id)"
             class="px-2 py-1 sm:px-3 sm:py-1 bg-blue-500 text-white text-xs sm:text-sm rounded-full hover:bg-blue-600 transition-colors duration-300"
@@ -55,7 +53,6 @@
       </div>
     </div>
 
-    <!-- Single Mobile Project Options Modal -->
     <MobileProjectOptions
       v-if="activeMobileProjectId !== null"
       :projectId="activeMobileProjectId"
@@ -82,31 +79,18 @@ interface Project {
   lastEdited: string;
 }
 
-const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit"]);
-// Props
+const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit", "restore", "remove-permanently"]);
 const props = defineProps<{
   project: Project;
   dropdownOptions: Array<{ label: string; icon: string; action?: () => void }>;
-  mode: "default" | "trash"; // Add mode prop
+  mode: "default" | "trash";
 }>();
 
 const mode = props.mode;
 
-// Emits
-const emit = defineEmits<{
-  (e: 'edit', id: number): void;
-  (e: 'open-new-tab', id: number): void;
-  (e: 'rename', id: number): void;
-  (e: 'move-to-trash', id: number): void;
-  (e: 'restore', id: number): void;
-  (e: 'remove-permanently', id: number): void;
-}>();
-
-// Reactive State
 const isLargeScreen = ref(window.innerWidth >= 1024);
-const activeMobileProjectId = ref<number | null>(null); // Tracks which project is active
+const activeMobileProjectId = ref<number | null>(null);
 
-// Methods
 const openMobileOptions = (projectId: number) => {
   activeMobileProjectId.value = projectId;
 };
@@ -115,7 +99,6 @@ const closeMobileOptions = () => {
   activeMobileProjectId.value = null;
 };
 
-// Handle Dropdown Options Based on Mode
 const getDropdownOptions = computed(() => {
   if (mode === "default") {
     return [
@@ -132,14 +115,13 @@ const getDropdownOptions = computed(() => {
   return [];
 });
 
-// Handle Screen Size Changes
 const updateScreenSize = () => {
   isLargeScreen.value = window.innerWidth >= 1024;
 };
 
 onMounted(() => {
   window.addEventListener("resize", updateScreenSize);
-  updateScreenSize(); // Check initial size
+  updateScreenSize();
 });
 
 onUnmounted(() => {
