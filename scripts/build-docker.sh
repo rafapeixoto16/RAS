@@ -3,7 +3,7 @@ set -e
 
 # To use with minikube run this before building: eval $(minikube docker-env)
 
-docker build -t web:latest -f scripts/web.Dockerfile .
+# docker build -t web:latest -f scripts/web.Dockerfile .
 
 SUBPROJECTS=(
   "api-gateway"
