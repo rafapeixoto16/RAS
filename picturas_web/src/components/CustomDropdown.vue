@@ -19,7 +19,7 @@
             >
               <div
                 class="flex items-center gap-2"
-                @click="handleClick(option.action, project)"
+                @click="option.action && project && handleClick(option.action, project)"
               >
                 <i v-if="option.icon" :class="option.icon"></i>
                 <span class="text-gray-700">{{ option.label }}</span>
@@ -62,11 +62,19 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
+interface Project {
+  id: number;
+  title: string;
+  imageUrl: string;
+  lastEdited: string;
+}
+
 interface Option {
   label: string;
   icon?: string;
   route?: string;
   target?: "_blank" | "_self";
+  action?: () => void;
 }
 
 interface Props {
@@ -75,7 +83,7 @@ interface Props {
   options: Option[];
   isIcon?: boolean;
   isSidebar?: boolean;
-  project?: object;
+  project?: Project;
   appendToBody?: boolean;
   menuColor?: string; // Add a new prop for menu color
 }
@@ -116,7 +124,13 @@ const updateDropdownPosition = () => {
 
 const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit"]);
 
-const handleClick = (action, project) => {
+const openInNewTab = (option: Option) => {
+  if (option.route) {
+    window.open(option.route, option.target || "_self");
+  }
+};
+
+const handleClick = (action: () => void, project: Project) => {
   if (typeof action === "function" && !isSidebar) {
     action();
   } else if (String(action).includes("open-new-tab")) {
