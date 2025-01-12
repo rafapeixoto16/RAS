@@ -41,13 +41,14 @@ interface TrashItem {
   title: string;
   imageUrl: string;
   deletedAt: string;
+  lastEdited: string;
 }
 
 const trashItems = ref<TrashItem[]>([
-  { id: 1, title: 'Old Design Mockups', imageUrl: 'https://picsum.photos/id/100/800/600', deletedAt: '2 days ago' },
-  { id: 2, title: 'Unused Presentation', imageUrl: 'https://picsum.photos/id/200/800/600', deletedAt: '1 week ago' },
-  { id: 3, title: 'Expired Reports', imageUrl: 'https://picsum.photos/id/300/800/600', deletedAt: '3 days ago' },
-  { id: 4, title: 'Outdated Resources', imageUrl: 'https://picsum.photos/id/400/800/600', deletedAt: '5 days ago' },
+  { id: 1, title: 'Old Design Mockups', imageUrl: 'https://picsum.photos/id/100/800/600', deletedAt: '2 days ago' , lastEdited: '2 days ago'  },
+  { id: 2, title: 'Unused Presentation', imageUrl: 'https://picsum.photos/id/200/800/600', deletedAt: '1 week ago', lastEdited: '2 days ago'},
+  { id: 3, title: 'Expired Reports', imageUrl: 'https://picsum.photos/id/300/800/600', deletedAt: '3 days ago' , lastEdited: '2 days ago' },
+  { id: 4, title: 'Outdated Resources', imageUrl: 'https://picsum.photos/id/400/800/600', deletedAt: '5 days ago' , lastEdited: '2 days ago' },
 ]);
 
 const searchQuery = ref('');
