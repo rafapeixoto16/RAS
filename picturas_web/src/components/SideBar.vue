@@ -53,6 +53,7 @@
               <Dropdown
                 placement="right"
                 trigger="..."
+                :isSidebar="true"
                 :project="project"
                 :options="getDropdownOptions(project)"
                 @open-new-tab="openInNewTab"
@@ -96,6 +97,8 @@ import { ref, computed } from "vue";
 import Dropdown from "./CustomDropdown.vue";
 import ProfileMenu from "./ProfileMenu.vue";
 import PremiumUpgrade from "./PremiumUpgrade.vue";
+
+const emit = defineEmits(["open-new-tab", "rename", "move-to-trash"]);
 
 interface Project {
   id: number;
@@ -155,12 +158,6 @@ const projects = ref<Project[]>([
   },
 ]);
 
-const emit = defineEmits<{
-  (e: "open-new-tab", id: number): void;
-  (e: "rename", id: number): void;
-  (e: "move-to-trash", id: number): void;
-}>();
-
 // Handle Dropdown Options Based on Mode
 const getDropdownOptions = (project: Project) => {
   return [
@@ -180,7 +177,6 @@ const getDropdownOptions = (project: Project) => {
       action: () => emit("move-to-trash", project.id),
     },
   ];
-  return [];
 };
 
 const openInNewTab = (id: number) => {

@@ -61,7 +61,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import { RouterLink } from "vue-router";
 
 interface Option {
   label: string;
@@ -75,6 +74,7 @@ interface Props {
   trigger: string;
   options: Option[];
   isIcon?: boolean;
+  isSidebar?: boolean;
   project?: object;
   appendToBody?: boolean;
   menuColor?: string; // Add a new prop for menu color
@@ -84,8 +84,9 @@ const props = defineProps<Props>();
 
 const placement = props.placement;
 const trigger = props.trigger;
-const options = props.options;
+const isSidebar = props.isSidebar;
 const project = props.project;
+const options = props.options;
 const isIcon = props.isIcon;
 const appendToBody = props.appendToBody;
 const menuColor = props.menuColor || "#F5F7FA"; // Default to a light color if no menuColor prop is passed
@@ -113,29 +114,16 @@ const updateDropdownPosition = () => {
   }
 };
 
-const openInNewTab = (option: Option) => {
-  console.log(option);
-  if (option.route) {
-    const fullUrl = window.location.origin + option.route;
-    if (option.target === "_blank") {
-      window.open(fullUrl, "_blank");
-    } else {
-      window.location.href = fullUrl;
-    }
-  }
-};
+const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit"]);
 
 const handleClick = (action, project) => {
-  console.log(action);
-  console.log(project);
-  console.log(typeof action === "function");
-  if (typeof action === "function") {
+  if (typeof action === "function" && !isSidebar) {
     action();
-  } else if (action === "open-new-tab") {
+  } else if (String(action).includes("open-new-tab")) {
     emit("open-new-tab", project.id);
-  } else if (action === "rename") {
+  } else if (String(action).includes("rename")) {
     emit("rename", project.id);
-  } else if (action === "move-to-trash") {
+  } else if (String(action).includes("move-to-trash")) {
     emit("move-to-trash", project.id);
   }
 };
