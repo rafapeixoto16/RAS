@@ -88,6 +88,14 @@
             @close="openPremiumModal"
           ></premium-upgrade>
       </div>
+      <div class="mt-auto w-full">
+        <ProfileMenu />
+      </div>
+      <premium-upgrade
+        :open="isOpenPremium"
+        @close="openPremiumModal"
+      ></premium-upgrade>
+    </div>
   </div>
 </template>
 
@@ -116,11 +124,11 @@ const seeAll = ref(false);
 const isOpenPremium = ref(false);
 
 const visibleProjects = computed(() => {
-  return seeAll.value ? projects : projects.slice(0, 7);
+  return seeAll.value ? projects : projects.value.slice(0, 7);
 });
 
 const showSeeAllButton = computed(() => {
-  return projects.length > 7;
+  return projects.value.length > 7;
 });
 
 const toggleSeeAll = () => {
@@ -141,21 +149,21 @@ const openPremiumModal = () => {
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
-  background: #F5F7FA;
+  background: #f5f7fa;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: #3B82F6;
+  background-color: #3b82f6;
   border-radius: 10px;
-  border: 2px solid #F5F7FA;
+  border: 2px solid #f5f7fa;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background-color: #2563EB;
+  background-color: #2563eb;
 }
 
 .overflow-y-auto {
   scrollbar-width: thin;
-  scrollbar-color: #3B82F6 #F5F7FA;
+  scrollbar-color: #3b82f6 #f5f7fa;
 }
 </style>
