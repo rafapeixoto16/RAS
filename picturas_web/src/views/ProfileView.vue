@@ -84,12 +84,14 @@
                 <input
                   v-if="isEditing && item.editable && item.key !== 'bio'"
                   :value="item.value"
+                  :placeholder="`Enter your ${item.label.toLowerCase()}`"
                   @input="updateUserInfo(item.key, ($event.target as HTMLInputElement).value)"
                   class="w-full bg-gray-50 border-2 border-gray-200 rounded-lg px-6 py-4 text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                 />
                 <textarea
                   v-else-if="isEditing && item.editable && item.key === 'bio'"
                   :value="item.value"
+                  :placeholder="`Enter your ${item.label.toLowerCase()}`"
                   @input="updateUserInfo(item.key, ($event.target as HTMLTextAreaElement).value)"
                   rows="4"
                   class="w-full bg-gray-50 border-2 border-gray-200 rounded-lg px-6 py-4 text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
@@ -99,7 +101,7 @@
                   class="text-gray-800 text-lg lg:text-xl py-4 bg-gray-50 rounded-lg px-6"
                   :class="{ 'h-40 overflow-y-auto': item.key === 'bio' }"
                 >
-                  {{ item.value }}
+                  {{ item.value || `No ${item.label.toLowerCase()} provided` }}
                 </div>
               </div>
             </div>
@@ -128,10 +130,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { updateProfile, updateProfilePic } from '@/api/mutations/updateProfile';
+import { getUserInfo } from '@/api/queries/getUserInfo';
 
 interface User {
   username: string;
@@ -143,12 +146,12 @@ interface User {
 }
 
 const user = ref<User>({
-  username: 'johndoe',
-  email: 'john.doe@example.com',
-  fullName: 'John Doe',
+  username: '',
+  email: '',
+  fullName: '',
   avatarUrl: '',
-  location: 'New York, USA',
-  bio: 'Passionate photographer and digital artist',
+  location: '',
+  bio: '',
 });
 
 const originalUser = ref<User>({ ...user.value });
@@ -229,6 +232,24 @@ const router = useRouter();
 const goHome = () => {
   router.push('/');
 };
+
+onMounted(async () => {
+  try {
+    const resp = await getUserInfo();
+    const filteredUser = {
+      username: resp.username,
+      email: resp.email,
+      location: resp.location,
+      bio: resp.bio,
+      fullName: resp.name,
+      avatarUrl: resp.avatarUrl || '',
+    };
+    user.value = filteredUser;
+    originalUser.value = { ...filteredUser };
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+  }
+});
 </script>
 
 <style scoped>
