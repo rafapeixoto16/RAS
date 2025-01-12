@@ -14,9 +14,14 @@ export const login = async (data: LoginData) => {
   }
 };
 
-export const loginSecondFactor = async (jwt: string, twoFactorCode: string) => {
+export const loginSecondFactor = async (validationToken: string, twoFactorCode?: string) => {
   try {
-    const response = await axiosInstance.post('/api/v1/user/login/2', { jwt, twoFactorCode });
+    const payload: { validationToken: string; code?: string } = { validationToken };
+    if (twoFactorCode) {
+      payload.code = twoFactorCode;
+    }
+
+    const response = await axiosInstance.post('/api/v1/user/login/2', payload);
     return response.data;
   } catch (error) {
     throw error;

@@ -40,5 +40,9 @@ export const useAuthStore = defineStore('auth', {
         throw error;
       }
     },
+
+    isLoggedIn(): boolean {
+      return !!this.accessToken && !!this.refreshToken;
+    },
   },
 });

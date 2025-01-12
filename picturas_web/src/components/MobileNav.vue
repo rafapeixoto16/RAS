@@ -98,7 +98,25 @@
         </div>
 
         <div class="border-t border-gray-200 p-4">
-          <MobileProfileMenu @close-menu="closeMenu" />
+          <div v-if="isLoggedIn">
+            <MobileProfileMenu @close-menu="closeMenu" />
+          </div>
+          <div v-else class="flex space-x-2">
+            <router-link
+              class="flex-1 flex items-center justify-center px-2 py-3 bg-blue-500 text-white hover:bg-blue-600 rounded-xl"
+              to="/login"
+              @click="closeMenu"
+            >
+              Login
+            </router-link>
+            <router-link
+              class="flex-1 flex items-center justify-center px-2 py-3 bg-white text-blue-500 border border-blue-500 hover:bg-blue-50 rounded-xl"
+              to="/register"
+              @click="closeMenu"
+            >
+              Sign Up
+            </router-link>
+          </div>
         </div>
       </div>
       <premium-upgrade
@@ -113,7 +131,12 @@
 import MobileProjectList from "./MobileProjectList.vue";
 import MobileProfileMenu from "./MobileProfileMenu.vue";
 import PremiumUpgrade from "./PremiumUpgrade.vue";
-import { ref } from "vue";
+import { useAuthStore } from '@/stores/authStore';
+import { ref, computed } from "vue";
+
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => authStore.isLoggedIn());
+
 const props = defineProps<{
   isOpen: boolean;
 }>();

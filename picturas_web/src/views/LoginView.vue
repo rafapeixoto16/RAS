@@ -68,21 +68,11 @@
               </button>
             </div>
           </div>
-          <div v-if="showTwoFactorInput" class="space-y-2">
-            <label for="two-factor-code" class="block text-sm font-medium text-blue-700">Two-Factor Code</label>
-            <input 
-              id="two-factor-code"
-              v-model="twoFactorCode"
-              type="text"
-              placeholder="Enter your two-factor code"
-              class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-            />
-          </div>
           <button 
             type="submit"
             class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg"
           >
-            {{ showTwoFactorInput ? 'Verify' : 'Sign In' }}
+            Sign In
           </button>
           <div v-if="errorMessage" class="mt-4 text-red-600 text-center">
             {{ errorMessage }}
@@ -103,6 +93,11 @@
       </div>
     </div>
   </div>
+  <TwoFactorModal 
+    v-if="showTwoFactorModal"
+    @close="showTwoFactorModal = false"
+    @verify="handleTwoFactorVerification"
+  />
 </template>
 
 <script setup lang="ts">
@@ -116,8 +111,7 @@ const router = useRouter();
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
-const twoFactorCode = ref('');
-const showTwoFactorInput = ref(false);
+const showTwoFactorModal = ref(false);
 const loginJwt = ref('');
 const errorMessage = ref('');
 
@@ -131,8 +125,10 @@ const handleLogin = async () => {
     const response = await login({ email: email.value, password: password.value });
     if (response.requiresOtp) {
       loginJwt.value = response.validationToken;
-      showTwoFactorInput.value = true;
+      showTwoFactorModal.value = true;
     } else {
+      const finalResponse = await loginSecondFactor(response.validationToken);
+      authStore.setTokens(finalResponse.accessToken, finalResponse.refreshToken);
       router.push('/');
     }
   } catch (error) {
@@ -141,10 +137,10 @@ const handleLogin = async () => {
   }
 };
 
-const handleTwoFactorLogin = async () => {
+const handleTwoFactorVerification = async (twoFactorCode: string) => {
   try {
     errorMessage.value = '';
-    const response = await loginSecondFactor(loginJwt.value, twoFactorCode.value);
+    const response = await loginSecondFactor(loginJwt.value, twoFactorCode);
     authStore.setTokens(response.accessToken, response.refreshToken);
     router.push('/');
   } catch (error) {

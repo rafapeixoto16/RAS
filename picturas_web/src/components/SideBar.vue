@@ -62,9 +62,27 @@
                   Trash
               </router-link>
           </div>
-          <div class="mt-auto w-full">
-              <ProfileMenu />
-          </div>
+            <div class="mt-auto w-full">
+              <div v-if="isLoggedIn">
+                <ProfileMenu />
+              </div>
+                <div v-else class="flex items-center justify-between space-x-2 px-4">
+                <router-link
+                  class="flex items-center justify-center w-1/2 py-3 bg-[#3B82F6] text-sm xl:text-base text-white hover:bg-[#2563EB] rounded-xl"
+                  to="/login"
+                >
+                  <i class="bi bi-box-arrow-in-right mr-2"></i>
+                  Log In
+                </router-link>
+                <router-link
+                  class="flex items-center justify-center w-1/2 py-3 bg-white text-sm xl:text-base text-[#3B82F6] hover:bg-gray-100 border border-[#3B82F6] rounded-xl"
+                  to="/register"
+                >
+                  <i class="bi bi-person-plus mr-2"></i>
+                  Sign Up
+                </router-link>
+                </div>
+            </div>
           <premium-upgrade
             :open="isOpenPremium"
             @close="openPremiumModal"
@@ -75,19 +93,15 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
 import Dropdown from './CustomDropdown.vue'
 import ProfileMenu from './ProfileMenu.vue';
 import PremiumUpgrade from './PremiumUpgrade.vue';
 
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => authStore.isLoggedIn());
+
 const projects = [
-  { name: 'Project 1', link: '/project1' },
-  { name: 'Project 2', link: '/project2' },
-  { name: 'Project 3', link: '/project3' },
-  { name: 'Project 4', link: '/project4' },
-  { name: 'Project 5', link: '/project5' },
-  { name: 'Project 6', link: '/project6' },
-  { name: 'Project 7', link: '/project7' },
-  { name: 'Project 8', link: '/project8' },
   { name: 'Project 1', link: '/project1' },
   { name: 'Project 2', link: '/project2' },
   { name: 'Project 3', link: '/project3' },
@@ -116,7 +130,6 @@ const toggleSeeAll = () => {
 const openPremiumModal = () => {
   isOpenPremium.value = !isOpenPremium.value;
 };
-
 </script>
 
 <style scoped>
