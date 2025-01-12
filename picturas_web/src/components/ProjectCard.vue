@@ -106,7 +106,7 @@ const closeMobileOptions = () => {
 const getDropdownOptions = computed(() => {
   if (mode === 'default') {
     return [
-      { label: 'Open in New Tab', icon: 'bi-box-arrow-up-right', action: () => $emit('open-new-tab', project.id) },
+      { label: 'Open in New Tab', icon: 'bi-box-arrow-up-right', action: () => $emit('open-new-tab', props.project.id) },
       { label: 'Rename', icon: 'bi-pencil', action: () => $emit('rename', props.project.id) },
       { label: 'Move to Trash', icon: 'bi-trash', action: () => $emit('move-to-trash', props.project.id) },
     ];
