@@ -19,21 +19,25 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: () => import('../views/SettingsView.vue'),
+      meta: { fullWidth: true },
     },
     {
       path: '/profile',
       name: 'profile',
       component: () => import('../views/ProfileView.vue'),
+      meta: { fullWidth: true },
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('../views/RegisterView.vue'),
+      meta: { fullWidth: true },
     },
     {
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue'),
+      meta: { fullWidth: true },
     },
     {
       path: '/plans',
@@ -44,11 +48,13 @@ const router = createRouter({
       path: '/forgot-password',
       name: 'forgot-password',
       component: () => import('../views/ForgotPasswordView.vue'),
+      meta: { fullWidth: true },
     },
     {
       path: '/validateAccount/:token',
       name: 'validate-account',
       component: () => import('../views/ValidateAccountView.vue'), 
+      meta: { fullWidth: true },
     },
     {
       path: '/create-project',
@@ -61,14 +67,16 @@ const router = createRouter({
       component: () => import('../views/TrashView.vue'),
     },
     {
+      path: '/registration-success/:email',
+      name: 'registration-success',
+      component: () => import('../views/RegisterSuccessView.vue'),
+      meta: { fullWidth: true },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('../views/Error404View.vue'),
-    },
-    {
-      path: '/registration-success/:email',
-      name: 'registration-success',
-      component: () => import('../views/RegisterSuccessView.vue')
+      meta: { fullWidth: true },
     }
   ],
 })
