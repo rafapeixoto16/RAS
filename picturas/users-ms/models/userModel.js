@@ -23,8 +23,8 @@ const userSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
             required: false,
-            index: { expires: '24h' }
-        }
+            index: { expires: '24h' },
+        },
     },
     { versionKey: false }
 );

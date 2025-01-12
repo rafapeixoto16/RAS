@@ -24,10 +24,7 @@ export function promMiddleware(requestDurationBuckets = [0.1, 0.5, 1, 1.5]) {
     });
 
     const middleware = ResponseTime((req, res, time) => {
-        const {
-            originalUrl,
-            method,
-        } = req;
+        const { originalUrl, method } = req;
         const status = `${Math.floor(res.statusCode / 100)}XX`;
         const labels = {
             route: originalUrl,
@@ -56,13 +53,11 @@ app.get('/metrics', async (req, res) => {
 });
 
 app.get('/healthz', (req, res) => {
-    res.status(200)
-        .send('I am healthy');
+    res.status(200).send('I am healthy');
 });
 
 app.get('/liveness', (req, res) => {
-    res.status(200)
-        .send('I am alive');
+    res.status(200).send('I am alive');
 });
 
 app.get('/readiness', (req, res) => {

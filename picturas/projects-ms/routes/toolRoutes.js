@@ -11,10 +11,12 @@ import { validateRequest } from '@picturas/schema-validation';
 import { queryToolSchema } from '../models/queryTool.js';
 
 const router = Router();
-router.use(validateRequest({
-    body: toolSchema,
-    query: queryToolSchema,
-}))
+router.use(
+    validateRequest({
+        body: toolSchema,
+        query: queryToolSchema,
+    })
+);
 
 router.post('/', async (req, res) => {
     const { body } = req;

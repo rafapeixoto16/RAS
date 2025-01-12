@@ -17,11 +17,14 @@ export const updateUser = (id, info) => {
 };
 
 export const updateUserPassword = (id, pwd) => {
-    return User.findOneAndUpdate({ _id: id }, {password: pwd}).exec(); // excute
+    return User.findOneAndUpdate({ _id: id }, { password: pwd }).exec(); // excute
 };
 
 export const updateUserProfilePic = (id, profilePicUrl) => {
-    return User.findOneAndUpdate({ _id: id }, { profilePic: profilePicUrl }).exec();
+    return User.findOneAndUpdate(
+        { _id: id },
+        { profilePic: profilePicUrl }
+    ).exec();
 };
 
 export const deleteUser = (id) => {

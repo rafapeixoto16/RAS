@@ -11,10 +11,12 @@ import { queryProjectSchema } from '../models/queryProject.js';
 import { validateRequest } from '@picturas/schema-validation';
 
 const router = Router();
-router.use(validateRequest({
-    body: projectSchema,
-    query: queryProjectSchema,
-}))
+router.use(
+    validateRequest({
+        body: projectSchema,
+        query: queryProjectSchema,
+    })
+);
 
 router.post('/', async (req, res) => {
     const { body } = req;
