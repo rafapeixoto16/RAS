@@ -6,3 +6,4 @@ export * from './queries/validateAccount';
 export * from './queries/refreshToken';
 export * from './mutations/accessToken';
 export * from './queries/getUserInfo';
+export * from './mutations/signout';
