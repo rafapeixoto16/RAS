@@ -7,7 +7,7 @@
     >
       <router-link
         :to="project.link"
-        class="block p-4 rounded w-full hover:bg-gray-100"
+        class="block p-4 rounded w-full"
         @click="$emit('close-menu')"
       >
         {{ project.name }}

@@ -159,4 +159,40 @@
     background-color: var(--azure-radiance-950);
   }
   
+
+  /* Hover text color classes */
+.hover\:text-azure-radiance-50:hover {
+  color: var(--azure-radiance-50);
+}
+.hover\:text-azure-radiance-100:hover {
+  color: var(--azure-radiance-100);
+}
+.hover\:text-azure-radiance-200:hover {
+  color: var(--azure-radiance-200);
+}
+.hover\:text-azure-radiance-300:hover {
+  color: var(--azure-radiance-300);
+}
+.hover\:text-azure-radiance-400:hover {
+  color: var(--azure-radiance-400);
+}
+.hover\:text-azure-radiance-500:hover {
+  color: var(--azure-radiance-500);
+}
+.hover\:text-azure-radiance-600:hover {
+  color: var(--azure-radiance-600);
+}
+.hover\:text-azure-radiance-700:hover {
+  color: var(--azure-radiance-700);
+}
+.hover\:text-azure-radiance-800:hover {
+  color: var(--azure-radiance-800);
+}
+.hover\:text-azure-radiance-900:hover {
+  color: var(--azure-radiance-900);
+}
+.hover\:text-azure-radiance-950:hover {
+  color: var(--azure-radiance-950);
+}
+
   
