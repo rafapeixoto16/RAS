@@ -17,15 +17,10 @@
               :key="option.label"
               class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
             >
-              <router-link
-                v-if="option.route"
-                :to="option.route"
+              <div
                 class="flex items-center gap-2"
+                @click="handleClick(option.action, project)"
               >
-                <i v-if="option.icon" :class="option.icon"></i>
-                <span class="text-gray-700">{{ option.label }}</span>
-              </router-link>
-              <div v-else class="flex items-center gap-2">
                 <i v-if="option.icon" :class="option.icon"></i>
                 <span class="text-gray-700">{{ option.label }}</span>
               </div>
@@ -80,6 +75,7 @@ interface Props {
   trigger: string;
   options: Option[];
   isIcon?: boolean;
+  project?: object;
   appendToBody?: boolean;
   menuColor?: string; // Add a new prop for menu color
 }
@@ -89,6 +85,7 @@ const props = defineProps<Props>();
 const placement = props.placement;
 const trigger = props.trigger;
 const options = props.options;
+const project = props.project;
 const isIcon = props.isIcon;
 const appendToBody = props.appendToBody;
 const menuColor = props.menuColor || "#F5F7FA"; // Default to a light color if no menuColor prop is passed
@@ -125,6 +122,21 @@ const openInNewTab = (option: Option) => {
     } else {
       window.location.href = fullUrl;
     }
+  }
+};
+
+const handleClick = (action, project) => {
+  console.log(action);
+  console.log(project);
+  console.log(typeof action === "function");
+  if (typeof action === "function") {
+    action();
+  } else if (action === "open-new-tab") {
+    emit("open-new-tab", project.id);
+  } else if (action === "rename") {
+    emit("rename", project.id);
+  } else if (action === "move-to-trash") {
+    emit("move-to-trash", project.id);
   }
 };
 

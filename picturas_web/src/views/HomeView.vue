@@ -161,11 +161,12 @@ const editProject = (id: number) => {
 };
 
 const openInNewTab = (id: number) => {
-  console.log(`Opening project with id: ${id} in a new tab`);
+  const fullUrl = window.location.origin + "/project" + id;
+  window.open(fullUrl, "_blank");
 };
 
 const renameProject = (id: number) => {
-  console.log(`Renaming project with id: ${id}`);
+  console.log(`renaming project with id: ${id} `);
 };
 
 const moveToTrash = (id: number) => {
