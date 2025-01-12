@@ -39,16 +39,20 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+
+  import { ref, computed } from 'vue';
+  import { useAuthStore } from '@/stores/authStore';
   import { useRouter } from 'vue-router';
-  
+  import { signOut} from '@/api/mutations/signout';
+
+  const isLoggedIn = computed(() => authStore.isLoggedIn());
   const router = useRouter();
   const isMenuOpen = ref(false);
   
   const profileOptions = [
     { label: 'Profile', icon: 'bi bi-person-circle', action: () => router.push('/profile') },
     { label: 'Settings', icon: 'bi bi-gear', action: () => router.push('/settings') },
-    { label: 'Logout', icon: 'bi bi-box-arrow-right', action: () => console.log('Logout clicked') },
+    { label: 'Logout', icon: 'bi bi-box-arrow-right', action: () => handelSignOut() },
   ];
   
   const toggleMenu = () => {
@@ -59,4 +63,23 @@
     action();
     isMenuOpen.value = false;
   };
+
+  const authStore = useAuthStore();
+
+  const handelSignOut = async () => {
+    try {
+      
+      console.log(isLoggedIn.value);
+      if (!isLoggedIn.value) {
+        return;
+      }
+      const response = await signOut();
+      console.log(response);
+      authStore.clearTokens();
+      router.push('/login');
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   </script>  

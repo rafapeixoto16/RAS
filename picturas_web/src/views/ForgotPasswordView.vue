@@ -67,20 +67,21 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+  import { forgotPassword } from '@/api';
+import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   
   const router = useRouter();
   const email = ref('');
+  const errorMessage = ref('');
   
   const resetPassword = async () => {
     try {
-      console.log('Initiating password reset for:', email.value);
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Password reset instructions have been sent to your email.');
-      router.push('/login');
+      errorMessage.value = '';
+      await forgotPassword({email: email.value});
+
+      router.push({ path: `/passwordRecovery-success/${email.value}` });
+
     } catch (error) {
       console.error('Error during password reset:', error);
       alert('An error occurred. Please try again.');

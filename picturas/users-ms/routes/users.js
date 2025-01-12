@@ -213,7 +213,7 @@ router.post('/passwordRecovery', validateRequest({
     User.getUserByEmail(req.body.email)
         .then((user) => {
             if (!user) return res.sendStatus(404);
-            if (user.active) res.sendStatus(401);
+            if (!user.active) res.sendStatus(401);
 
             const filteredUser = {
                 _id: user._id,
