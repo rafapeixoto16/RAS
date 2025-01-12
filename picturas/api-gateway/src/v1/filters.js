@@ -7,7 +7,7 @@ const router = Router();
 
 const schemas = JSON.parse(
     readFileSync(
-        resolve(dirname(fileURLToPath(import.meta.url)), '../schemas.json'),
+        resolve(dirname(fileURLToPath(import.meta.url)), '../../schemas.json'),
         'utf-8'
     )
 );

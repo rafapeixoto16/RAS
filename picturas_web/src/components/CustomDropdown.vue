@@ -44,7 +44,6 @@
             :key="option.label"
             class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
           >
-            <!-- Conditional rendering based on 'target' -->
             <a
               v-if="option.route"
               href="javascript:void(0)"
@@ -82,6 +81,7 @@ interface Props {
   options: Option[];
   isIcon?: boolean;
   appendToBody?: boolean;
+  menuColor?: string; // Add a new prop for menu color
 }
 
 const props = defineProps<Props>();
@@ -91,6 +91,7 @@ const trigger = props.trigger;
 const options = props.options;
 const isIcon = props.isIcon;
 const appendToBody = props.appendToBody;
+const menuColor = props.menuColor || "#F5F7FA"; // Default to a light color if no menuColor prop is passed
 
 const isOpen = ref(false);
 const triggerElement = ref<HTMLElement | null>(null);
@@ -110,6 +111,7 @@ const updateDropdownPosition = () => {
     dropdownStyle.value = {
       top: `${rect.bottom + window.scrollY}px`,
       left: `${rect.left + window.scrollX}px`,
+      backgroundColor: menuColor, // Apply the background color from the prop
     };
   }
 };

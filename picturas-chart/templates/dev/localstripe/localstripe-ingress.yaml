@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: localstripe
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /localstripe(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: localstripe
+                port:
+                  number: 8420

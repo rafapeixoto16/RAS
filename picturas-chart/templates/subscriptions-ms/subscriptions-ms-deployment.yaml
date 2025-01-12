@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subscriptions-ms
+spec:
+  selector:
+    matchLabels:
+      name: subscriptions-ms
+  template:
+    metadata:
+      labels:
+        name: subscriptions-ms
+    spec:
+      containers:
+        - name: subscriptions-ms
+          image: subscriptions-ms:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: STRIPE_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: stripe-secret
+                  key: private-key
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: stripe-secret
+                  key: webhook-secret
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: {{ $.Values.rabbitmq.service.ports.amqp | quote }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: password
+            - name: FILTER_OUTPUT_QUEUE
+              value: {{ $.Values.filter_output_queue }}
+            - name: SUBS_DB_HOST
+              value: 'subscriptions-ms-db'
+            - name: SUBS_DB_PORT
+              value: {{ index .Values "subscriptions-ms-db" "containerPorts" "mongodb" | quote }}
+            - name: SUBS_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: subscriptions-ms-db-secret
+                  key: username
+            - name: SUBS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: subscriptions-ms-db-secret
+                  key: password

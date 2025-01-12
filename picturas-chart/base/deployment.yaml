@@ -13,6 +13,7 @@ spec:
     spec:
       containers:
         - name: EXAMPLE
-          image: { { .Values.registry } }EXAMPLE:latest
+          image: EXAMPLE:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000

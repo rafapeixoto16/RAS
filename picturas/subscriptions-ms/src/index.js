@@ -73,8 +73,7 @@ app.post('/create-subscription', async (req, res) => {
 
         return res.json({ subscriptionId: subscription.id });
     } catch (err) {
-        return res.status(500)
-            .json({ error: 'Failed to create subscription' });
+        return res.status(500).json({ error: 'Failed to create subscription' });
     }
 });
 
@@ -135,8 +134,7 @@ app.get('/billing-info', async (req, res) => {
             billingInfo,
         });
     } catch (err) {
-        return res.status(500)
-            .json({ error: 'Failed to fetch billing info' });
+        return res.status(500).json({ error: 'Failed to fetch billing info' });
     }
 });
 
@@ -148,11 +146,10 @@ app.post('/webhook', async (req, res) => {
         event = stripe.webhooks.constructEvent(
             req.body,
             sig,
-            process.env.STRIPE_WEBHOOK_SECRET,
+            process.env.STRIPE_WEBHOOK_SECRET
         );
     } catch (err) {
-        return res.status(400)
-            .send(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
     if (event.type === 'invoice.payment_succeeded') {

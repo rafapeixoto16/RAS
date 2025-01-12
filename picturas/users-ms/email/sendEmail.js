@@ -4,13 +4,15 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const vars = {
-    'validateAccount': {
+    validateAccount: {
         title: 'Confirm your Account Creation',
-        description: 'Please click the button below to confirm your email address.',
+        description:
+            'Please click the button below to confirm your email address.',
     },
-    'resetPassword': {
+    resetPassword: {
         title: 'Reset Password',
-        description: 'We received a request to reset your password. Click the button below to create a new password.',
+        description:
+            'We received a request to reset your password. Click the button below to create a new password.',
     },
 };
 
@@ -29,7 +31,7 @@ export default function sendEmail(email, token, kind) {
         port: process.env.EMAIL_PORT,
         secure: false,
         auth: {
-            user: `no-reply@${process.env.EMAIL_HOSTNAME}`,
+            user: process.env.EMAIL_EMAIL,
             pass: process.env.EMAIL_PASSWORD,
         },
     });
@@ -42,7 +44,7 @@ export default function sendEmail(email, token, kind) {
     });
 
     transporter.sendMail({
-        from: `no-reply@${process.env.EMAIL_HOSTNAME}`,
+        from: process.env.EMAIL_EMAIL,
         to: email,
         subject: 'Picturas',
         html: content,
