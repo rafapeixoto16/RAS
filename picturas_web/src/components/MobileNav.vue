@@ -55,24 +55,24 @@
       @click="closeMenu"
     >
       <div
-        class="fixed inset-y-0 left-0 w-64 bg-blue-50 transform transition-transform duration-300 ease-in-out flex flex-col"
+        class="fixed inset-y-0 left-0 w-64 bg-azure-radiance-100 transform transition-transform duration-300 ease-in-out flex flex-col"
         :class="{ '-translate-x-full': !isOpen, 'translate-x-0': isOpen }"
         @click.stop
       >
         <div class="flex-grow overflow-y-auto">
           <div class="pt-20 px-4 space-y-4">
             <router-link
-              class="flex items-center justify-center px-2 py-3 w-full bg-[#3B82F6] text-white hover:bg-[#2563EB] rounded-xl"
+              class="flex items-center justify-center px-2 py-3 w-full bg-azure-radiance-500 text-sm xl:text-base text-white font-bold hover:bg-azure-radiance-800  rounded-xl"
               to="/create-project"
               @click="closeMenu"
             >
-              <i class="bi bi-plus mr-2 fs-5"></i>
+              <i class="bi bi-plus mr-2 fs-5 text-[20px]"></i>
               Create a Project
             </router-link>
 
             <a
               href="#"
-              class="flex items-center justify-center px-2 py-3 w-full bg-[#ff9800] text-sm xl:text-base text-white hover:bg-[#e68900] rounded rounded-xl"
+              class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
               @click="openPremiumModal"
             >
               <i class="bi bi-gem mr-2"></i>
@@ -88,7 +88,7 @@
         
         <div class="px-4 py-2 border-t border-gray-200">
           <router-link
-            class="flex items-center px-4 py-3 w-full bg-red-500 text-sm xl:text-base text-white hover:bg-red-600 rounded-xl"
+            class="flex items-center px-4 py-3 w-full bg-azure-radiance-100 text-sm xl:text-base text-gray-500 font-bold hover:bg-gray-500 hover:text-azure-radiance-100 rounded-xl"
             to="/trash"
             @click="closeMenu"
           >

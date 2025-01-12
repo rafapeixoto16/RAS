@@ -22,13 +22,17 @@
           <div 
             class="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
           >
-            <Dropdown 
-              placement="right" 
-              trigger="click" 
-              :options="getDropdownOptions" 
-              :menu-color="'#FFFFFF'"
-              append-to-body 
-            />
+          <Dropdown
+                  placement="right"
+                  trigger="click"
+                  :project="project"
+                  @open-new-tab="$emit('open-new-tab', $event)"
+                  @rename="$emit('rename', $event)"
+                  @move-to-trash="$emit('move-to-trash', $event)"
+                  :options="getDropdownOptions"
+                  :menu-color="'#FFFFFF'"
+                  append-to-body
+                  /> 
           </div>
         </div>
         <div v-else>
@@ -70,6 +74,8 @@ interface Project {
   lastEdited: string;
 }
 
+const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit"]);
+
 // Props
 const props = defineProps<{
   project: Project;
@@ -79,15 +85,7 @@ const props = defineProps<{
 
 const mode = props.mode;
 
-// Emits
-const emit = defineEmits<{
-  (e: 'edit', id: number): void;
-  (e: 'open-new-tab', id: number): void;
-  (e: 'rename', id: number): void;
-  (e: 'move-to-trash', id: number): void;
-  (e: 'restore', id: number): void;
-  (e: 'remove-permanently', id: number): void;
-}>();
+
 
 // Reactive State
 const isLargeScreen = ref(window.innerWidth >= 1024);
