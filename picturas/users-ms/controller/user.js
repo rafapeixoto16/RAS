@@ -17,7 +17,7 @@ export const updateUser = (id, info) => {
 };
 
 export const updateUserPassword = (id, pwd) => {
-    return User.findOneAndUpdate({ _id: id }, pwd).exec(); // excute
+    return User.findOneAndUpdate({ _id: id }, {password: pwd}).exec(); // excute
 };
 
 export const updateUserProfilePic = (id, profilePicUrl) => {

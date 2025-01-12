@@ -2,8 +2,11 @@ import express from 'express';
 import Prometheus from 'prom-client';
 import ResponseTime from 'response-time';
 
+// Prometheus & Kubernetes Probes
+
 const port = 9091;
 const app = express();
+let isReady = false;
 
 export function promMiddleware(requestDurationBuckets = [0.1, 0.5, 1, 1.5]) {
     const labels = ['route', 'method', 'status'];
@@ -43,6 +46,10 @@ export function promMiddleware(requestDurationBuckets = [0.1, 0.5, 1, 1.5]) {
     return middleware;
 }
 
+export function serverIsReady() {
+    isReady = true;
+}
+
 app.get('/metrics', async (req, res) => {
     res.set('Content-Type', Prometheus.register.contentType);
     return res.end(await Prometheus.register.metrics());
@@ -59,8 +66,11 @@ app.get('/liveness', (req, res) => {
 });
 
 app.get('/readiness', (req, res) => {
-    res.status(200)
-        .send('I am ready');
+    if (isReady) {
+        res.status(200).send('I am ready.');
+    } else {
+        res.status(503).send('I am not ready.');
+    }
 });
 
 export function startPLServer() {
@@ -68,3 +78,24 @@ export function startPLServer() {
         console.log('Prometheus Metrics and Probes ready');
     });
 }
+
+// Auth
+export function useGatewayAuth(req, res, next) {
+    const token = req.headers.authorization;
+
+    if (!token) {
+        next();
+        return;
+    }
+
+    req.user = JSON.parse(req.headers.authorization);
+    next();
+}
+
+export const requiresAuth = (req, res, next) => {
+    if (!req.user) {
+        res.sendStatus(401);
+    } else {
+        next();
+    }
+};

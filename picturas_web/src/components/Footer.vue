@@ -2,12 +2,10 @@
 <footer class="bg-white border-t border-gray-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="py-6 flex flex-col md:flex-row items-center justify-between">
-      <!-- Copyright Section -->
       <p class="text-sm text-gray-500">
-        © 2025 Your Company, Inc. All rights reserved.
+        © 2025 PictuRas, Inc. All rights reserved.
       </p>
 
-      <!-- Social Links Section -->
       <div class="flex space-x-4 mt-4 md:mt-0">
         <a href="#" class="text-gray-400 hover:text-gray-500">
           <span class="sr-only">Facebook</span>

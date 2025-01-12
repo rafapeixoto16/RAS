@@ -18,6 +18,11 @@ spec:
           ports:
             - containerPort: 3000
           env:
+            - name: AUTH_JWT_SECRET
+              valueFrom:
+               secretKeyRef:
+                 name: auth-jwt-secret
+                 key: token-secret
             - name: RATE_LIMITER_REDIS_HOST
               value: "rate-limiter-redis-master"
             - name: RATE_LIMITER_REDIS_PASSWORD
