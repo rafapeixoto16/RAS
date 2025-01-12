@@ -51,6 +51,18 @@ const router = createRouter({
       meta: { fullWidth: true },
     },
     {
+      path: '/resetPassword/:token',
+      name: 'reset-password',
+      component: () => import('../views/ValidatePasswordRecoveryView.vue'), 
+      meta: { fullWidth: true },
+    },
+    {
+      path: '/passwordRecovery-success/:email',
+      name: 'reset-password-success',
+      component: () => import('../views/PasswordRecoverySuccessView.vue'), 
+      meta: { fullWidth: true },
+    },
+    {
       path: '/validateAccount/:token',
       name: 'validate-account',
       component: () => import('../views/ValidateAccountView.vue'), 

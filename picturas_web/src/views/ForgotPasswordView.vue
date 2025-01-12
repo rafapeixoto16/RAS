@@ -78,12 +78,10 @@ import { ref } from 'vue';
   const resetPassword = async () => {
     try {
       errorMessage.value = '';
-      const response = await forgotPassword({email: email.value});
-      
-      console.log('Password reset response:', response);
-      
-      alert('Password reset instructions have been sent to your email.');
-      router.push('/login');
+      await forgotPassword({email: email.value});
+
+      router.push({ path: `/passwordRecovery-success/${email.value}` });
+
     } catch (error) {
       console.error('Error during password reset:', error);
       alert('An error occurred. Please try again.');
