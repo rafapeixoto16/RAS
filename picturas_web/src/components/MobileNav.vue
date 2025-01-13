@@ -55,7 +55,7 @@
       @click="closeMenu"
     >
       <div
-        class="fixed inset-y-0 left-0 w-64 bg-azure-radiance-100 transform transition-transform duration-300 ease-in-out flex flex-col"
+        class="fixed inset-y-0 left-0 w-64 bg-blue-50 transform transition-transform duration-300 ease-in-out flex flex-col"
         :class="{ '-translate-x-full': !isOpen, 'translate-x-0': isOpen }"
         @click.stop
       >
@@ -88,7 +88,7 @@
         
         <div class="px-4 py-2 border-t border-gray-200">
           <router-link
-            class="flex items-center px-4 py-3 w-full bg-azure-radiance-100 text-sm xl:text-base text-gray-500 font-bold hover:bg-gray-500 hover:text-azure-radiance-100 rounded-xl"
+            class="flex items-center px-4 py-3 w-full text-sm xl:text-base text-gray-500 hover:text-gray-700"
             to="/trash"
             @click="closeMenu"
           >
