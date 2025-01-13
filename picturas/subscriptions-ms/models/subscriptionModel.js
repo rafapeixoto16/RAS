@@ -15,5 +15,4 @@ const subcriptionSchema = new mongoose.Schema({
     {versionKey: false});
 
 const Subscription = mongoose.model('subscription', subcriptionSchema);
-
 export default Subscription;

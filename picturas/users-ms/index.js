@@ -4,7 +4,7 @@ import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import usersRouter from './routes/users.js';
-import {useGatewayAuth} from "@picturas/ms-helper";
+import { useGatewayAuth } from '@picturas/ms-helper';
 
 const app = express();
 const port = 3000;

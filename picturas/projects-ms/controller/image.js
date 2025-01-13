@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import * as Image from '../models/imageModel.js';
-import { buildPagination, buildSort, buildQuery } from '../models/queryImage.js';
+import {
+    buildPagination,
+    buildSort,
+    buildQuery,
+} from '../models/queryImage.js';
 
 export const imageSchema = z.object({
     uri: z.string().min(1, 'URI is required'),

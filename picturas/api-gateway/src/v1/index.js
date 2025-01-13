@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import filtersRouter from './filters.js';
-import {checkAuthToken} from "../auth/auth.js";
-import proxyAuthRequest from "../utils/proxy.js";
+import { checkAuthToken } from '../auth/auth.js';
+import proxyAuthRequest from '../utils/proxy.js';
 
 const router = Router();
 

@@ -31,14 +31,12 @@ export const validateRequest = (schemas) => {
             }
         }
         if (errors.length > 0) {
-            return res
-                .status(400)
-                .send(
-                    errors.map((error) => ({
-                        type: error.type,
-                        errors: error.errors,
-                    }))
-                );
+            return res.status(400).send(
+                errors.map((error) => ({
+                    type: error.type,
+                    errors: error.errors,
+                }))
+            );
         }
         return next();
     };
