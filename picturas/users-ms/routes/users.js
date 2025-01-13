@@ -455,4 +455,50 @@ router.delete('/otp', (req, res) => {
         .catch((_) => res.sendStatus(447));
 });
 
+router.put(
+    '/updateEmailPreferences',
+    validateRequest(
+        schemaValidation.object({
+            projectUpdates: schemaValidation.boolean().optional(),
+            newFeatures: schemaValidation.boolean().optional(),
+            marketing: schemaValidation.boolean().optional(),
+            projectCollaborations: schemaValidation.boolean().optional(),
+            comments: schemaValidation.boolean().optional(),
+        })
+    ),
+    async (req, res) => {
+        try {
+            const preferences = req.body;
+
+            const user = await User.getUser(req.user._id);
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            // update das preferencias
+            const updatedPreferences = {
+                ...user.emailPreferences,
+                ...preferences,
+            };
+
+            user.emailPreferences = updatedPreferences;
+
+            await User.updateUser(req.user._id, user);
+
+            res.status(200).json({
+                message: 'Email preferences updated successfully',
+                emailPreferences: updatedPreferences,
+            });
+
+        } catch (error) {
+            console.error('Error updating email preferences:', error);
+            res.status(500).json({
+                error: 'Failed to update email preferences',
+                details: error.message,
+            });
+        }
+    }
+);
+
+
 export default router;

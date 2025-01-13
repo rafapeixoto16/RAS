@@ -19,6 +19,13 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        emailPreferences: {
+            projectUpdates: { type: Boolean, default: true },
+            newFeatures: { type: Boolean, default: true },
+            marketing: { type: Boolean, default: true },
+            projectCollaborations: { type: Boolean, default: true },
+            comments: { type: Boolean, default: true },
+        },
         expireAt: {
             type: Date,
             default: Date.now,
