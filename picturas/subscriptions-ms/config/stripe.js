@@ -5,6 +5,7 @@ const stripeConf = {};
 if (process.env.STRIPE_ENDPOINT) {
     stripeConf['host'] = process.env.STRIPE_ENDPOINT;
     stripeConf['port'] = process.env.STRIPE_ENDPOINT_PORT;
+    stripeConf['protocol'] = 'http';
 }
 
 export const stripe = Stripe(process.env.STRIPE_PRIVATE_KEY, stripeConf);

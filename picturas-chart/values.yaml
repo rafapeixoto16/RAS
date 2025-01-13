@@ -116,8 +116,9 @@ subscriptions-ms-db:
     serviceMonitor:
       enabled: true
 
-stripe_private_key: "stripe-private-key"
-stripe_webhook_secret: "stripe-webhook-key"
+# public "pk_test_51QgAMx2N0LZkFOX8kS6Uup5aA9DPOQyZung7JCahsiIwxTL04x2w2isGgXQ3H47h9mpQRT6bf0myenjv2Lu97eRw00kSryOqGS"
+stripe_private_key: "sk_test_51QgAMx2N0LZkFOX80fxcwYd2zgR8DE7joCC24spW08WOgoE0y7RYMOQFGTlZHPabssPxJBQERnxnt90xcFJ8FAde0052KK0rYF"
+stripe_webhook_secret: "whsec_fa74bde4ed91cfac2ec248c0677ef672e9ce362f2c2624322cee1a3fd5ecbc29"
 
 s3_endpoint: "minio" # static from dev
 s3_port: 9000 # static from dev
