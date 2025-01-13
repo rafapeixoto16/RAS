@@ -31,3 +31,13 @@ export const deleteUser = (id) => {
 export const deleteAll = () => {
     return User.deleteMany().exec();
 };
+
+// (sotf) delete an account
+export const softDeleteUser = (id) => {
+    return User.findOneAndUpdate({ _id: id, deletedAt: { $exists: false } }, { deletedAt: new Date() }).exec();
+};
+
+// Recover a (soft) deleted account
+export const recoverUser = (id) => {
+    return User.findOneAndUpdate({ _id: id, deletedAt: { $exists: true } }, { deletedAt: null }).exec();
+};

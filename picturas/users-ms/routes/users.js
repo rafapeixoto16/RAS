@@ -500,5 +500,32 @@ router.put(
     }
 );
 
+router.delete('/:id/softDelete', async (req, res) => {
+    const userId = req.user._id; 
+    try {
+        const user = await User.softDeleteUser(userId); 
+        res.status(200).json({ 
+            message: 'User marked for deletion. Recoverable within 30 days.',
+            user: { _id: user._id, deletedAt: user.deletedAt }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+router.put('/:id/recover', async (req, res) => {
+    const userId = req.user._id;
+    try {
+        const user = await User.recoverUser(userId);  
+        res.status(200).json({ 
+            message: 'User account recovered successfully.',
+            user: { _id: user._id, deletedAt: user.deletedAt }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 export default router;

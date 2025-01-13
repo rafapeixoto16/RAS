@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema(
             projectCollaborations: { type: Boolean, default: true },
             comments: { type: Boolean, default: true },
         },
+        deletedAt: {
+            type: Date,
+            default: null, // Null means the account is not deleted
+            index: { expires: '30d' } // Automatically remove 30 days after deletion
+        },
         expireAt: {
             type: Date,
             default: Date.now,
