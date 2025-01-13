@@ -100,16 +100,7 @@ router.post('/webhook', async (req, res) => {
 });
 
 // Requires Auth from now on
-// TODO
-//router.use(requiresAuth);
-router.use((req, res, next) => {
-    req.user = {
-        'name': 'demo',
-        'email': 'demo@demo.com',
-        '_id': '64d0d02167d49b2512345678'
-    };
-    next();
-});
+router.use(requiresAuth);
 
 router.get('/', async (req, res) => {
     Subscription.getSubcriptionByUserId(req.user._id).then(userData => {
