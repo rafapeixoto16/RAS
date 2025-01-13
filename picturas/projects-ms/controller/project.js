@@ -52,7 +52,10 @@ export const deleteProject = (id) => {
     return Project.deleteOne({ _id: id }).exec();
 };
 
-// helper function
+//////////////////////////////////////////////////////////////////////////////////////////
+// Tools
+//////////////////////////////////////////////////////////////////////////////////////////
+
 export const addTool = async (projectId, tool) => {
     const project = await getProject(projectId);
 
@@ -117,3 +120,37 @@ export const reorderTool = async (projectId, toolIdx, toolIdxAfter) => {
         toolIdx
     };
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Images
+//////////////////////////////////////////////////////////////////////////////////////////
+
+export const addImage = async (projectId, image) => {
+    const project = await getProject(projectId);
+    if (!project) {
+        throw new Error('Project not found');
+    }
+    const idx = project.images.push(image);
+    const updatedProject = await updateProject(projectId, project);
+    return {
+        updatedProject,
+        idx
+    };
+};
+
+export const removeImage = async (projectId, imageIdx) => {
+    const project = await getProject(projectId);
+    if (!project) {
+        throw new Error('Project not found');
+    }
+    if (imageIdx < 0 || imageIdx >= project.images.length) {
+        throw new Error('Invalid image index');
+    }
+
+    const removedImage = project.images.splice(imageIdx, 1)[0];
+    const updatedProject = await updateProject(projectId, project);
+    return {
+        updatedProject,
+        removedImage
+    };
+};
