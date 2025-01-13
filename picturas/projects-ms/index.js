@@ -4,10 +4,9 @@ import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import projectRouter from './routes/projects.js';
-import toolRouter from './routes/tools.js';
 import {setupBucket} from "./config/minioClient.js";
 import {devAuthMiddleware, requiresAuth, useGatewayAuth} from "@picturas/ms-helper";
-import {getLimitsMiddleware, isPremiumMiddleware} from "./premium.js";
+import {getLimitsMiddleware, isPremiumMiddleware} from "./utils/premium.js";
 
 const app = express();
 const port = 3000;
@@ -37,8 +36,7 @@ app.use(isPremiumMiddleware);
 app.use(getLimitsMiddleware);
 
 // Routers
-app.use('/project', projectRouter);
-app.use('/tool', toolRouter);
+app.use('/', projectRouter);
 
 // 404
 app.use((req, res) => {

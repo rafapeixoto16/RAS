@@ -64,8 +64,17 @@ spec:
                   key: password
             - name: S3_PICTURE_BUCKET
               value: {{ .Values.s3_picture_bucket }}
+            - name: FILTER_SHARED_DIR
+              value: {{ .Values.filter_shared_dir }}
+            - name: FILTER_REDIS_HOST
+              value: "filter-redis-master"
+            - name: FILTER_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: filter-redis-auth-secret
+                  key: password
           volumeMounts:
-            - mountPath: /mnt/nfs
+            - mountPath: {{ .Values.filter_shared_dir }}
               name: nfs-volume
       volumes:
         - name: nfs-volume # Simulated with hostPath (single node)

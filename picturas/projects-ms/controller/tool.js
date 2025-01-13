@@ -3,11 +3,11 @@ import * as Tool from '../models/toolModel.js';
 import { buildPagination, buildSort, buildQuery } from '../models/queryTool.js';
 
 // Zod schema for validating tool data
-export const toolSchema = z.object({
-    position: z.number().min(1, 'Position is required'),
-    procedure: z.string().min(1, 'Procedure is required'),
-    parameters: z.string().min(1, 'Parameters are required'),
-    project_id: z.string().uuid('Invalid project ID'),
+export const toolSchema = schemaValidation.object({
+    position: schemaValidation.number().min(1, 'Position is required'),
+    procedure: schemaValidation.string().min(1, 'Procedure is required'),
+    parameters: schemaValidation.string().min(1, 'Parameters are required'),
+    project_id: schemaValidation.string().uuid('Invalid project ID'),
 });
 
 export const getTool = (id) => {

@@ -15,4 +15,4 @@ async function contrastHandler(imageBuffer, _, params) {
     return sharp(imageBuffer).linear(slope, intercept).toBuffer();
 }
 
-createFilterHandler('contrast', contrastSchema, contrastHandler);
+createFilterHandler('contrast', false, contrastSchema, contrastHandler);

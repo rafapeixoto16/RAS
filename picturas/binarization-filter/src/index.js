@@ -12,4 +12,4 @@ async function binarizationHandler(imageBuffer, _, params) {
     return sharp(imageBuffer).threshold(threshold).toBuffer();
 }
 
-createFilterHandler('binarization', binarizationSchema, binarizationHandler);
+createFilterHandler('binarization', false, binarizationSchema, binarizationHandler);

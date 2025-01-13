@@ -8,3 +8,5 @@ venv
 
 # Miscelaneous
 .DS_Store
+
+keys.yaml

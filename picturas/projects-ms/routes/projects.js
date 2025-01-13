@@ -6,17 +6,20 @@ import {
     deleteProject,
     getProject,
     projectSchema,
+    addTool,
+    removeTool,
+    reorderTool
 } from '../controller/project.js';
 import { queryProjectSchema } from '../models/queryProject.js';
 import { validateRequest } from '@picturas/schema-validation';
+import schemas from '../utils/filters.js';
 
 const router = Router();
-router.use(validateRequest({
-    body: projectSchema,
-    query: queryProjectSchema,
-}))
 
-router.post('/', async (req, res) => {
+router.post('/', validateRequest({
+    body: projectSchema,
+    query: queryProjectSchema
+}), async (req, res) => {
     const { body } = req;
 
     try {
@@ -27,7 +30,10 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateRequest({
+    body: projectSchema,
+    query: queryProjectSchema
+}), async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -41,7 +47,10 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', validateRequest({
+    body: projectSchema,
+    query: queryProjectSchema
+}), async (req, res) => {
     const { query } = req;
 
     try {
@@ -55,7 +64,10 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateRequest({
+    body: projectSchema,
+    query: queryProjectSchema
+}), async (req, res) => {
     const { id } = req.params;
     const { body } = req;
 
@@ -70,7 +82,10 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', validateRequest({
+    body: projectSchema,
+    query: queryProjectSchema
+}), async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -83,5 +98,46 @@ router.delete('/:id', async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 });
+
+// TODO: validate request
+router.post('/:id/tool', validateRequest({
+    // if the user is not premium and it tries to add a premium tool just send a 401
+    body: schemaValidation.Object({
+        filterName: schemaValidation.enum(Object.keys(schemas)),
+        parameters: schemaValidation.unknown(),
+    }).refine((data) => schemas[data.filterName].safeParse(data.parameters).success)
+}), async (req, res) => {
+    const { id } = req.params;
+    const toolInformation = req.body;
+
+    try {
+        const { project, index } = await addTool(id, toolInformation);
+        return res.status(200).json({
+            project,
+            index
+        })
+    } catch(error) {
+        return res.status(500).json({ error: error.message });
+    } 
+})
+
+// TODO: validate request
+router.delete('/:id/tool/:idxTool', validateRequest({}), async (req, res) => {
+    const { id, idxTool } = req.params;
+
+    try {
+        const { project, removedTool } = await removeTool(id, idxTool);
+        return res.status(200).json({
+            project,
+            removedTool
+        });
+    } catch(error) {
+        return res.status(500).json({ error: error.message });
+    }
+})
+
+router.put('/:id/tool/:idxTool', validateRequest({}), async (req, res) => {
+    const { idxTool } = req.params;
+})
 
 export default router;

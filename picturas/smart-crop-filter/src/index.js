@@ -75,4 +75,4 @@ async function smartCropHandler(imageBuffer, _, _params) {
         .toBuffer();
 }
 
-createFilterHandler('smart-crop', smartCropSchema, smartCropHandler);
+createFilterHandler('smart-crop', true, smartCropSchema, smartCropHandler);

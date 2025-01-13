@@ -72,4 +72,4 @@ setInterval(() => {
     resetScheduler().then(() => {});
 }, 500 * 1000); // every 500 seconds, maybe too frequent
 
-createFilterHandler('ocr', ocrSchema, ocrHandler);
+createFilterHandler('ocr', true, ocrSchema, ocrHandler);

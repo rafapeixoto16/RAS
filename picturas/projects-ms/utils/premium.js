@@ -24,16 +24,20 @@ export const isPremiumMiddleware = async (req, res, next) => {
 export const getLimitsMiddleware = (req, res, next) => {
     const limits = {
         hasTtl: false,
-        has4kUpload: false
+        has4kUpload: false,
+        noWatermark: false
     }
+
+    limits.ttlStartTime = new Date(req.user.iat * 1000);
 
     if (req.user.isGuest) {
         limits.hasTtl = true;
-        limits.ttlTime = new Date(req.user.iat * 1000)
-        limits.ttlTime.setDate(limits.ttlTime.getDate() + 1);
     }
 
-    if (req.user.isPremium) limits.has4kUpload = true;
+    if (req.user.isPremium) {
+        limits.has4kUpload = true;
+        limits.noWatermark = true;
+    }
 
     req.user.limits = limits;
     next();

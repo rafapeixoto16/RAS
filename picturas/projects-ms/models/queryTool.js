@@ -1,20 +1,17 @@
 import { z } from 'zod';
 
-export const queryToolSchema = z.object({
-    position: z.number().optional(),
-    procedure: z.string().optional(),
-    parameters: z.string().optional(),
-    project_id: z.string().optional(),
-    _id: z.string().optional(),
-    limit: z.number().optional().default(10),
-    page: z.number().optional().default(1),
+export const queryToolSchema = schemaValidation.object({
+    position: schemaValidation.number().optional(),
+    parameters: schemaValidation.string().optional(),
+    project_id: schemaValidation.string().optional(),
+    _id: schemaValidation.string().optional(),
+    limit: schemaValidation.number().optional().default(10),
+    page: schemaValidation.number().optional().default(1),
     sort: z
         .object({
-            position: z.number().optional(),
-            procedure: z.number().optional(),
-            parameters: z.number().optional(),
-            project_id: z.number().optional(),
-            _id: z.number().optional(),
+            position: schemaValidation.number().optional(),
+            project_id: schemaValidation.number().optional(),
+            _id: schemaValidation.number().optional(),
         })
         .optional(),
 });

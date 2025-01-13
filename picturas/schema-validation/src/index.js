@@ -1,10 +1,15 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { jsonSchemaToZod } from 'json-to-zod-schema';
 
 export { z as schemaValidation };
 
 export function toJsonSchema(name, schema) {
     return zodToJsonSchema(schema, name);
+}
+
+export function fromJsonSchema(schema) {
+    return jsonSchemaToZod(schema);
 }
 
 export const validateRequest = (schemas) => {
