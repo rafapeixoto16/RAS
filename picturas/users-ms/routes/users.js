@@ -4,15 +4,14 @@ import jwt from 'jsonwebtoken';
 import * as OTPAuth from 'otpauth';
 import sendEmail from '../email/sendEmail.js';
 import crypto from 'node:crypto';
+import path from 'node:path';
 
 import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
-import {v4 as uuidv4} from 'uuid';
 import {schemaValidation, validateRequest} from '@picturas/schema-validation';
 import {requiresAuth} from "@picturas/ms-helper";
 
-const BUCKET_NAME = 'bucket-name'; //TODO **TROCAR PELO bucket-name do MinIO**
 const SALT_WORK_FACTOR = 10;
 
 const router = Router();
@@ -316,26 +315,26 @@ router.delete('/logout', async (req, res) => {
         .catch((err) => res.sendStatus(400));
 });
 
-// UNTESTED
 router.put('/profilePic', multer.single('profilePic'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({error: 'No file uploaded'});
     }
 
-    const extensionName = path.extname(req.file.name);
-    const profilePicName = `${uuidv4()}.${extensionName}`;
+    const extensionName = path.extname(req.file.originalname);
+    const profilePicName = `${req.user._id}${extensionName}`;
 
     const metaData = {
         'Content-Type': req.file.mimetype,
     };
 
     minioClient.putObject(
-        BUCKET_NAME,
+        process.env.S3_PROFILE_PICTURE_BUCKET,
         profilePicName,
         req.file.buffer,
         metaData,
         (err, etag) => {
             if (err) {
+                console.error(err);
                 return res
                     .status(500)
                     .json({
@@ -344,9 +343,9 @@ router.put('/profilePic', multer.single('profilePic'), (req, res) => {
                     });
             }
 
-            const imageUrl = `http://${process.env.S3_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
+            // TODO unnecessary
+            const imageUrl = `${process.env.S3_PROFILE_PICTURE_BUCKET}/${profilePicName}`;
 
-            // update no user
             User.updateUserProfilePic(req.user._id, imageUrl)
                 .then(() =>
                     res
@@ -356,13 +355,15 @@ router.put('/profilePic', multer.single('profilePic'), (req, res) => {
                             imageUrl,
                         })
                 )
-                .catch((err) =>
-                    res
-                        .status(500)
-                        .json({
-                            error: 'Failed to update user profile picture',
-                            details: err,
-                        })
+                .catch((err) => {
+                    console.error(err);
+                        res
+                            .status(500)
+                            .json({
+                                error: 'Failed to update user profile picture',
+                                details: err,
+                            })
+                    }
                 );
         }
     );
@@ -379,6 +380,8 @@ router.get('/', (req, res) => {
                 location: resp.location,
                 bio: resp.bio,
                 name: resp.name,
+                profilePic: resp.profilePic,
+                emailPreferences: resp.emailPreferences
             };
 
             res.status(200).json(filteredUser);
@@ -457,39 +460,23 @@ router.delete('/otp', (req, res) => {
 
 router.put(
     '/updateEmailPreferences',
-    validateRequest(
-        schemaValidation.object({
+    validateRequest({
+        body: schemaValidation.object({
             projectUpdates: schemaValidation.boolean().optional(),
             newFeatures: schemaValidation.boolean().optional(),
             marketing: schemaValidation.boolean().optional(),
             projectCollaborations: schemaValidation.boolean().optional(),
             comments: schemaValidation.boolean().optional(),
         })
-    ),
+    }),
     async (req, res) => {
         try {
-            const preferences = req.body;
-
-            const user = await User.getUser(req.user._id);
-            if (!user) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-
-            // update das preferencias
-            const updatedPreferences = {
-                ...user.emailPreferences,
-                ...preferences,
-            };
-
-            user.emailPreferences = updatedPreferences;
-
-            await User.updateUser(req.user._id, user);
+            const out = await User.updateUser(req.user._id, {emailPreferences: req.body});
 
             res.status(200).json({
                 message: 'Email preferences updated successfully',
-                emailPreferences: updatedPreferences,
+                emailPreferences: out.emailPreferences
             });
-
         } catch (error) {
             console.error('Error updating email preferences:', error);
             res.status(500).json({
@@ -499,6 +486,5 @@ router.put(
         }
     }
 );
-
 
 export default router;
