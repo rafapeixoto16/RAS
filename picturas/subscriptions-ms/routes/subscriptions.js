@@ -1,7 +1,15 @@
 // based on https://docs.stripe.com/billing/subscriptions/build-subscriptions
 // and https://docs.stripe.com/payments/accept-a-payment-deferred?type=subscription
 
-import {stripe, INTERVALS, PLANS, stripeProductInfo, TRIAL_DAYS} from '../config/stripe.js';
+import {
+    stripe,
+    MONTHLY_INTERVAL,
+    INTERVALS,
+    PLANS,
+    stripeProductInfo,
+    TRIAL_DAYS,
+    YEARLY_INTERVAL
+} from '../config/stripe.js';
 import * as Subscription from '../controller/subscriptions.js';
 import {Router} from 'express';
 import {requiresAuth} from "@picturas/ms-helper";
@@ -17,53 +25,40 @@ const webhookInvoicePaymentSucceeded = async (req, res, invoice, subscriptionId)
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     const {userId} = subscription.metadata;
 
-    const userData = await Subscription.getSubcriptionByUserId(userId);
-
-    if (!userData) throw new Error();
-
     const userDataUpd = {
-        ...userData,
         premium: true,
-        trialUSed: true,
+        trialUsed: true,
         plan:
-            subscription.items.data[0].price.unit_amount ===
-            PLANS.monthly.amount
-                ? 'monthly'
-                : 'yearly',
+            subscription.items.data[0].price.id ===
+            stripeProductInfo[MONTHLY_INTERVAL]
+                ? MONTHLY_INTERVAL
+                : YEARLY_INTERVAL,
     };
 
-    await Subscription.updateSubcriptionByUserId(userData.userId, userDataUpd);
+    await Subscription.updateSubcriptionByUserId(userId, userDataUpd);
 }
 
 const webhookInvoicePaymentFailed = async (req, res, invoice, subscriptionId) => {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     const {userId} = subscription.metadata;
 
-    const userData = Subscription.getSubcriptionByUserId(userId);
-
-    if (!userData) throw new Error();
-
     const userDataUpd = {
-        ...userData,
         premium: false,
     };
 
-    await Subscription.updateSubcriptionByUserId(userData.userId, userDataUpd);
+    await Subscription.updateSubcriptionByUserId(userId, userDataUpd);
 }
 
 const webhookInvoiceSubscriptionDeleted = async (req, res, subscription) => {
     const {userId} = subscription.metadata;
-    const userData = Subscription.getSubcriptionByUserId(userId);
-
-    if (!userData) throw new Error();
 
     const userDataUpd = {
-        ...userData,
         premium: false,
         plan: 'regular',
+        subscriptionId: null
     };
 
-    await Subscription.updateSubcriptionByUserId(userData.userId, userDataUpd);
+    await Subscription.updateSubcriptionByUserId(userId, userDataUpd);
 }
 
 router.post('/webhook', async (req, res) => {
@@ -72,12 +67,12 @@ router.post('/webhook', async (req, res) => {
 
     try {
         event = stripe.webhooks.constructEvent(
-            req.body,
+            req.rawBody, // Added on the verify hook of the express.json() in index
             sig,
             process.env.STRIPE_WEBHOOK_SECRET
         );
     } catch (err) {
-        return res.status(400).send(`Webhook Error: ${err.message}`);
+        return res.sendStatus(400);
     }
 
     try {
@@ -96,17 +91,18 @@ router.post('/webhook', async (req, res) => {
 
             await webhookInvoiceSubscriptionDeleted(req, res, subscription)
         }
-    } catch (_) {
-        res.sendStatus(500);
+    } catch (err) {
+        console.error(err)
+        return res.sendStatus(500);
     }
 
-    return res.status(200);
+    return res.sendStatus(200);
 });
 
 // Requires Auth from now on
 // TODO
 //router.use(requiresAuth);
-router.use((req,res,next) => {
+router.use((req, res, next) => {
     req.user = {
         'name': 'demo',
         'email': 'demo@demo.com',
@@ -177,7 +173,7 @@ router.post('/subscribe', validateRequest({
             metadata: {userId},
 
             payment_behavior: 'default_incomplete',
-            payment_settings: { save_default_payment_method: 'on_subscription' },
+            payment_settings: {save_default_payment_method: 'on_subscription'},
             expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
         };
 
@@ -211,21 +207,18 @@ router.delete('/cancelSubscription', async (req, res) => {
     try {
         const data = await Subscription.getSubcriptionByUserId(req.user._id)
 
-        if(!data) return res.sendStatus(404);
+        if (!data) return res.sendStatus(404);
+        if (!data.subscriptionId) return res.sendStatus(456);
 
-        const deletedSubscription = await stripe.subscriptions.del(data.subscriptionId);
+        await stripe.subscriptions.cancel(data._doc.subscriptionId);
+        await Subscription.updateSubcriptionByUserId(req.user._id, {subscriptionId: null})
 
-        data.subscriptionId = null;
-
-        await Subscription.updateSubcriptionByUserId(req.user._id,data)
-
-        res.send(deletedSubscription);
-    }catch (_){
+        res.sendStatus(200);
+    } catch (_) {
         res.sendStatus(567);
     }
 });
 
-// TESTING
 router.get('/transactionHistory', async (req, res) => {
     try {
         const userId = req.user._id;
@@ -255,7 +248,6 @@ router.get('/transactionHistory', async (req, res) => {
     }
 });
 
-// TESTING
 router.get('/billingInfo', async (req, res) => {
     try {
         const userId = req.user._id;
@@ -264,16 +256,20 @@ router.get('/billingInfo', async (req, res) => {
         let billingInfo = {};
 
         if (userData) {
-            const customer = (await stripe.customers.list({customer: userData.stripeId})).data[0];
+            const paymentMethods = (await stripe.paymentMethods.list({
+                type: 'card',
+                limit: 1,
+                customer: userData._doc.stripeId,
+            })).data;
 
-            if (customer.sources.length > 0) {
-                billingInfo = {last4: customer.sources[0].data.last4, bankName: customer.sources[0].data.bank_name};
+            if (paymentMethods.length > 0) {
+                billingInfo = {last4: paymentMethods[0].card.last4, brand: paymentMethods[0].card.brand};
             }
         }
 
         return res.json(billingInfo);
-    } catch (err) {
-        return res.status(500).json({error: 'Failed to fetch billing info'});
+    } catch (_) {
+        return res.sendStatus(500);
     }
 });
 

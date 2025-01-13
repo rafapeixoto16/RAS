@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const subcriptionSchema = new mongoose.Schema({
-        userId: {type: String, unique: true, required: true},
+        userId: {type: mongoose.Types.ObjectId, unique: true, required: true},
         premium: {type: Boolean, required: true, default: false},
         plan: {
             type: String,

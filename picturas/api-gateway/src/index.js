@@ -11,7 +11,6 @@ const port = 3000;
 
 // Default configs
 app.use(morgan('dev'));
-app.use(express.json());
 app.use(cors()); // TODO we might need to properly configure this
 app.use(rateLimiterMiddleware);
 
