@@ -77,3 +77,5 @@ spec:
                 secretKeyRef:
                   name: s3-secret
                   key: password
+            - name: S3_PROFILE_PICTURE_BUCKET
+              value: {{ .Values.s3_profile_picture_bucket }}
