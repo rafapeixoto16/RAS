@@ -74,7 +74,7 @@ interface Project {
   lastEdited: string;
 }
 
-const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit"]);
+const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit", "restore","remove-permanently"]);
 
 // Props
 const props = defineProps<{
