@@ -12,7 +12,7 @@ import {
 } from '../config/stripe.js';
 import * as Subscription from '../controller/subscriptions.js';
 import {Router} from 'express';
-import {requiresAuth} from "@picturas/ms-helper";
+import {requiresAuth, requiresNonGuest} from "@picturas/ms-helper";
 import {schemaValidation, validateRequest} from '@picturas/schema-validation';
 
 const router = new Router();
@@ -101,6 +101,7 @@ router.post('/webhook', async (req, res) => {
 
 // Requires Auth from now on
 router.use(requiresAuth);
+router.user(requiresNonGuest);
 
 router.get('/', async (req, res) => {
     Subscription.getSubcriptionByUserId(req.user._id).then(userData => {
