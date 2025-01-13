@@ -457,23 +457,20 @@ router.delete('/otp', (req, res) => {
 
 router.put(
     '/updateEmailPreferences',
-    validateRequest({
-        body: schemaValidation.object({
-            preferences: schemaValidation.object({
-                projectUpdates: schemaValidation.boolean().optional(),
-                newFeatures: schemaValidation.boolean().optional(),
-                marketing: schemaValidation.boolean().optional(),
-                projectCollaborations: schemaValidation.boolean().optional(),
-                comments: schemaValidation.boolean().optional(),
-            }),
-        }),
-    }),
+    validateRequest(
+        schemaValidation.object({
+            projectUpdates: schemaValidation.boolean().optional(),
+            newFeatures: schemaValidation.boolean().optional(),
+            marketing: schemaValidation.boolean().optional(),
+            projectCollaborations: schemaValidation.boolean().optional(),
+            comments: schemaValidation.boolean().optional(),
+        })
+    ),
     async (req, res) => {
-        const { preferences } = req.body;
-
         try {
-            const user = await User.getUser(req.user._id);
+            const preferences = req.body;
 
+            const user = await User.getUser(req.user._id);
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
@@ -492,6 +489,7 @@ router.put(
                 message: 'Email preferences updated successfully',
                 emailPreferences: updatedPreferences,
             });
+
         } catch (error) {
             console.error('Error updating email preferences:', error);
             res.status(500).json({
