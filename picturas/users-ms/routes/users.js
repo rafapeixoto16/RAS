@@ -172,11 +172,14 @@ router.post('/login/2', validateRequest({
                 if (val == null) return res.sendStatus(401);
             }
 
+            const iat = Math.floor(Date.now() / 1000);
+
             const filteredUser = {
                 isGuest: false,
                 _id: user._id,
                 username: user.username,
                 email: user.email,
+                iat
             };
 
             const accessToken = jwt.sign(
@@ -210,7 +213,8 @@ router.post('/guestLogin', (req, res) => {
         isGuest: true,
         _id: new mongoose.Types.ObjectId(),
         username: null,
-        email: null
+        email: null,
+        iat: Math.floor(Date.now() / 1000)
     };
 
     const accessToken = jwt.sign(

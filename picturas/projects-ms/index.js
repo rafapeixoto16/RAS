@@ -3,8 +3,11 @@
 import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
-import projectRouter from './routes/projectRoutes.js';
-import toolRouter from './routes/toolRoutes.js';
+import projectRouter from './routes/projects.js';
+import toolRouter from './routes/tools.js';
+import {setupBucket} from "./config/minioClient.js";
+import {devAuthMiddleware, requiresAuth, useGatewayAuth} from "@picturas/ms-helper";
+import {getLimitsMiddleware, isPremiumMiddleware} from "./premium.js";
 
 const app = express();
 const port = 3000;
@@ -20,9 +23,18 @@ db.once('open', () => {
     console.log('MongoDB connection established');
 });
 
+setupBucket().then(() => {});
+
 // Default configs
 app.use(morgan('dev'));
 app.use(express.json());
+
+// Auth from Gateway
+app.use(useGatewayAuth);
+//app.use(requiresAuth); TODO
+app.use(devAuthMiddleware)
+app.use(isPremiumMiddleware);
+app.use(getLimitsMiddleware);
 
 // Routers
 app.use('/project', projectRouter);

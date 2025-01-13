@@ -124,6 +124,7 @@ s3_port: 9000 # static from dev
 s3_username: "s3-username" # access
 s3_password: "s3-password" # secret
 s3_profile_picture_bucket: "profile"
+s3_picture_bucket: "picture"
 
 email_hostname: "mailhog-node"
 email_port: 1025
