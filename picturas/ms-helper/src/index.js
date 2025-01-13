@@ -99,3 +99,19 @@ export const requiresAuth = (req, res, next) => {
         next();
     }
 };
+
+export const requiresNonGuest = (req, res, next) => {
+    if (!req.user || req.user.isGuest) {
+        res.sendStatus(401);
+    } else {
+        next();
+    }
+}
+
+export const requiresGuest = (req, res, next) => {
+    if (!req.user || !req.user.isGuest) {
+        res.sendStatus(401);
+    } else {
+        next();
+    }
+}

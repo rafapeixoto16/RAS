@@ -10,7 +10,7 @@ import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
 import {schemaValidation, validateRequest} from '@picturas/schema-validation';
-import {requiresAuth} from "@picturas/ms-helper";
+import {requiresAuth, requiresNonGuest} from "@picturas/ms-helper";
 
 const SALT_WORK_FACTOR = 10;
 
@@ -173,6 +173,7 @@ router.post('/login/2', validateRequest({
             }
 
             const filteredUser = {
+                isGuest: false,
                 _id: user._id,
                 username: user.username,
                 email: user.email,
@@ -202,6 +203,25 @@ router.post('/login/2', validateRequest({
                 .catch((_) => res.status(447));
         }
     );
+});
+
+router.post('guestLogin', (req, res) => {
+    const filteredUser = {
+        isGuest: true,
+        _id: new mongoose.Types.ObjectId(),
+        username: null,
+        email: null
+    };
+
+    const accessToken = jwt.sign(
+        filteredUser,
+        process.env.AUTH_JWT_SECRET,
+        {expiresIn: '24h'}
+    );
+
+    res.json({
+        accessToken,
+    });
 });
 
 router.post('/passwordRecovery', validateRequest({
@@ -301,6 +321,7 @@ router.post('/token', validateRequest({
 
 // Requires Auth from now on
 router.use(requiresAuth);
+router.use(requiresNonGuest);
 
 router.delete('/logout', async (req, res) => {
     User.getUser(req.user._id).then(userInfo => {
