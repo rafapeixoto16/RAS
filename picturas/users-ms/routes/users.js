@@ -205,7 +205,7 @@ router.post('/login/2', validateRequest({
     );
 });
 
-router.post('guestLogin', (req, res) => {
+router.post('/guestLogin', (req, res) => {
     const filteredUser = {
         isGuest: true,
         _id: new mongoose.Types.ObjectId(),
