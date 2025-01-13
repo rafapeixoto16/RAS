@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Accept a payment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!--<script src="http://localhost/localstripe/js.stripe.com/v3/"></script>-->
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+<form id="payment-form">
+    <div id="payment-element">
+        <!-- Elements will create form elements here -->
+    </div>
+    <button id="submit">Subscribe</button>
+    <div id="error-message">
+        <!-- Display error message to your customers here -->
+    </div>
+</form>
+
+<script>
+    const stripe = Stripe('pk_test_51QgAMx2N0LZkFOX8kS6Uup5aA9DPOQyZung7JCahsiIwxTL04x2w2isGgXQ3H47h9mpQRT6bf0myenjv2Lu97eRw00kSryOqGS');
+
+    const data = {interval: "month"};
+
+    const options = {
+        mode: 'subscription',
+        amount: 999,
+        currency: 'usd',
+        appearance: {/*...*/},
+    };
+
+    const elements = stripe.elements(options);
+
+    // Create and mount the Payment Element
+    const paymentElementOptions = { layout: 'accordion'};
+    const paymentElement = elements.create('payment', paymentElementOptions);
+    paymentElement.mount('#payment-element');
+
+    const form = document.getElementById('payment-form');
+    const submitBtn = document.getElementById('submit');
+
+    const handleError = (error) => {
+        const messageContainer = document.querySelector('#error-message');
+        messageContainer.textContent = error.message;
+        submitBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (submitBtn.disabled) {
+            return;
+        }
+
+        submitBtn.disabled = true;
+
+        const {error: submitError} = await elements.submit();
+        if (submitError) {
+            handleError(submitError);
+            return;
+        }
+
+        const res = await fetch('/api/v1/subscription/subscribe',{
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: '{"interval":"month"}',
+        });
+        const {type, clientSecret} = await res.json();
+        const confirmIntent = type === "setup" ? stripe.confirmSetup : stripe.confirmPayment;
+
+        // Confirm the Intent using the details collected by the Payment Element
+        const {error} = await confirmIntent({
+            elements,
+            clientSecret,
+            confirmParams: {
+                return_url: "http://localhost/checkout?confirmed",
+            },
+        });
+
+        if (error) {
+            handleError(error);
+        }
+    });
+
+    /*
+    const stripe = Stripe('');
+
+    // Retrieve the "payment_intent_client_secret" query parameter appended to
+    // your return_url by Stripe.js
+    const clientSecret = new URLSearchParams(window.location.search).get(
+        'payment_intent_client_secret'
+    );
+
+    // Retrieve the PaymentIntent
+    stripe.retrievePaymentIntent(clientSecret).then(({paymentIntent}) => {
+        const message = document.querySelector('#message')
+
+        // Inspect the PaymentIntent `status` to indicate the status of the payment
+        // to your customer.
+        //
+        // Some payment methods will [immediately succeed or fail][0] upon
+        // confirmation, while others will first enter a `processing` state.
+        //
+        // [0]: https://stripe.com/docs/payments/payment-methods#payment-notification
+        switch (paymentIntent.status) {
+            case 'succeeded':
+                message.innerText = 'Success! Payment received.';
+                break;
+
+            case 'processing':
+                message.innerText = "Payment processing. We'll update you when payment is received.";
+                break;
+
+            case 'requires_payment_method':
+                message.innerText = 'Payment failed. Please try another payment method.';
+                // Redirect your user back to your payment page to attempt collecting
+                // payment again
+                break;
+
+            default:
+                message.innerText = 'Something went wrong.';
+                break;
+        }
+    });*/
+</script>
+
+</body>
+</html>

@@ -1,7 +1,7 @@
-import { Subscription } from '../models/subscriptionModel.js';
+import Subscription from '../models/subscriptionModel.js';
 
-export const getSubcriptionByEmail = (email) => {
-    return Subscription.findOne({ email: email }).exec();
+export const getSubcriptionByUserId = (id) => {
+    return Subscription.findOne({ userId: id }).exec();
 };
 
 export const getSubcriptionById = (id) => {
@@ -16,16 +16,16 @@ export const updateSubcription = (id, info) => {
     return Subscription.updateOne({ _id: id }, info).exec();
 };
 
-export const updateSubcriptionByEmail = (email, info) => {
-    return Subscription.updateOne({ email: email }, info).exec();
+export const updateSubcriptionByUserId = (id, info) => {
+    return Subscription.updateOne({ userId: id }, info).exec();
 };
 
 export const deleteSubcription = (id) => {
     return Subscription.deleteOne({ _id: id }).exec();
 };
 
-export const deleteSubcriptionByEmail = (email) => {
-    return Subscription.deleteOne({ email: email }).exec();
+export const deleteSubcriptionByUserId = (id) => {
+    return Subscription.deleteOne({ userId: id }).exec();
 };
 
 export const deleteAll = () => {
