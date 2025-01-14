@@ -53,7 +53,7 @@ const activeComponent = computed(() => {
 
 const router = useRouter();
 const goHome = () => {
-  router.push('/');
+  router.push('/dashboard');
 };
 </script>
 <style scoped>

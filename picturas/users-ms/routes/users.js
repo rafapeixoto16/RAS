@@ -5,6 +5,7 @@ import * as OTPAuth from 'otpauth';
 import sendEmail from '../email/sendEmail.js';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import mongoose from 'mongoose';
 
 import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';

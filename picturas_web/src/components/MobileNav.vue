@@ -5,7 +5,7 @@
       class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden z-20"
     >
       <router-link
-        to="/"
+        to="/dashboard"
         class="text-2xl font-bold text-gray-900"
         style="font-family: 'Caveat', cursive;"
       >
