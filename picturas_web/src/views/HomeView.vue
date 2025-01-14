@@ -65,6 +65,34 @@
       />
     </div>
 
+   <!-- Modal for Title Input -->
+<div v-if="showTitleModal" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white p-6 sm:p-8 md:p-10 rounded-lg w-full max-w-lg md:max-w-1/3">
+    <h2 class="text-xl sm:text-2xl font-semibold mb-4">Enter Project Title</h2>
+    <input
+      v-model="titleInput"
+      type="text"
+      placeholder="Project Title"
+      class="w-full bg-gray-100 text-gray-800 font-medium py-2 sm:py-3 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    />
+    <div class="flex justify-end mt-4">
+      <button
+        class="bg-blue-500 text-white py-2 px-4 rounded-lg mr-2"
+        @click="saveProject"
+      >
+        Save
+      </button>
+      <button
+        class="bg-gray-300 text-gray-800 py-2 px-4 rounded-lg"
+        @click="closeTitleModal"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+
     <div
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4"
     >
@@ -84,6 +112,7 @@
 </template>
 
 
+
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import ProjectCard from "@/components/ProjectCard.vue";
@@ -91,7 +120,7 @@ import ProjectCard from "@/components/ProjectCard.vue";
 interface Project {
   id: number;
   title: string;
-  imageUrls: string[]; // Updated to an array
+  imageUrls: string[];
   lastEdited: string;
 }
 
@@ -108,12 +137,14 @@ const projects = ref<Project[]>([
     imageUrls: ["https://picsum.photos/id/29/800/600"],
     lastEdited: "1 week ago",
   },
-  // Add more projects...
 ]);
 
 const searchQuery = ref("");
 const isDragging = ref(false);
 const notification = ref<string | null>(null);
+const showTitleModal = ref(false);
+const titleInput = ref("");
+const newImageUrls = ref<string[]>([]);  // Armazenar imagens temporariamente antes de salvar
 
 const filteredProjects = computed(() => {
   return projects.value.filter((project) =>
@@ -157,22 +188,16 @@ const onDrop = (event: DragEvent) => {
 };
 
 const handleFiles = (files: File[]) => {
-  const imageUrls: string[] = [];
+  newImageUrls.value = [];  // Limpar a lista de imagens antes de adicionar novas
   files.forEach((file) => {
     const reader = new FileReader();
     reader.onload = () => {
-      imageUrls.push(reader.result as string);
+      newImageUrls.value.push(reader.result as string);
 
-      // Add project after all images are processed
-      if (imageUrls.length === files.length) {
-        projects.value.unshift({
-          id: Date.now(),
-          title: `New Project - ${files[0].name}`,
-          imageUrls,
-          lastEdited: "just now",
-        });
-
-        showNotification("Projects successfully created!");
+      // Exibir a modal de título quando todas as imagens forem carregadas
+      if (newImageUrls.value.length === files.length) {
+        titleInput.value = '';  // Limpar o título anterior
+        showTitleModal.value = true;  // Mostrar a modal de título
       }
     };
     reader.readAsDataURL(file);
@@ -199,7 +224,34 @@ const showNotification = (message: string) => {
     notification.value = null;
   }, 3000);
 };
+
+// Função para salvar o projeto após inserir o título
+const saveProject = () => {
+  if (titleInput.value.trim() === "") {
+    showNotification("Por favor, insira um título para o projeto.");
+    return;
+  }
+
+  // Criar um novo projeto com o título e as imagens carregadas
+  const newProject = {
+    id: Date.now(),
+    title: titleInput.value,
+    imageUrls: [...newImageUrls.value], // Usar as URLs das imagens carregadas
+    lastEdited: "just now",
+  };
+
+  projects.value.unshift(newProject); // Adicionar o novo projeto à lista
+  showNotification("Projeto criado com sucesso!");
+  closeTitleModal(); // Fechar a modal
+};
+
+// Fechar a modal de título
+const closeTitleModal = () => {
+  showTitleModal.value = false;
+};
 </script>
+
+
 
 <style scoped>
 .drag-drop-area {

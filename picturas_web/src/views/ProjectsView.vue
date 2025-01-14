@@ -82,7 +82,6 @@
                 <div v-else class="w-full h-full bg-gray-200"></div>
               </button>
             </div>
-            <span class="absolute top-2 right-2 text-white bg-gray-700 p-1 text-sm">{{ index + 1 }}</span>
           </div>
         </div>
 
