@@ -32,8 +32,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     isLoading.value = true;
     error.value = null;
     try {
-      const response = await getSubscriptionStatus();
-      status.value = response;
+      ({ trialUsed: status.value.trialUsed, isPremium: status.value.isPremium, plan: status.value.plan } = await getSubscriptionStatus());
     } catch (err) {
       error.value = 'Failed to fetch subscription status';
       console.error(err);

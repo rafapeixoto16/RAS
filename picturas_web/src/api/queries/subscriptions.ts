@@ -9,7 +9,7 @@ export const getPlans = async () => {
 };
 
 export const getSubscriptionStatus = async () => {
-    const response = await axiosInstance.get('/api/v1/subscription', {
+    const response = await axiosInstance.get('/api/v1/subscription/', {
         headers: {
             Authorization: `Bearer ${authStore.accessToken}`
         }
