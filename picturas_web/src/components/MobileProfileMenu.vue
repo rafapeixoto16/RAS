@@ -41,8 +41,13 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, computed } from 'vue';
+  import { useAuthStore } from '@/stores/authStore';
   import { useRouter } from 'vue-router';
+  import { signOut} from '@/api/mutations/signout';
+
+  const authStore = useAuthStore();
+  const isLoggedIn = computed(() => authStore.isLoggedIn());
   
   const emit = defineEmits<{
     (e: 'close-menu'): void;
@@ -56,7 +61,7 @@
   const profileOptions = [
     { label: 'Profile', icon: 'bi bi-person-circle', action: () => router.push('/profile') },
     { label: 'Settings', icon: 'bi bi-gear', action: () => router.push('/settings') },
-    { label: 'Logout', icon: 'bi bi-box-arrow-right', action: () => console.log('Logout clicked') },
+    { label: 'Logout', icon: 'bi bi-box-arrow-right', action: () => handelSignOut() },
   ];
   
   const toggleMenu = () => {
@@ -76,6 +81,22 @@
       isMenuOpen.value = false;
     }, 300);
   };
+
+  const handelSignOut = async () => {
+    try {
+      
+      console.log(isLoggedIn.value);
+      if (!isLoggedIn.value) {
+        return;
+      }
+      const response = await signOut();
+      console.log(response);
+      authStore.clearTokens();
+      router.push('/');
+    } catch (error) {
+      console.log(error);
+    }
+  }
   
   const handleOptionClick = (action: () => void) => {
     action();

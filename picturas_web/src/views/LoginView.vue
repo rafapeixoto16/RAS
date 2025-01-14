@@ -74,6 +74,12 @@
           >
             Sign In
           </button>
+          <button 
+            @click.prevent="handleGuest"
+            class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg"
+          >
+            Continue as a Guest
+          </button>
           <div v-if="errorMessage" class="mt-4 text-red-600 text-center">
             {{ errorMessage }}
           </div>
@@ -129,9 +135,19 @@ const handleLogin = async () => {
     } else {
       const finalResponse = await loginSecondFactor(response.validationToken);
       authStore.setTokens(finalResponse.accessToken, finalResponse.refreshToken);
-      router.push('/');
+      router.push('/dashboard');
     }
   } catch (error) {
+    console.error('Login error:', error);
+    errorMessage.value = 'Invalid username or password. Please try again.';
+  }
+};
+
+const handleGuest = async () => {
+  try {
+    errorMessage.value = '';
+    //const response = await loginGuest({ email: 'guest@example'})
+    } catch (error) {
     console.error('Login error:', error);
     errorMessage.value = 'Invalid username or password. Please try again.';
   }
@@ -142,7 +158,7 @@ const handleTwoFactorVerification = async (twoFactorCode: string) => {
     errorMessage.value = '';
     const response = await loginSecondFactor(loginJwt.value, twoFactorCode);
     authStore.setTokens(response.accessToken, response.refreshToken);
-    router.push('/');
+    router.push('/dashboard');
   } catch (error) {
     console.error('Two-factor login error:', error);
     errorMessage.value = 'Invalid two-factor code. Please try again.';

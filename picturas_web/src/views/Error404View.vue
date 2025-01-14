@@ -18,7 +18,7 @@
           <h2 class="text-4xl font-bold text-blue-800 mb-4">Page Not Found</h2>
           <p class="text-xl text-blue-600 mb-8">Oops! The page you're looking for doesn't exist.</p>
           <router-link 
-            to="/" 
+            to="/dashboard" 
             class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg transition duration-300 ease-in-out hover:bg-blue-700 hover:shadow-lg"
           >
             Go Back Home
