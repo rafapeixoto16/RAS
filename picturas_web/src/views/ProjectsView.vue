@@ -4,7 +4,6 @@
       <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
-            <!-- Se está em modo de edição, exiba o campo de entrada -->
             <template v-if="isEditingTitle">
               <input 
                 v-model="projectTitle" 
@@ -14,7 +13,6 @@
                 autofocus
               />
             </template>
-            <!-- Se não está em modo de edição, exiba o título e permita clicar para editar -->
             <template v-else>
               <h1 
                 class="text-xl md:text-2xl font-bold text-gray-900 mb-[10%] sm:mb-0 cursor-pointer"
@@ -111,6 +109,8 @@ import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
 import type { Tool } from '@/components/ToolButton.vue';
+import JSZip from 'jszip';
+
 
 interface Page {
   id: number;

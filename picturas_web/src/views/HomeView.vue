@@ -61,6 +61,7 @@
         ref="fileInput"
         @change="handleFileUpload"
         accept="image/*"
+        multiple
       />
     </div>
 
@@ -82,6 +83,7 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import ProjectCard from "@/components/ProjectCard.vue";
@@ -89,7 +91,7 @@ import ProjectCard from "@/components/ProjectCard.vue";
 interface Project {
   id: number;
   title: string;
-  imageUrl: string;
+  imageUrls: string[]; // Updated to an array
   lastEdited: string;
 }
 
@@ -97,51 +99,16 @@ const projects = ref<Project[]>([
   {
     id: 1,
     title: "Beautiful Nature",
-    imageUrl: "https://picsum.photos/id/10/800/600",
+    imageUrls: ["https://picsum.photos/id/10/800/600", "https://picsum.photos/id/11/800/600"],
     lastEdited: "2 days ago",
   },
   {
     id: 2,
     title: "Mountain Sunset",
-    imageUrl: "https://picsum.photos/id/29/800/600",
+    imageUrls: ["https://picsum.photos/id/29/800/600"],
     lastEdited: "1 week ago",
   },
-  {
-    id: 3,
-    title: "City Skyline",
-    imageUrl: "https://picsum.photos/id/41/800/600",
-    lastEdited: "3 days ago",
-  },
-  {
-    id: 4,
-    title: "Calm Beach",
-    imageUrl: "https://picsum.photos/id/152/800/600",
-    lastEdited: "5 days ago",
-  },
-  {
-    id: 5,
-    title: "Forest Pathway",
-    imageUrl: "https://picsum.photos/id/110/800/600",
-    lastEdited: "1 day ago",
-  },
-  {
-    id: 6,
-    title: "Sunny Day",
-    imageUrl: "https://picsum.photos/id/106/800/600",
-    lastEdited: "4 days ago",
-  },
-  {
-    id: 7,
-    title: "Snowy Peaks",
-    imageUrl: "https://picsum.photos/id/65/800/600",
-    lastEdited: "2 weeks ago",
-  },
-  {
-    id: 8,
-    title: "Desert Dunes",
-    imageUrl: "https://picsum.photos/id/111/800/600",
-    lastEdited: "6 days ago",
-  },
+  // Add more projects...
 ]);
 
 const searchQuery = ref("");
@@ -164,7 +131,7 @@ const openInNewTab = (id: number) => {
 };
 
 const renameProject = (id: number) => {
-  console.log(`renaming project with id: ${id} `);
+  console.log(`Renaming project with id: ${id}`);
 };
 
 const moveToTrash = (id: number) => {
@@ -184,25 +151,32 @@ const onDragLeave = () => {
 const onDrop = (event: DragEvent) => {
   isDragging.value = false;
   const files = event.dataTransfer?.files;
-  if (files && files[0]) {
-    handleFile(files[0]);
+  if (files) {
+    handleFiles(Array.from(files));
   }
 };
 
-const handleFile = (file: File) => {
-  const reader = new FileReader();
-  reader.onload = () => {
-    const imageUrl = reader.result as string;
-    projects.value.unshift({
-      id: Date.now(),
-      title: `New Project - ${file.name}`,
-      imageUrl,
-      lastEdited: "just now",
-    });
+const handleFiles = (files: File[]) => {
+  const imageUrls: string[] = [];
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      imageUrls.push(reader.result as string);
 
-    showNotification("Project successfully created!");
-  };
-  reader.readAsDataURL(file);
+      // Add project after all images are processed
+      if (imageUrls.length === files.length) {
+        projects.value.unshift({
+          id: Date.now(),
+          title: `New Project - ${files[0].name}`,
+          imageUrls,
+          lastEdited: "just now",
+        });
+
+        showNotification("Projects successfully created!");
+      }
+    };
+    reader.readAsDataURL(file);
+  });
 };
 
 const triggerFileUpload = () => {
@@ -214,8 +188,8 @@ const fileInput = ref<HTMLInputElement | null>(null);
 
 const handleFileUpload = (event: Event) => {
   const input = event.target as HTMLInputElement;
-  if (input.files && input.files[0]) {
-    handleFile(input.files[0]);
+  if (input.files) {
+    handleFiles(Array.from(input.files));
   }
 };
 
