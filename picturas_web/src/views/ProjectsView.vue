@@ -31,6 +31,12 @@
               <button @click="downloadCurrentImage" class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200">
                 <i class="bi bi-download text-xl"></i>
               </button>
+              <button 
+                @click="toggleGridView" 
+                class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
+              >
+                <i class="bi bi-grid text-xl"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -58,8 +64,30 @@
         </div>
       </aside>
 
+      <!-- Show either carousel or grid view based on isGridView -->
       <main class="flex-1 overflow-hidden relative">
-        <div class="absolute inset-0 overflow-hidden">
+        <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+          <!-- Display the images in a grid with portrait orientation -->
+          <div v-for="(page, index) in pages" :key="page.id" class="relative group">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+              <button 
+                @click="goToImage(index)" 
+                class="w-full h-72">
+                <img
+                  v-if="page.imageUrl"
+                  :src="page.imageUrl"
+                  alt="Project image"
+                  class="w-full h-full object-cover transform scale-90 transition-transform duration-300 ease-in-out"
+                />
+                <div v-else class="w-full h-full bg-gray-200"></div>
+              </button>
+            </div>
+            <span class="absolute top-2 right-2 text-white bg-gray-700 p-1 text-sm">{{ index + 1 }}</span>
+          </div>
+        </div>
+
+        <div v-else class="absolute inset-0 overflow-hidden">
+          <!-- Original carousel view -->
           <Carousel 
             v-model="currentPage" 
             :items="pages" 
@@ -116,6 +144,19 @@ interface Page {
   id: number;
   imageUrl: string | null;
 }
+
+
+const isGridView = ref(false);
+
+const toggleGridView = () => {
+  isGridView.value = !isGridView.value;
+};
+
+const goToImage = (index: number) => {
+  currentPage.value = index;  
+  isGridView.value = false;   
+};
+
 
 const projectTitle = ref("Projects");
 const isEditingTitle = ref(false);
