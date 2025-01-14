@@ -61,8 +61,37 @@
         ref="fileInput"
         @change="handleFileUpload"
         accept="image/*"
+        multiple
       />
     </div>
+
+   <!-- Modal for Title Input -->
+<div v-if="showTitleModal" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white p-6 sm:p-8 md:p-10 rounded-lg w-full max-w-lg md:max-w-1/3">
+    <h2 class="text-xl sm:text-2xl font-semibold mb-4">Enter Project Title</h2>
+    <input
+      v-model="titleInput"
+      type="text"
+      placeholder="Project Title"
+      class="w-full bg-gray-100 text-gray-800 font-medium py-2 sm:py-3 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    />
+    <div class="flex justify-end mt-4">
+      <button
+        class="bg-blue-500 text-white py-2 px-4 rounded-lg mr-2"
+        @click="saveProject"
+      >
+        Save
+      </button>
+      <button
+        class="bg-gray-300 text-gray-800 py-2 px-4 rounded-lg"
+        @click="closeTitleModal"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
 
     <div
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4"
@@ -82,6 +111,8 @@
   </div>
 </template>
 
+
+
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import ProjectCard from "@/components/ProjectCard.vue";
@@ -89,7 +120,7 @@ import ProjectCard from "@/components/ProjectCard.vue";
 interface Project {
   id: number;
   title: string;
-  imageUrl: string;
+  imageUrls: string[];
   lastEdited: string;
 }
 
@@ -97,56 +128,23 @@ const projects = ref<Project[]>([
   {
     id: 1,
     title: "Beautiful Nature",
-    imageUrl: "https://picsum.photos/id/10/800/600",
+    imageUrls: ["https://picsum.photos/id/10/800/600", "https://picsum.photos/id/11/800/600"],
     lastEdited: "2 days ago",
   },
   {
     id: 2,
     title: "Mountain Sunset",
-    imageUrl: "https://picsum.photos/id/29/800/600",
+    imageUrls: ["https://picsum.photos/id/29/800/600"],
     lastEdited: "1 week ago",
-  },
-  {
-    id: 3,
-    title: "City Skyline",
-    imageUrl: "https://picsum.photos/id/41/800/600",
-    lastEdited: "3 days ago",
-  },
-  {
-    id: 4,
-    title: "Calm Beach",
-    imageUrl: "https://picsum.photos/id/152/800/600",
-    lastEdited: "5 days ago",
-  },
-  {
-    id: 5,
-    title: "Forest Pathway",
-    imageUrl: "https://picsum.photos/id/110/800/600",
-    lastEdited: "1 day ago",
-  },
-  {
-    id: 6,
-    title: "Sunny Day",
-    imageUrl: "https://picsum.photos/id/106/800/600",
-    lastEdited: "4 days ago",
-  },
-  {
-    id: 7,
-    title: "Snowy Peaks",
-    imageUrl: "https://picsum.photos/id/65/800/600",
-    lastEdited: "2 weeks ago",
-  },
-  {
-    id: 8,
-    title: "Desert Dunes",
-    imageUrl: "https://picsum.photos/id/111/800/600",
-    lastEdited: "6 days ago",
   },
 ]);
 
 const searchQuery = ref("");
 const isDragging = ref(false);
 const notification = ref<string | null>(null);
+const showTitleModal = ref(false);
+const titleInput = ref("");
+const newImageUrls = ref<string[]>([]);  // Armazenar imagens temporariamente antes de salvar
 
 const filteredProjects = computed(() => {
   return projects.value.filter((project) =>
@@ -164,7 +162,7 @@ const openInNewTab = (id: number) => {
 };
 
 const renameProject = (id: number) => {
-  console.log(`renaming project with id: ${id} `);
+  console.log(`Renaming project with id: ${id}`);
 };
 
 const moveToTrash = (id: number) => {
@@ -184,25 +182,26 @@ const onDragLeave = () => {
 const onDrop = (event: DragEvent) => {
   isDragging.value = false;
   const files = event.dataTransfer?.files;
-  if (files && files[0]) {
-    handleFile(files[0]);
+  if (files) {
+    handleFiles(Array.from(files));
   }
 };
 
-const handleFile = (file: File) => {
-  const reader = new FileReader();
-  reader.onload = () => {
-    const imageUrl = reader.result as string;
-    projects.value.unshift({
-      id: Date.now(),
-      title: `New Project - ${file.name}`,
-      imageUrl,
-      lastEdited: "just now",
-    });
+const handleFiles = (files: File[]) => {
+  newImageUrls.value = [];  // Limpar a lista de imagens antes de adicionar novas
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      newImageUrls.value.push(reader.result as string);
 
-    showNotification("Project successfully created!");
-  };
-  reader.readAsDataURL(file);
+      // Exibir a modal de título quando todas as imagens forem carregadas
+      if (newImageUrls.value.length === files.length) {
+        titleInput.value = '';  // Limpar o título anterior
+        showTitleModal.value = true;  // Mostrar a modal de título
+      }
+    };
+    reader.readAsDataURL(file);
+  });
 };
 
 const triggerFileUpload = () => {
@@ -214,8 +213,8 @@ const fileInput = ref<HTMLInputElement | null>(null);
 
 const handleFileUpload = (event: Event) => {
   const input = event.target as HTMLInputElement;
-  if (input.files && input.files[0]) {
-    handleFile(input.files[0]);
+  if (input.files) {
+    handleFiles(Array.from(input.files));
   }
 };
 
@@ -225,7 +224,34 @@ const showNotification = (message: string) => {
     notification.value = null;
   }, 3000);
 };
+
+// Função para salvar o projeto após inserir o título
+const saveProject = () => {
+  if (titleInput.value.trim() === "") {
+    showNotification("Por favor, insira um título para o projeto.");
+    return;
+  }
+
+  // Criar um novo projeto com o título e as imagens carregadas
+  const newProject = {
+    id: Date.now(),
+    title: titleInput.value,
+    imageUrls: [...newImageUrls.value], // Usar as URLs das imagens carregadas
+    lastEdited: "just now",
+  };
+
+  projects.value.unshift(newProject); // Adicionar o novo projeto à lista
+  showNotification("Projeto criado com sucesso!");
+  closeTitleModal(); // Fechar a modal
+};
+
+// Fechar a modal de título
+const closeTitleModal = () => {
+  showTitleModal.value = false;
+};
 </script>
+
+
 
 <style scoped>
 .drag-drop-area {
