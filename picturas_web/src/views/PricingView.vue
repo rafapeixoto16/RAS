@@ -39,7 +39,7 @@
           <PricingCard
             title="Premium"
             description="Advanced tools for serious creators"
-            :price="billingCycle === 'monthly' ? 9.99 : 99"
+            :price="billingCycle === 'monthly' ? monthlyPrice : yearlyPrice"
             :billing-cycle="billingCycle"
             button-text="Upgrade Now"
             button-variant="premium"
@@ -57,10 +57,11 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue'
+  import { ref, onMounted } from 'vue'
   import PricingCard from '@/components/PricingCard.vue'
   import PlanToggle from '@/components/PlanToggle.vue'
   import FeatureComparison from '@/components/FeatureComparison.vue'
+  import { getPlans } from '@/api/queries/subscriptions.ts'
   
   const billingCycle = ref<'monthly' | 'yearly'>('monthly')
   
@@ -133,4 +134,17 @@
       ]
     }
   ]
-  </script>  
+  
+  const monthlyPrice = ref(0)
+  const yearlyPrice = ref(0)
+  
+  onMounted(async () => {
+      const plans = await getPlans()
+      if (plans["month"]) {
+          monthlyPrice.value = plans["month"].amount / 100
+      }
+      if (plans["year"]) {
+          yearlyPrice.value = plans["year"].amount / 100
+      }
+  })
+  </script> 

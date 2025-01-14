@@ -50,6 +50,7 @@
     </ul>
 
     <button
+      @click="handleButtonClick"
       class="w-full rounded-lg px-4 py-2 sm:py-3 text-center text-sm sm:text-base font-semibold transition-colors duration-200"
       :class="{
         'bg-[#3B82F6] text-white hover:bg-[#2563EB]':
@@ -62,10 +63,28 @@
     >
       {{ buttonText }}
     </button>
+
+    <SubscriptionModal
+      :is-open="isModalOpen"
+      :billing-cycle="billingCycle"
+      :price="price"
+      @close="closeModal"
+      @success="handleSubscriptionSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useAuthStore } from '@/stores/authStore';
+import SubscriptionModal from './SubscriptionModal.vue';
+import router from '@/router';
+
+const isModalOpen = ref(false);
+const authStore = useAuthStore();
+const subStore = useSubscriptionStore();
+
 interface Feature {
   text: string;
   included: boolean;
@@ -82,7 +101,28 @@ interface Props {
   features: Feature[];
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   isPopular: false,
 });
+
+const handleButtonClick = () => {
+  if (!authStore.isLoggedIn) {
+    router.push('/login');
+    return;
+  }
+
+  if (!subStore.isPremium && props.price > 0) {
+    isModalOpen.value = true;
+  } else if (props.title === 'Free Account' && !subStore.isPremium) {
+    console.log('Switching to free account');
+  }
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+};
+
+const handleSubscriptionSuccess = () => {
+  subStore.fetchSubscriptionStatus();
+};
 </script>
