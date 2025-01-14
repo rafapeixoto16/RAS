@@ -26,7 +26,8 @@ export const getLimitsMiddleware = (req, res, next) => {
         hasTtl: false,
         has4kUpload: false,
         noWatermark: false,
-        pipelines: 1
+        concurrentPipelines: 1,
+        dailyPipelines: 1
     }
 
     limits.ttlStartTime = new Date(req.user.iat * 1000);
@@ -38,7 +39,10 @@ export const getLimitsMiddleware = (req, res, next) => {
     if (req.user.isPremium) {
         limits.has4kUpload = true;
         limits.noWatermark = true;
-        limits.pipelines = 5;
+        limits.concurrentPipelines = 5;
+        limits.dailyPipelines = Infinity;
+    } else {
+        limits.dailyPipelines = 5;
     }
 
     req.user.limits = limits;

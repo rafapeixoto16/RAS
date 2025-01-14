@@ -1,7 +1,7 @@
 import amqp from 'amqplib';
 import path from 'node:path';
-import Redis from 'ioredis';
 import redisLock from './redisLock.js';
+import redisClient from '../config/redisConfig.js';
 import JSZip from 'jszip';
 import fs from 'node:fs';
 
@@ -16,15 +16,6 @@ const {
 
 const RABBITMQ_URL = `amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}:${RABBITMQ_PORT}`;
 const BASE_PATH = path.resolve(process.env.FILTER_SHARED_DIR);
-
-// TODO redis on connect
-const redisClient = new Redis({
-    host: process.env.FILTER_REDIS_HOST,
-    password: process.env.FILTER_REDIS_PASSWORD,
-    options: {
-        enableOfflineQueue: false, // We require realtime data
-    },
-});
 
 let channel;
 

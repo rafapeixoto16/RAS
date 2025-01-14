@@ -27,10 +27,10 @@ export const addProjectToPipeline = async (userId, projectId, userLimits) => {
         pipeline = new Pipeline({ userId, projects: [] });
     }
 
-    if (pipeline.projects.length + 1 > userLimits.pipelines) {
+    if (pipeline.projects.length + 1 > userLimits.concurrentPipelines) {
         await session.abortTransaction();
         session.endSession();
-        throw new Error(`You can only have ${userLimits.pipelines} running at a time`);
+        throw new Error(`You can only have ${userLimits.concurrentPipelines} running at a time`);
     }
 
     const isProjectPresent = pipeline.projects.some(id => id.toString() === projectId.toString());
@@ -124,3 +124,22 @@ export const removeProjectPipeline = async (userId, projectId) => {
     return updatedPipeline;
 };
 
+export const isUserLimitReached = async (userId, limits) => {
+    const userLimit = limits.dailyPipelines;
+
+    const userLimits = await Limits.findOne({ _id: userId });
+
+    if (!userLimits) {
+        await Limits.create({
+            _id: userId,
+            qtdRunnedPipelines: 0
+        });
+        return false;
+    }
+
+    if (userLimits.qtdRunnedPipelines >= userLimit) {
+        return true;
+    }
+
+    return false;
+};

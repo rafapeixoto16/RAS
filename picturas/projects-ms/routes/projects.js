@@ -10,6 +10,7 @@ import {
     removeTool,
     reorderTool,
     addImage,
+    getImage,
     removeImage,
     downloadImageLocally,
     uploadLocalImage
@@ -21,7 +22,8 @@ import multer from '../config/multerConfig.js';
 import { getLimitsMiddleware } from '../utils/premium.js'
 import {
     addProjectToPipeline,
-    removeProjectFromPipeline
+    removeProjectFromPipeline,
+    isUserLimitReached
 } from '../controller/pipeline.js'
 import {
     cancelPipeline,
@@ -30,9 +32,6 @@ import {
     setHooks
 } from '../utils/filterCall.js'
 
-//downloadResource: (imageInfo, path) => {},
-//uploadResource: (projectId, path, isPreview) => {},
-//terminated: (projectId) => {}
 setHooks(
     async (imageInfo, path) => {
         await downloadImageLocally(imageInfo, path);
@@ -54,7 +53,12 @@ router.post('/', validateRequest({
 }), async (req, res) => {
     const { body } = req;
 
+    // TODO we can easily limit the number of project
+
     try {
+        if (req.user.limits.hasTtl) {
+            body.ttl = ttlStartTime;
+        }
         const project = await addProject(body);
         return res.status(200).json(project);
     } catch (error) {
@@ -201,20 +205,36 @@ router.put('/:id/tool/:idxTool', validateRequest({
 // Images
 //////////////////////////////////////////////////////////////////////////////////////////
 
+router.get('/:id/image/:idxImage', async (req, res) => {
+    const { id, idxImage } = req.params;
+
+    try {
+        const { imageUrl } = await getImage(id, idxImage);
+        return res.status(200).json({
+            imageUrl
+        });
+    } catch(error) {
+        return res.status(500).json({ error: error.message });
+    } 
+})
+
 router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
     const { id } = req.params;
     const image = req.file;
     const userLimits = req.user.limits;
+
+    // TODO we can easily limit the number of images in project
 
     if (!image) {
         return res.status(400).json({error: 'No image uploaded'});
     }
 
     try {
-        const { project, index } = await addImage(id, image, userLimits);
+        const { project, index, imageUrl } = await addImage(id, image, userLimits);
         return res.status(200).json({
             project,
-            index
+            index,
+            imageUrl
         })
     } catch(error) {
         return res.status(500).json({ error: error.message });
@@ -245,6 +265,12 @@ router.post('/:id/process', async (req, res) => {
     const userLimits = req.user.limits;
     
     try {
+        const isLimitReached = await isUserLimitReached(userId, userLimits);
+        if (isLimitReached) 
+            return res.status(429).json({
+                message: 'Daily limit reached'
+            })
+
         const updatedPipeline = await addProjectToPipeline(userId, id, userLimits);
         const project = await getProject(id);
 
@@ -274,7 +300,7 @@ router.post('/:id/preview', validateRequest({
         const project = await getProject(id);
 
         const image = await project.images.findOne(id => id === imageId);
-        if (!image){
+        if (!image) {
             res.status(404).json({ message: `The specified image does not exist` });
         }
 

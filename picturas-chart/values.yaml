@@ -150,6 +150,7 @@ s3_username: "s3-username" # access
 s3_password: "s3-password" # secret
 s3_profile_picture_bucket: "profile"
 s3_picture_bucket: "picture"
+s3_temp_bucket: "temp"
 
 filter_shared_dir: /mnt/nfs
 

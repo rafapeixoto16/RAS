@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+import redisClient from '../config/redisConfig.js';
+import minioClient from '../config/minioClient.js';
+import redisLock from '../utils/redisLock.js';
 
 const projectSchema = new mongoose.Schema({
     userId: {
@@ -51,4 +54,15 @@ const projectSchema = new mongoose.Schema({
 });
 
 const Project = mongoose.model('Project', projectSchema); 
+
+mongoose.connection.collection('Projects').watch([
+    { $match: {operationType: 'delete'} }
+]).on('change', async (change) => {
+    const lock = await redisLock(redisClient, `delete_${change._id}`, 0);
+
+    await minioClient.removeObjects(process.env.S3_IMAGE_BUCKET, change.images.map((img) => `${img.id}.${img.format}`));
+
+    await lock();
+});
+
 export default Project;

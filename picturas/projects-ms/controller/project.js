@@ -131,46 +131,45 @@ export const reorderTool = async (projectId, toolIdx, toolIdxAfter) => {
 
 // file = req.file from multer
 export const addImage = async (projectId, file, userLimits) => {
-    const extensionName = path.extname(req.file.originalname);
-    const imageName = `${(new Date()).now()}${extensionName}`;
+    const extensionName = path.extname(file.originalname);
+    const objectId = new mongoose.Types.ObjectId();
+    const imageName = `${objectId}${extensionName}`;
     const is4kAllowed = userLimits.has4kUpload;
 
-    // check if the project exists
-    const checkProject = await getProject(projectId);
-    if (!checkProject) {
-        throw new Error('Project not found')
+    const project = await getProject(projectId);
+    if (!project) {
+        throw new Error('Project not found');
     }
 
-    if(!is4kAllowed && await isImage4k(file.buffer)) {
-        throw new Error("The user is not premium therefore 4k images are not allowed");
+    if (!is4kAllowed && await isImage4k(file.buffer)) {
+        throw new Error("The user is not premium; 4K images are not allowed.");
     }
+
+    const bucketName = process.env.S3_PICTURE_BUCKET;
 
     const metaData = {
         'Content-Type': file.mimetype,
     };
 
-    let imageUrl;
+    await minioClient.putObject(bucketName, imageName, file.buffer, metaData);
 
-    minioClient.putObject(
-        // TODO: change this
-        ///process.env.S3_PICTURE_BUCKET
-        process.env,
-        imageName,
-        file.buffer,
-        metaData,
-        (err, etag) => {
-            if (err) throw new Error('Failed to upload image to MinIO');
-            imageUrl = `${process.env.S3_PICTURE_BUCKET}/${imageName}`;
-        }
-    );
+    const publicUrl = await minioClient.presignedGetObject(bucketName, imageName, 24 * 60 * 60);
 
-    const { project, idx } = await addImageToProject(projectId, {
-        id: imageUrl,
-        format: extensionName
+    const imageDocument = new Image({
+        _id: objectId,
+        project: projectId,
+        url: publicUrl,
     });
 
-    return { updatedProject, imageIdx: idx };
-}
+    await imageDocument.save();
+
+    const { updatedProject, idx } = await addImageToProject(projectId, {
+        id: objectId,
+        format: extensionName.replace('.', ''),
+    });
+
+    return { updatedProject, imageIdx: idx, imageUrl: publicUrl };
+};
 
 const isImage4k = async (image) => {
     const metadata = await sharp(image).metadata();
@@ -212,8 +211,7 @@ export const removeImage = async (projectId, imageIdx) => {
     const updatedProject = await updateProject(projectId, project);
     const imageName = removedImage.id; // S3 location
 
-    minioClient.removeObject(
-        // TODO: change this
+    await minioClient.removeObject(
         process.env.S3_PICTURE_BUCKET,
         imageName,
     );
@@ -222,6 +220,40 @@ export const removeImage = async (projectId, imageIdx) => {
         updatedProject,
         removedImage
     };
+};
+
+export const getImage = async (projectId, imageIdx) => {
+    const project = await getProject(projectId);
+    if (!project) {
+        throw new Error('Project not found');
+    }
+
+    if (imageIdx < 0 || imageIdx >= project.images.length) {
+        throw new Error('Invalid image index');
+    }
+
+    const imageRef = project.images[imageIdx];
+
+    let image = await Image.findById(imageRef.id);
+
+    if (!image) {
+        const extensionName = imageRef.format.startsWith('.') ? imageRef.format : `.${imageRef.format}`;
+        const bucketName = process.env.S3_PICTURE_BUCKET;
+        const imageName = `${imageRef.id}${extensionName}`;
+        const publicUrl = await minioClient.presignedGetObject(bucketName, imageName, 24 * 60 * 60);
+
+        image = new Image({
+            _id: imageRef.id,
+            project: projectId,
+            url: publicUrl,
+        });
+
+        await image.save();
+
+        return publicUrl;
+    }
+
+    return image.url;
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -270,15 +302,14 @@ export const uploadLocalImage = async (filePath, isPreview, projectId) => {
 
     const fileName = `${objectId}${extensionName}`;
     
-    const bucketName = isPreview 
-        ? process.env.S3_PREVIEW_BUCKET 
-        : process.env.S3_PICTURE_BUCKET;
+    const bucketName = process.env.S3_TEMP_BUCKET
 
     const metaData = {
         'Content-Type': contentType,
     };
 
     await minioClient.putObject(bucketName, fileName, fileStream, metaData);
+    await minioClient.setObjectTagging(bucketName);
     const imageUrl = await minioClient.presignedGetObject(bucketName, fileName, 24 * 60 * 60);
 
     // save the result in the project
@@ -286,7 +317,7 @@ export const uploadLocalImage = async (filePath, isPreview, projectId) => {
         const project = await getProject(projectId);
         project.result = {
             output: imageUrl,
-            // expireDate:  TODO: add expireDate when needed
+            expireDate:  Date.now()
         };
         await updateProject(projectId, project);
     }

@@ -10,7 +10,13 @@ const pipelineModel = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Project'
-    }]
+    }],
+    ttl: {
+        type: Date,
+        default: Date.now(),
+        required: true,
+        index: { expires: '24h' }
+    }
 }, {
     timestamps: false
 });
