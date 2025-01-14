@@ -3,7 +3,27 @@
     <header class="bg-white shadow-sm z-0">
       <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-          <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-[10%] sm:mb-0">Projects</h1>
+          <div>
+            <!-- Se está em modo de edição, exiba o campo de entrada -->
+            <template v-if="isEditingTitle">
+              <input 
+                v-model="projectTitle" 
+                @keyup.enter="saveTitle" 
+                @blur="saveTitle" 
+                class="text-xl md:text-2xl font-bold text-gray-900 bg-gray-100 px-2 border-b border-gray-300 focus:outline-none"
+                autofocus
+              />
+            </template>
+            <!-- Se não está em modo de edição, exiba o título e permita clicar para editar -->
+            <template v-else>
+              <h1 
+                class="text-xl md:text-2xl font-bold text-gray-900 mb-[10%] sm:mb-0 cursor-pointer"
+                @click="editTitle"
+              >
+                {{ projectTitle }}
+              </h1>
+            </template>
+          </div>
           <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
             <span class="text-sm text-gray-500">Page {{ currentPage + 1 }} of {{ pages.length }}</span>
             <div class="flex space-x-2">
@@ -96,6 +116,17 @@ interface Page {
   id: number;
   imageUrl: string | null;
 }
+
+const projectTitle = ref("Projects");
+const isEditingTitle = ref(false);
+
+const editTitle = () => {
+  isEditingTitle.value = true;
+};
+
+const saveTitle = () => {
+  isEditingTitle.value = false;
+};
 
 const pages = ref<Page[]>([{ id: 1, imageUrl: null }]);
 const currentPage = ref(0);
