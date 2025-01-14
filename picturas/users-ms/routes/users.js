@@ -4,15 +4,15 @@ import jwt from 'jsonwebtoken';
 import * as OTPAuth from 'otpauth';
 import sendEmail from '../email/sendEmail.js';
 import crypto from 'node:crypto';
+import path from 'node:path';
+import mongoose from 'mongoose';
 
 import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
-import {v4 as uuidv4} from 'uuid';
 import {schemaValidation, validateRequest} from '@picturas/schema-validation';
-import {requiresAuth} from "@picturas/ms-helper";
+import {requiresAuth, requiresNonGuest} from "@picturas/ms-helper";
 
-const BUCKET_NAME = 'bucket-name'; //TODO **TROCAR PELO bucket-name do MinIO**
 const SALT_WORK_FACTOR = 10;
 
 const router = Router();
@@ -174,6 +174,7 @@ router.post('/login/2', validateRequest({
             }
 
             const filteredUser = {
+                isGuest: false,
                 _id: user._id,
                 username: user.username,
                 email: user.email,
@@ -203,6 +204,25 @@ router.post('/login/2', validateRequest({
                 .catch((_) => res.status(447));
         }
     );
+});
+
+router.post('/guestLogin', (req, res) => {
+    const filteredUser = {
+        isGuest: true,
+        _id: new mongoose.Types.ObjectId(),
+        username: null,
+        email: null
+    };
+
+    const accessToken = jwt.sign(
+        filteredUser,
+        process.env.AUTH_JWT_SECRET,
+        {expiresIn: '24h'}
+    );
+
+    res.json({
+        accessToken,
+    });
 });
 
 router.post('/passwordRecovery', validateRequest({
@@ -302,6 +322,7 @@ router.post('/token', validateRequest({
 
 // Requires Auth from now on
 router.use(requiresAuth);
+router.use(requiresNonGuest);
 
 router.delete('/logout', async (req, res) => {
     User.getUser(req.user._id).then(userInfo => {
@@ -316,26 +337,26 @@ router.delete('/logout', async (req, res) => {
         .catch((err) => res.sendStatus(400));
 });
 
-// UNTESTED
 router.put('/profilePic', multer.single('profilePic'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({error: 'No file uploaded'});
     }
 
-    const extensionName = path.extname(req.file.name);
-    const profilePicName = `${uuidv4()}.${extensionName}`;
+    const extensionName = path.extname(req.file.originalname);
+    const profilePicName = `${req.user._id}${extensionName}`;
 
     const metaData = {
         'Content-Type': req.file.mimetype,
     };
 
     minioClient.putObject(
-        BUCKET_NAME,
+        process.env.S3_PROFILE_PICTURE_BUCKET,
         profilePicName,
         req.file.buffer,
         metaData,
         (err, etag) => {
             if (err) {
+                console.error(err);
                 return res
                     .status(500)
                     .json({
@@ -344,9 +365,9 @@ router.put('/profilePic', multer.single('profilePic'), (req, res) => {
                     });
             }
 
-            const imageUrl = `http://${process.env.S3_ENDPOINT}/${BUCKET_NAME}/${profilePicName}`;
+            // TODO unnecessary
+            const imageUrl = `${process.env.S3_PROFILE_PICTURE_BUCKET}/${profilePicName}`;
 
-            // update no user
             User.updateUserProfilePic(req.user._id, imageUrl)
                 .then(() =>
                     res
@@ -356,13 +377,15 @@ router.put('/profilePic', multer.single('profilePic'), (req, res) => {
                             imageUrl,
                         })
                 )
-                .catch((err) =>
-                    res
-                        .status(500)
-                        .json({
-                            error: 'Failed to update user profile picture',
-                            details: err,
-                        })
+                .catch((err) => {
+                    console.error(err);
+                        res
+                            .status(500)
+                            .json({
+                                error: 'Failed to update user profile picture',
+                                details: err,
+                            })
+                    }
                 );
         }
     );
@@ -379,6 +402,8 @@ router.get('/', (req, res) => {
                 location: resp.location,
                 bio: resp.bio,
                 name: resp.name,
+                profilePic: resp.profilePic,
+                emailPreferences: resp.emailPreferences
             };
 
             res.status(200).json(filteredUser);
@@ -454,5 +479,34 @@ router.delete('/otp', (req, res) => {
     })
         .catch((_) => res.sendStatus(447));
 });
+
+router.put(
+    '/updateEmailPreferences',
+    validateRequest({
+        body: schemaValidation.object({
+            projectUpdates: schemaValidation.boolean().optional(),
+            newFeatures: schemaValidation.boolean().optional(),
+            marketing: schemaValidation.boolean().optional(),
+            projectCollaborations: schemaValidation.boolean().optional(),
+            comments: schemaValidation.boolean().optional(),
+        })
+    }),
+    async (req, res) => {
+        try {
+            const out = await User.updateUser(req.user._id, {emailPreferences: req.body});
+
+            res.status(200).json({
+                message: 'Email preferences updated successfully',
+                emailPreferences: out.emailPreferences
+            });
+        } catch (error) {
+            console.error('Error updating email preferences:', error);
+            res.status(500).json({
+                error: 'Failed to update email preferences',
+                details: error.message,
+            });
+        }
+    }
+);
 
 export default router;

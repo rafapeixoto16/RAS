@@ -3,7 +3,25 @@
     <header class="bg-white shadow-sm z-0">
       <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-          <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-[10%] sm:mb-0">Projects</h1>
+          <div>
+            <template v-if="isEditingTitle">
+              <input 
+                v-model="projectTitle" 
+                @keyup.enter="saveTitle" 
+                @blur="saveTitle" 
+                class="text-xl md:text-2xl font-bold text-gray-900 bg-gray-100 px-2 border-b border-gray-300 focus:outline-none"
+                autofocus
+              />
+            </template>
+            <template v-else>
+              <h1 
+                class="text-xl md:text-2xl font-bold text-gray-900 mb-[10%] sm:mb-0 cursor-pointer"
+                @click="editTitle"
+              >
+                {{ projectTitle }}
+              </h1>
+            </template>
+          </div>
           <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
             <span class="text-sm text-gray-500">Page {{ currentPage + 1 }} of {{ pages.length }}</span>
             <div class="flex space-x-2">
@@ -12,6 +30,12 @@
               </button>
               <button @click="downloadCurrentImage" class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200">
                 <i class="bi bi-download text-xl"></i>
+              </button>
+              <button 
+                @click="toggleGridView" 
+                class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
+              >
+                <i class="bi bi-grid text-xl"></i>
               </button>
             </div>
           </div>
@@ -40,8 +64,39 @@
         </div>
       </aside>
 
+      <!-- Show either carousel or grid view based on isGridView -->
       <main class="flex-1 overflow-hidden relative">
-        <div class="absolute inset-0 overflow-hidden">
+        <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+          <!-- Display the images in a grid with portrait orientation -->
+          <div 
+            v-for="(page, index) in pages" 
+            :key="page.id" 
+            class="relative group"
+            draggable="true"
+            @dragstart="onDragStart(index, $event)"
+            @dragover="onDragOver($event)"
+            @dragenter="onDragEnter($event)"
+            @dragleave="onDragLeave($event)"
+            @drop="onDrop(index, $event)"
+          >
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+              <button 
+                @click="goToImage(index)" 
+                class="w-full h-72">
+                <img
+                  v-if="page.imageUrl"
+                  :src="page.imageUrl"
+                  alt="Project image"
+                  class="w-full h-full object-cover transform scale-90 transition-transform duration-300 ease-in-out"
+                />
+                <div v-else class="w-full h-full bg-gray-200"></div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="absolute inset-0 overflow-hidden">
+          <!-- Original carousel view -->
           <Carousel 
             v-model="currentPage" 
             :items="pages" 
@@ -91,11 +146,37 @@ import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
 import type { Tool } from '@/components/ToolButton.vue';
+import JSZip from 'jszip';
+
 
 interface Page {
   id: number;
   imageUrl: string | null;
 }
+
+
+const isGridView = ref(false);
+
+const toggleGridView = () => {
+  isGridView.value = !isGridView.value;
+};
+
+const goToImage = (index: number) => {
+  currentPage.value = index;  
+  isGridView.value = false;   
+};
+
+
+const projectTitle = ref("Projects");
+const isEditingTitle = ref(false);
+
+const editTitle = () => {
+  isEditingTitle.value = true;
+};
+
+const saveTitle = () => {
+  isEditingTitle.value = false;
+};
 
 const pages = ref<Page[]>([{ id: 1, imageUrl: null }]);
 const currentPage = ref(0);
@@ -121,6 +202,52 @@ watch(() => pages.value.length, (newLength) => {
     currentPage.value = Math.max(0, newLength - 1);
   }
 });
+
+let draggedIndex: number | null = null;
+
+const onDragStart = (index: number, event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault(); // Prevent default touch behavior
+  }
+  draggedIndex = index;
+};
+
+const onDragOver = (event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault(); 
+  } else {
+    event.preventDefault();
+  }
+};
+
+const onDragEnter = (event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault();
+  } else {
+    event.preventDefault();
+  }
+};
+
+const onDragLeave = (event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault();
+  } else {
+    event.preventDefault();
+  }
+};
+
+const onDrop = (index: number, event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault(); 
+  }
+  
+  if (draggedIndex === null || draggedIndex === index) return;
+  const draggedItem = pages.value[draggedIndex];
+  pages.value.splice(draggedIndex, 1);
+  pages.value.splice(index, 0, draggedItem);
+  draggedIndex = null;
+};
+
 
 const tools: Tool[] = [
   { 
@@ -310,6 +437,7 @@ const zoomImage = (event: WheelEvent | TouchEvent) => {
 </script>
 
 <style scoped>
+
 @media (max-width: 768px) {
   .md\:w-20 {
     width: 100%;

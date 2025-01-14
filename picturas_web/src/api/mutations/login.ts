@@ -27,3 +27,12 @@ export const loginSecondFactor = async (validationToken: string, twoFactorCode?:
     throw error;
   }
 };
+
+export const loginGuest = async () => {
+  try {
+    const response = await axiosInstance.post('/api/v1/user/guestLogin');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

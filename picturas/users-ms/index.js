@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 import usersRouter from './routes/users.js';
 import {useGatewayAuth} from "@picturas/ms-helper";
+import {setupBucket} from "./config/minioClient.js";
 
 const app = express();
 const port = 3000;
@@ -19,6 +20,8 @@ db.on('error', console.error.bind(console, 'MongoDB Connection Error'));
 db.once('open', () => {
     console.log('MongoDB connection established');
 });
+
+setupBucket().then(() => {});
 
 // Default configs
 app.use(morgan('dev'));

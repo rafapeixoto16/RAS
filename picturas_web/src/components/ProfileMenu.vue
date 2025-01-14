@@ -76,7 +76,7 @@
       const response = await signOut();
       console.log(response);
       authStore.clearTokens();
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.log(error);
     }

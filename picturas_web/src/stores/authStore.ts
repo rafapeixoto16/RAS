@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', {
     accessToken: localStorage.getItem('accessToken'),
     refreshToken: localStorage.getItem('refreshToken'),
   }),
-  
+
   actions: {
     setTokens(accessToken: string, refreshToken: string) {
       this.accessToken = accessToken;
@@ -25,6 +25,11 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = null;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+    },
+
+    setTokensGuest(accessToken: string) {
+      this.accessToken = accessToken;
+      localStorage.setItem('accessToken', accessToken);
     },
 
     async refreshAccessToken() {
