@@ -1,6 +1,10 @@
 import * as Project from '../models/projectModel.js';
 import { buildPagination, buildSort, buildQuery } from '../models/queryProject.js';
 import {schemaValidation} from '@picturas/schema-validation';
+import Image from '../models/imageModel.js'
+import minioClient from '../config/minioClient.js';
+import sharp from 'sharp';
+import path from 'node:path';
 
 export const projectSchema = schemaValidation.object({
     name: schemaValidation.string().min(1, 'Name is required'),
@@ -125,7 +129,64 @@ export const reorderTool = async (projectId, toolIdx, toolIdxAfter) => {
 // Images
 //////////////////////////////////////////////////////////////////////////////////////////
 
-export const addImage = async (projectId, image) => {
+// file = req.file from multer
+export const addImage = async (projectId, file, userLimits) => {
+    const extensionName = path.extname(req.file.originalname);
+    const imageName = `${(new Date()).now()}${extensionName}`;
+    const is4kAllowed = userLimits.has4kUpload;
+
+    // check if the project exists
+    const checkProject = await getProject(projectId);
+    if (!checkProject) {
+        throw new Error('Project not found')
+    }
+
+    if(!is4kAllowed && await isImage4k(file.buffer)) {
+        throw new Error("The user is not premium therefore 4k images are not allowed");
+    }
+
+    const metaData = {
+        'Content-Type': file.mimetype,
+    };
+
+    let imageUrl;
+
+    minioClient.putObject(
+        // TODO: change this
+        ///process.env.S3_PICTURE_BUCKET
+        process.env,
+        imageName,
+        file.buffer,
+        metaData,
+        (err, etag) => {
+            if (err) throw new Error('Failed to upload image to MinIO');
+            imageUrl = `${process.env.S3_PICTURE_BUCKET}/${imageName}`;
+        }
+    );
+
+    const { project, idx } = await addImageToProject(projectId, {
+        id: imageUrl,
+        format: extensionName
+    });
+
+    return { updatedProject, imageIdx: idx };
+}
+
+const isImage4k = async (image) => {
+    const metadata = await sharp(image).metadata();
+
+    const width = metadata.width;
+    const height = metadata.height;
+
+    if (!width || !height) {
+        throw new Error('Invalid image dimensions');
+    }
+
+    // Check if the image meets or exceeds 4K resolution
+    return (width >= 3840 && height >= 2160) || (width >= 2160 && height >= 3840);
+}
+
+const addImageToProject = async (projectId, image) => {
     const project = await getProject(projectId);
     if (!project) {
         throw new Error('Project not found');
@@ -149,8 +210,86 @@ export const removeImage = async (projectId, imageIdx) => {
 
     const removedImage = project.images.splice(imageIdx, 1)[0];
     const updatedProject = await updateProject(projectId, project);
+    const imageName = removedImage.id; // S3 location
+
+    minioClient.removeObject(
+        // TODO: change this
+        process.env.S3_PICTURE_BUCKET,
+        imageName,
+    );
+
     return {
         updatedProject,
         removedImage
     };
+};
+
+///////////////////////////////////////////////////////////////////////////
+// S3 Specific
+///////////////////////////////////////////////////////////////////////////
+
+export const downloadImageLocally = async (imageName, targetPath) => {
+    const localFilePath = path.resolve(targetPath, imageName);
+
+    const objectStream = await minioClient.getObject(
+        process.env.S3_PICTURE_BUCKET,
+        imageName
+    );
+
+    return new Promise((resolve, reject) => {
+        const fileStream = fs.createWriteStream(localFilePath);
+
+        objectStream.pipe(fileStream);
+
+        objectStream.on('error', (err) => {
+            console.error('Error downloading the image:', err);
+            reject(new Error('Failed to download the image from MinIO'));
+        });
+
+        fileStream.on('finish', () => {
+            console.log(`Image downloaded successfully to ${localFilePath}`);
+            resolve(localFilePath);
+        });
+
+        fileStream.on('error', (err) => {
+            console.error('Error saving the image locally:', err);
+            reject(new Error('Failed to save the image locally'));
+        });
+    });
+};
+
+export const uploadLocalImage = async (filePath, isPreview, projectId) => {
+    if (!fs.existsSync(filePath)) {
+        throw new Error('File does not exist');
+    }
+
+    const fileStream = fs.createReadStream(filePath);
+    const extensionName = pathModule.extname(filePath);
+    const contentType = mime.lookup(extensionName);
+    const objectId = new mongoose.Types.ObjectId();
+
+    const fileName = `${objectId}${extensionName}`;
+    
+    const bucketName = isPreview 
+        ? process.env.S3_PREVIEW_BUCKET 
+        : process.env.S3_PICTURE_BUCKET;
+
+    const metaData = {
+        'Content-Type': contentType,
+    };
+
+    await minioClient.putObject(bucketName, fileName, fileStream, metaData);
+    const imageUrl = await minioClient.presignedGetObject(bucketName, fileName, 24 * 60 * 60);
+
+    // save the result in the project
+    if(!isPreview){
+        const project = await getProject(projectId);
+        project.result = {
+            output: imageUrl,
+            // expireDate:  TODO: add expireDate when needed
+        };
+        await updateProject(projectId, project);
+    }
+    
+    return imageUrl;
 };

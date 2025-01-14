@@ -21,7 +21,7 @@ spec:
             - name: RABBITMQ_HOST
               value: rabbitmq
             - name: RABBITMQ_PORT
-              value: {{ $.Values.rabbitmq.service.ports.amqp | quote }}
+              value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
             - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -33,7 +33,9 @@ spec:
                   name: rabbitmq-auth-secret
                   key: password
             - name: FILTER_OUTPUT_QUEUE
-              value: {{ $.Values.filter_output_queue }}
+              value: {{ .Values.filter_output_queue }}
+            - name: NOTIFICATION_QUEUE
+              value: {{ .Values.notification_queue }}
             - name: PROJ_DB_HOST
               value: 'projects-ms-db'
             - name: PROJ_DB_PORT

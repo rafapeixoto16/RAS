@@ -10,70 +10,69 @@ const server = createServer();
 const io = new SocketIo(server);
 const userSessions = {};
 
-io.on('connection', (socket) => {
-    console.log('A user connected');
+const redisClient = createClient({
+    url: `redis://${process.env.WS_REDIS_HOST}`,
+    password: process.env.WS_REDIS_PASSWORD,
+});
 
-    userSessions[socket.id] = {
-        expiry: expiry,
-        authenticated: false,
-    };
+redisClient.connect().catch((err) => {
+    console.error("Redis connection error:", err);
+    process.exit(1);
+});
 
-    const timeout = setTimeout(() => {
-        console.log('Session expired for socket:', socket.id);
-        socket.emit('auth_error', 'Disconnected due to limit exceeded');
-        socket.disconnect();
-        delete userSessions[socket.id];
-    }, expiry - Date.now());
+io.adapter(createAdapter(redisClient));
 
-    socket.on('migrate', (token) => {
-        jwt.verify(token, AUTH_SECRET, (err, decoded) => {
-            if (err) {
-                console.log('Invalid token for socket:', socket.id);
-                socket.emit('auth_error', 'Invalid token');
-            } else {
-                console.log('Token validated for socket:', socket.id);
-                userSessions[socket.id] = {
-                    expiry: null,
-                    authenticated: true,
-                    user: decoded,
-                };
-                clearTimeout(timeout);
-                socket.emit('auth_success', 'Session extended');
-            }
-        });
-    });
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+        return next(new Error("Authentication error"));
+    }
 
-    socket.on('disconnect', () => {
-        console.log('A user disconnected');
-        if (timeout) clearTimeout(timeout);
-        delete userSessions[socket.id];
+    try {
+        const payload = jwt.verify(token, process.env.AUTH_JWT_SECRET);
+        socket.user = payload;
+        next();
+    } catch (err) {
+        next(new Error("Invalid token"));
+    }
+});
+
+io.on("connection", (socket) => {
+    console.log(`User connected: ${socket.user._id}`);
+
+    socket.join(socket.user._id);
+
+    socket.on("disconnect", () => {
+        console.log(`User disconnected: ${socket.user._id}`);
     });
 });
 
-amqp.connect(
-    `amqp://${process.env.RABBITMQ_USERNAME}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`,
-    (connErr, conn) => {
-        if (connErr) throw connErr;
+(async () => {
+    try {
+        const connection = await amqp.connect(
+        `amqp://${process.env.RABBITMQ_USERNAME}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`
+        );
+        const channel = await connection.createChannel();
+        const queue = process.env.NOTIFICATION_QUEUE;
 
-        conn.createChannel((chanErr, channel) => {
-            if (chanErr) throw chanErr;
+        await channel.assertQueue(queue, { durable: true });
 
-            channel.assertQueue(process.env.RABBITMQ_QUEUE, {durable: true});
-            console.log(
-                `Listening to RabbitMQ queue: ${process.env.RABBITMQ_QUEUE}`
-            );
+        channel.consume(queue, (msg) => {
+        if (msg !== null) {
+            const content = JSON.parse(msg.content.toString());
+            const { userId, projectId, message } = content;
 
-            channel.consume(process.env.RABBITMQ_QUEUE, (event) => {
-                const messageContent = event.content.toString();
-                console.log(`Received from RabbitMQ: ${messageContent}`);
-
-                io.emit('rabbitmq_message', messageContent);
-
-                channel.ack(event);
-            });
+            io.to(userId).emit("notification", { project: projectId, message });
+            channel.ack(msg);
+        }
         });
+
+        console.log(`Listening to RabbitMQ queue: ${queue}`);
+    } catch (err) {
+        console.error("RabbitMQ connection error:", err);
+        process.exit(1);
     }
-);
+})();
 
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);

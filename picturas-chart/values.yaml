@@ -38,6 +38,7 @@ refresh_jwt_secret: "refresh-secret"
 validate_jwt_secret: "validate-secret"
 
 filter_output_queue: "filters-output"
+notification_queue: "notification-output"
 
 # Dependencies Configuration
 

@@ -36,7 +36,7 @@ const projectSchema = new mongoose.Schema({
             required: false
         },
         output: {
-            type: mongoose.Schema.Types.ObjectId, // S3 filename
+            type: String,
             required: false
         },
     },
