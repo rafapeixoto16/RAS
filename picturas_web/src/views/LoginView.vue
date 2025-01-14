@@ -169,7 +169,7 @@ const carouselImages = [
 ];
 
 const currentImageIndex = ref(0);
-let carouselInterval: number | null = null;
+let carouselInterval: ReturnType<typeof setInterval> | null = null;
 
 const rotateCarousel = () => {
   currentImageIndex.value = (currentImageIndex.value + 1) % carouselImages.length;

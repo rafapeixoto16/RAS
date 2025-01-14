@@ -37,7 +37,6 @@
             <Dropdown
               placement="right"
               trigger="click"
-              :project="project"
               @open-new-tab="$emit('open-new-tab', $event)"
               @rename="$emit('rename', $event)"
               @move-to-trash="$emit('move-to-trash', $event)"
