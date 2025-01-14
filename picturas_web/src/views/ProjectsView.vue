@@ -68,7 +68,17 @@
       <main class="flex-1 overflow-hidden relative">
         <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
           <!-- Display the images in a grid with portrait orientation -->
-          <div v-for="(page, index) in pages" :key="page.id" class="relative group">
+          <div 
+            v-for="(page, index) in pages" 
+            :key="page.id" 
+            class="relative group"
+            draggable="true"
+            @dragstart="onDragStart(index, $event)"
+            @dragover="onDragOver($event)"
+            @dragenter="onDragEnter($event)"
+            @dragleave="onDragLeave($event)"
+            @drop="onDrop(index, $event)"
+          >
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
               <button 
                 @click="goToImage(index)" 
@@ -192,6 +202,52 @@ watch(() => pages.value.length, (newLength) => {
     currentPage.value = Math.max(0, newLength - 1);
   }
 });
+
+let draggedIndex: number | null = null;
+
+const onDragStart = (index: number, event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault(); // Prevent default touch behavior
+  }
+  draggedIndex = index;
+};
+
+const onDragOver = (event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault(); 
+  } else {
+    event.preventDefault();
+  }
+};
+
+const onDragEnter = (event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault();
+  } else {
+    event.preventDefault();
+  }
+};
+
+const onDragLeave = (event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault();
+  } else {
+    event.preventDefault();
+  }
+};
+
+const onDrop = (index: number, event: DragEvent | TouchEvent) => {
+  if (event instanceof TouchEvent) {
+    event.preventDefault(); 
+  }
+  
+  if (draggedIndex === null || draggedIndex === index) return;
+  const draggedItem = pages.value[draggedIndex];
+  pages.value.splice(draggedIndex, 1);
+  pages.value.splice(index, 0, draggedItem);
+  draggedIndex = null;
+};
+
 
 const tools: Tool[] = [
   { 
@@ -381,6 +437,7 @@ const zoomImage = (event: WheelEvent | TouchEvent) => {
 </script>
 
 <style scoped>
+
 @media (max-width: 768px) {
   .md\:w-20 {
     width: 100%;
