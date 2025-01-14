@@ -1,7 +1,7 @@
 FROM node:lts-alpine AS build-stage
-#
+
 WORKDIR /app
-#
+
 COPY picturas_web/package*.json ./
 RUN npm install
 

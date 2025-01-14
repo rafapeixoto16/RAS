@@ -9,15 +9,15 @@ const minioClient = new Client({
 });
 
 const lifecycleConfig = {
-    Rule: [
-      {
+    Rule: [{
         ID: 'DeleteAfter2Days',
         Status: 'Enabled',
         Expiration: { Days: 2 },
-        Filter: {}
-      }
-    ]
-  };
+        Filter: {
+            Prefix: ''
+        }
+    }]
+};
 
 export async function setupBucket() {
     const exists = await minioClient.bucketExists(process.env.S3_PICTURE_BUCKET);
@@ -25,7 +25,7 @@ export async function setupBucket() {
     if (!exists) {
         await minioClient.makeBucket(process.env.S3_PICTURE_BUCKET);
         await minioClient.makeBucket(process.env.S3_TEMP_BUCKET);
-        await minioClient.setBucketLifecycle(process.env.S3_TEMP_BUCKET, JSON.stringify(lifecycleConfig));
+        await minioClient.setBucketLifecycle(process.env.S3_TEMP_BUCKET, lifecycleConfig);
     }
 }
 

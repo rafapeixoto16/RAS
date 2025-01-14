@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { readFileSync } from 'fs';
-import { fromJsonSchema } from '';
+import { fromJsonSchema } from '@picturas/schema-validation';
 
 const baseSchemas = JSON.parse(
     readFileSync(
@@ -10,7 +10,7 @@ const baseSchemas = JSON.parse(
     )
 );
 
-const schemas = Object.entries(schemas).reduce((acc, [filterName, { isPremium, schema }]) => {
+const schemas = Object.entries(baseSchemas).reduce((acc, [filterName, { isPremium, schema }]) => {
     acc[filterName] = {
         isPremium,
         schema: fromJsonSchema(schema),

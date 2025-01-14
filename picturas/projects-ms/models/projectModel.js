@@ -55,7 +55,7 @@ const projectSchema = new mongoose.Schema({
 
 const Project = mongoose.model('Project', projectSchema); 
 
-mongoose.connection.collection('Projects').watch([
+Project.watch([
     { $match: {operationType: 'delete'} }
 ]).on('change', async (change) => {
     const lock = await redisLock(redisClient, `delete_${change._id}`, 0);

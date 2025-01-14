@@ -37,7 +37,7 @@ spec:
             - name: NOTIFICATION_QUEUE
               value: {{ .Values.notification_queue }}
             - name: PROJ_DB_HOST
-              value: 'projects-ms-db'
+              value: 'projects-ms-db-headless'
             - name: PROJ_DB_PORT
               value: {{ index .Values "projects-ms-db" "containerPorts" "mongodb" | quote }}
             - name: PROJ_DB_USERNAME

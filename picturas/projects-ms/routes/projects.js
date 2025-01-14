@@ -13,10 +13,11 @@ import {
     getImage,
     removeImage,
     downloadImageLocally,
-    uploadLocalImage
+    uploadLocalImage,
+    objectIdSchema
 } from '../controller/project.js';
 import { queryProjectSchema } from '../models/queryProject.js';
-import { validateRequest } from '@picturas/schema-validation';
+import { schemaValidation, validateRequest } from '@picturas/schema-validation';
 import schemas from '../utils/filters.js';
 import multer from '../config/multerConfig.js';
 import { getLimitsMiddleware } from '../utils/premium.js'
@@ -140,7 +141,7 @@ router.delete('/:id', validateRequest({
 //////////////////////////////////////////////////////////////////////////////////////////
 
 router.post('/:id/tool', validateRequest({
-    body: schemaValidation.Object({
+    body: schemaValidation.object({
         filterName: schemaValidation.enum(Object.keys(schemas)),
         parameters: schemaValidation.unknown(),
     }).refine((data) => schemas[data.filterName].safeParse(data.parameters).success)
@@ -182,7 +183,7 @@ router.delete('/:id/tool/:idxTool', async (req, res) => {
 })
 
 router.put('/:id/tool/:idxTool', validateRequest({
-  body: schemaValidation.Object({
+  body: schemaValidation.object({
     idxToolAfter: schemaValidation.number().min(0)
   })
 }), async (req, res) => {
@@ -286,8 +287,8 @@ router.post('/:id/process', async (req, res) => {
 });
 
 router.post('/:id/preview', validateRequest({
-    body: schemaValidation.Object({
-        imageId: schemaValidation.string().refine((val) => mongoose.Types.ObjectId.isValid(val))
+    body: schemaValidation.object({
+        imageId: objectIdSchema
     })
 }), async (req, res) => {
     const { id } = req.params;

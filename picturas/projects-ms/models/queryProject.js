@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import {schemaValidation} from '@picturas/schema-validation';
 
 export const queryProjectSchema = schemaValidation.object({
     name: schemaValidation.string().optional(),
@@ -8,8 +8,7 @@ export const queryProjectSchema = schemaValidation.object({
     _id: schemaValidation.string().optional(),
     limit: schemaValidation.number().optional().default(10),
     page: schemaValidation.number().optional().default(1),
-    sort: z
-        .object({
+    sort: schemaValidation.object({
             name: schemaValidation.number().optional(),
             _id: schemaValidation.number().optional(),
             'tools.filterName': schemaValidation.number().optional(),

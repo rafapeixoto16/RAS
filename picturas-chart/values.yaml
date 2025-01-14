@@ -115,6 +115,9 @@ users-ms-db:
 
 projects-ms-db:
   fullnameOverride: projects-ms-db
+  architecture: replicaset
+  replicaSetName: replika
+  replicaCount: 1
   auth:
     rootUser: root
     rootPassword: projects-ms-db-password

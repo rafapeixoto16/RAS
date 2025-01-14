@@ -6,6 +6,8 @@ import minioClient from '../config/minioClient.js';
 import sharp from 'sharp';
 import path from 'node:path';
 
+export const objectIdSchema = schemaValidation.string().refine((val) => mongoose.Types.ObjectId.isValid(val));
+
 export const projectSchema = schemaValidation.object({
     name: schemaValidation.string().min(1, 'Name is required'),
     user_id: schemaValidation.string().uuid('Invalid user ID'),

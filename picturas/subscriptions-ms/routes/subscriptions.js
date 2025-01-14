@@ -101,7 +101,7 @@ router.post('/webhook', async (req, res) => {
 
 // Requires Auth from now on
 router.use(requiresAuth);
-router.user(requiresNonGuest);
+router.use(requiresNonGuest);
 
 router.get('/', async (req, res) => {
     Subscription.getSubcriptionByUserId(req.user._id).then(userData => {

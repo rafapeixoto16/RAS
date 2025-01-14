@@ -3,6 +3,8 @@
 import {Server as SocketIo} from 'socket.io';
 import {createServer} from 'node:http';
 import amqp from 'amqplib';
+import Redis from 'ioredis';
+import { createAdapter } from "@socket.io/redis-streams-adapter";
 
 const port = 3000;
 
@@ -10,14 +12,9 @@ const server = createServer();
 const io = new SocketIo(server);
 const userSessions = {};
 
-const redisClient = createClient({
-    url: `redis://${process.env.WS_REDIS_HOST}`,
-    password: process.env.WS_REDIS_PASSWORD,
-});
-
-redisClient.connect().catch((err) => {
-    console.error("Redis connection error:", err);
-    process.exit(1);
+const redisClient = new Redis({
+    host: process.env.WS_REDIS_HOST,
+    password: process.env.WS_REDIS_PASSWORD
 });
 
 io.adapter(createAdapter(redisClient));

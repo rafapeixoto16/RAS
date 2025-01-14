@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { jsonSchemaToZod } from 'json-to-zod-schema';
+import { jsonSchemaToZod } from 'json-schema-to-zod';
 
 export { z as schemaValidation };
 
