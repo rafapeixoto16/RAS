@@ -34,17 +34,7 @@ import {
     setHooks
 } from '../utils/filterCall.js'
 
-setHooks(
-    async (imageInfo, path) => {
-        await downloadImageLocally(imageInfo, path);
-    }, 
-    async  (projectId, path, isPreview) => {
-        return await uploadLocalImage(path, isPreview, projectId) // returns public S3 url
-    }, 
-    async (projectId) => {
-        const updatedPipeline = await removeProjectFromPipeline(projectId);
-    }
-)
+setHooks(downloadImageLocally, uploadLocalImage, removeProjectFromPipeline);
 
 const router = Router();
 router.use(getLimitsMiddleware);
@@ -68,7 +58,6 @@ router.post('/', validateRequest({
         const project = await addProject(data);
         return res.status(200).json(filterProject(project));
     } catch (error) {
-        console.error(error)
         return res.status(500).json({ error: 'Failed to add project' });
     }
 });
@@ -161,7 +150,6 @@ router.post('/:id/tool', validateRequest({
     })
     .strict()
     .refine((data) => {
-        console.error(schemas[data.filterName])
         return schemas[data.filterName].schema.safeParse(data.args).success
     })
 }, {strict: false}), async (req, res) => {
@@ -303,7 +291,7 @@ router.post('/:id/process', async (req, res) => {
             })
 
         const updatedPipeline = await addProjectToPipeline(userId, id, userLimits);
-        const project = await getProject(id);
+        const project = await getProject(userId, id);
 
         await runPipeline(userId, id, project.images, project.tools, !req.user.limits.noWatermark)
 
@@ -312,6 +300,7 @@ router.post('/:id/process', async (req, res) => {
             pipeline: updatedPipeline
         });
     } catch (error) {
+        console.error(error)
         res.status(500).json({ message: `Error processing pipeline: ${error.message}` });
     }
 });

@@ -36,7 +36,7 @@ function startProcessingOutputQueue() {
     );
 }
 
-async function connectToRabbitMQ() {
+export async function connectToRabbitMQ() {
     const connection = await amqp.connect(RABBITMQ_URL);
     channel = await connection.createChannel();
 
@@ -71,7 +71,7 @@ async function sendMessage(queueName, message) {
 // filterInfo: {filterName: string, filterProps: {}}
 
 const hooks = {
-    downloadResource: (imageInfo, path) => {},
+    downloadResource: (projectId, imageInfo, path) => {},
     uploadResource: (projectId, path, isPreview) => {},
     terminated: (projectId) => {}
 }
@@ -97,11 +97,11 @@ function fromMessageId(messageId) {
 }
 
 function getTempName(imageInfo, stage) {
-    return path.join(BASE_PATH, `${stage}-${imageInfo.imageId}.${imageInfo.extensionName}`);
+    return path.join(BASE_PATH, `${stage}-${imageInfo.id}.${imageInfo.format}`);
 }
 
 function getTempNameStage(imagePath, stage) {
-    const { dir, name, ext } = path.parse(tempName);
+    const { dir, name, ext } = path.parse(imagePath);
     
     const regex = /^(\d+)-/;
     const match = name.match(regex);
@@ -119,7 +119,7 @@ async function allocRedis(userId, projectId, isPreview, filterInfo, images) {
     await redisClient.set(getRedisKey(projectId, 'meta'), JSON.stringify({userId, isPreview, extraUpload: []}));
     await redisClient.set(getRedisKey(projectId, 'term'), 0);
     await redisClient.set(getRedisKey(projectId, 'filters'), JSON.stringify(filterInfo));
-    await redisClient.set(getRedisKey(projectId, 'images'), JSON.stringify(images.map((info) => info.imageId)).toArray());
+    await redisClient.set(getRedisKey(projectId, 'images'), JSON.stringify(images.map((info) => info.imageId)));
 
     for (let imageInfo of images) {
         await redisClient.set(getRedisKey(projectId, 'images', imageInfo.imageId), imageInfo.path);
@@ -189,6 +189,8 @@ async function filterTerminated(msg) {
     }
 
     let filterInfoList;
+    let inPath;
+    let outPath;
 
     if (runNext) {
         // Check if there is a next
@@ -197,8 +199,8 @@ async function filterTerminated(msg) {
 
         // Update base image (deal with non image outputs)
         const key = getRedisKey(projectId, 'images', imageId);
-        let inPath = await redisClient.get(key);
-        const outPath = getTempNameStage(inPath, stage + 1);
+        inPath = await redisClient.get(key);
+        outPath = getTempNameStage(inPath, stage + 1);
     
         if (data.output.type === 'image') {
             fs.unlink(inPath);
@@ -268,8 +270,7 @@ async function runPipelineInternal(userId, projectId, imageInfoList, filterInfoL
         const imageInfo = imageInfoList[i];
 
         const tempName = getTempName(imageInfo, 0);
-        await hooks.downloadResource(imageInfo, tempName);
-        names.push(tempName);
+        await hooks.downloadResource(projectId, imageInfo, tempName);
         
         images.push({imageId: imageInfo.imageId, path: tempName});
     }
@@ -277,7 +278,7 @@ async function runPipelineInternal(userId, projectId, imageInfoList, filterInfoL
     await allocRedis(userId, projectId, isPreview, filterInfoList, images);
 
     for (let image of images) {
-        await applyFilter(projectId, image.imageId, image.paths[0], image.paths[1], filterInfoList[0], 1);
+        await applyFilter(projectId, image.imageId, image.path, getTempNameStage(image.path, 1), filterInfoList[0], 1);
     }
 }
 
@@ -288,9 +289,9 @@ export async function cancelPipeline(projectId) {
 }
 
 export async function runPipeline(userId, projectId, imageInfoList, filterInfoList, applyWatermark) {
-    await runPipelineInternal(projectId, [imageInfo], [filterInfo], applyWatermark, false);
+    await runPipelineInternal(userId, projectId, imageInfoList, filterInfoList, applyWatermark, false);
 }
 
 export async function runPreview(userId, projectId, imageInfo, filterInfo, applyWatermark) {
-    await runPipelineInternal(projectId, [imageInfo], [filterInfo], applyWatermark, true);
+    await runPipelineInternal(userId, projectId, [imageInfo], [filterInfo], applyWatermark, true);
 }

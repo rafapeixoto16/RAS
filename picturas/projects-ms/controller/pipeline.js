@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Pipeline from '../models/pipelineModel.js';
+import Limits from '../models/limitsModel.js';
 
 export const isPipelineActive = async (projectId) => {
     const pipeline = await Pipeline.findOne({ projects: projectId }).exec();
@@ -7,12 +8,12 @@ export const isPipelineActive = async (projectId) => {
 };
 
 const getPipeline = async (userId) => {
-    return await Pipeline.findOne({ userId }).exec();
+    return await Pipeline.findOne({ _id: userId }).exec();
 };
 
 const updatePipeline = async (userId, pipeline) => {
     return await Pipeline.findOneAndUpdate(
-        { userId },
+        { _id: userId },
         { projects: pipeline.projects },
         { new: true, upsert: true }
     );
@@ -24,7 +25,7 @@ export const addProjectToPipeline = async (userId, projectId, userLimits) => {
 
     let pipeline = await Pipeline.findOne({ userId }).session(session);
     if (!pipeline) {
-        pipeline = new Pipeline({ userId, projects: [] });
+        pipeline = new Pipeline({ _id: userId, projects: [] });
     }
 
     if (pipeline.projects.length + 1 > userLimits.concurrentPipelines) {
@@ -74,7 +75,7 @@ const createPipeline = async (userId, projectId) => {
     session.startTransaction();
 
     const newPipeline = new Pipeline({
-        userId,
+        _id: userId,
         projects: [projectId],
     });
 
@@ -91,7 +92,7 @@ export const addProjectPipeline = async (userId, projectId) => {
     session.startTransaction();
 
     const updatedPipeline = await Pipeline.findOneAndUpdate(
-        { userId },
+        { _id: userId },
         { $addToSet: { projects: projectId } },
         { new: true, upsert: true, session }
     );
@@ -107,7 +108,7 @@ export const removeProjectPipeline = async (userId, projectId) => {
     session.startTransaction();
 
     const updatedPipeline = await Pipeline.findOneAndUpdate(
-        { userId },
+        { _id: userId },
         { $pull: { projects: projectId } },
         { new: true, session }
     );
@@ -127,19 +128,23 @@ export const removeProjectPipeline = async (userId, projectId) => {
 export const isUserLimitReached = async (userId, limits) => {
     const userLimit = limits.dailyPipelines;
 
-    const userLimits = await Limits.findOne({ _id: userId });
+    let userLimits = await Limits.findOne({ _id: userId });
 
     if (!userLimits) {
-        await Limits.create({
+        userLimits = new Limits({
             _id: userId,
-            qtdRunnedPipelines: 0
+            qtdRunnedPipelines: 1 
         });
+        await userLimits.save();
         return false;
     }
 
     if (userLimits.qtdRunnedPipelines >= userLimit) {
         return true;
     }
+
+    userLimits.qtdRunnedPipelines += 1;
+    await userLimits.save();
 
     return false;
 };

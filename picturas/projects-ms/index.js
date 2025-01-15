@@ -7,6 +7,7 @@ import projectRouter from './routes/projects.js';
 import {setupBucket} from "./config/minioClient.js";
 import {requiresAuth, useGatewayAuth} from "@picturas/ms-helper";
 import {getLimitsMiddleware, isPremiumMiddleware} from "./utils/premium.js";
+import { connectToRabbitMQ } from './utils/filterCall.js'
 
 const app = express();
 const port = 3000;
@@ -23,6 +24,9 @@ db.once('open', async () => {
 });
 
 setupBucket().then(() => {});
+connectToRabbitMQ().then(() => {
+    console.log("RabbitMQ connected");
+});
 
 // Default configs
 app.use(morgan('dev'));

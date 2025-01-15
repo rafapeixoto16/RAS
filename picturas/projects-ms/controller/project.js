@@ -6,6 +6,7 @@ import minioClient from '../config/minioClient.js';
 import sharp from 'sharp';
 import path from 'node:path';
 import mongoose from 'mongoose';
+import fs from 'node:fs';
 
 export const objectIdSchema = schemaValidation.string().refine((val) => mongoose.Types.ObjectId.isValid(val));
 
@@ -268,12 +269,12 @@ export const reorderImage = async (userId, projectId, imageIdx, imageIdxAfter) =
 // S3 Specific
 ///////////////////////////////////////////////////////////////////////////
 
-export const downloadImageLocally = async (imageName, targetPath) => {
-    const localFilePath = path.resolve(targetPath, imageName);
+export const downloadImageLocally = async (projectId, imageName, targetPath) => {
+    const localFilePath = path.resolve(targetPath);
 
     const objectStream = await minioClient.getObject(
         process.env.S3_PICTURE_BUCKET,
-        `${projectId}/${imageName.id}.${imageName.ext}`
+        `${projectId}/${imageName.id}.${imageName.format}`
     );
 
     return new Promise((resolve, reject) => {
@@ -281,24 +282,21 @@ export const downloadImageLocally = async (imageName, targetPath) => {
 
         objectStream.pipe(fileStream);
 
-        objectStream.on('error', (err) => {
-            console.error('Error downloading the image:', err);
+        objectStream.on('error', (_) => {
             reject(new Error('Failed to download the image from MinIO'));
         });
 
         fileStream.on('finish', () => {
-            console.log(`Image downloaded successfully to ${localFilePath}`);
             resolve(localFilePath);
         });
 
-        fileStream.on('error', (err) => {
-            console.error('Error saving the image locally:', err);
+        fileStream.on('error', (_) => {
             reject(new Error('Failed to save the image locally'));
         });
     });
 };
 
-export const uploadLocalImage = async (filePath, isPreview, projectId) => {
+export const uploadLocalImage = async (projectId, filePath, isPreview) => {
     if (!fs.existsSync(filePath)) {
         throw new Error('File does not exist');
     }
