@@ -8,4 +8,4 @@ async function grayscaleHandler(imageBuffer, _, _params) {
     return sharp(imageBuffer).grayscale().toBuffer();
 }
 
-createFilterHandler('grayscale', grayscaleSchema, grayscaleHandler);
+createFilterHandler('grayscale', false, grayscaleSchema, grayscaleHandler);

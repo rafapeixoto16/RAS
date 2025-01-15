@@ -2,7 +2,7 @@ import amqp from 'amqplib';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { toJsonSchema } from '@picturas/schema-validation';
 
-export function createFilterHandler(filterName, paramsSchema, imageHandler) {
+export function createFilterHandler(filterName, isPremium, paramsSchema, imageHandler) {
     if (process.env.EXPORT_SCHEMA === 'true') {
         const args = process.argv.slice(2);
 
@@ -13,7 +13,7 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
         const fileContent = readFileSync(schemaPath, 'utf-8');
         const jsonData = JSON.parse(fileContent);
 
-        jsonData[filterName] = toJsonSchema(filterName, paramsSchema);
+        jsonData[filterName] = {isPremium, schema: toJsonSchema(filterName, paramsSchema)};
 
         writeFileSync(schemaPath, JSON.stringify(jsonData, null, 2), 'utf-8');
 
@@ -54,20 +54,6 @@ export function createFilterHandler(filterName, paramsSchema, imageHandler) {
 
                 if (Array.isArray(result)) {
                     [output, outputFormat] = result;
-
-                    if (
-                        ![
-                            'png',
-                            'jpg',
-                            'jpeg',
-                            'bmp',
-                            'webp',
-                            'tiff',
-                            'json',
-                        ].includes(outputFormat)
-                    ) {
-                        throw new Error('Invalid output format provided');
-                    }
                 } else {
                     output = result;
                     outputFormat = inputFormat;

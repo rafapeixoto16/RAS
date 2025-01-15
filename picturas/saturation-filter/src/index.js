@@ -12,4 +12,4 @@ async function saturationHandler(imageBuffer, _, params) {
     return sharp(imageBuffer).modulate({ saturation }).toBuffer();
 }
 
-createFilterHandler('saturation', saturationSchema, saturationHandler);
+createFilterHandler('saturation', false, saturationSchema, saturationHandler);

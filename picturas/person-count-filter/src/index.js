@@ -31,4 +31,4 @@ async function personCountHandler(imageBuffer, _, _params) {
     return [jsonOutput, 'json'];
 }
 
-createFilterHandler('person-count', personCountSchema, personCountHandler);
+createFilterHandler('person-count', true, personCountSchema, personCountHandler);

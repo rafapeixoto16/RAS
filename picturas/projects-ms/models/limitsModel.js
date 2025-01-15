@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
 
-const imageSchema = new mongoose.Schema({
+const limitsModel = new mongoose.Schema({
     _id: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'Image'
+        ref: 'userId' 
     },
-    url: {
-        type: String,
-        required: true
+    qtdRunnedPipelines: {
+        type: Number,
+        required: true,
     },
     ttl: {
         type: Date,
@@ -16,7 +16,9 @@ const imageSchema = new mongoose.Schema({
         required: true,
         index: { expires: '48h' }
     }
+}, {
+    timestamps: false
 });
 
-const Image = mongoose.model('Image', imageSchema); 
-export default Image;
+const Limits = mongoose.model('Limits', limitsModel); 
+export default Limits;

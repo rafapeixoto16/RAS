@@ -12,4 +12,4 @@ async function rotationHandler(imageBuffer, _, params) {
     return sharp(imageBuffer).rotate(angle).toBuffer();
 }
 
-createFilterHandler('rotation', rotationSchema, rotationHandler);
+createFilterHandler('rotation', false, rotationSchema, rotationHandler);

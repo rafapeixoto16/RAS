@@ -2,8 +2,8 @@
 
 import { createFilterHandler } from '@picturas/filter-helper';
 import { schemaValidation } from '@picturas/schema-validation';
-import execa from 'execa';
-import { watermarkPath, venvDir } from './utils';
+import {execa} from 'execa';
+import { watermarkPath, venvDir } from './utils.js';
 
 const toolName = 'watermark';
 

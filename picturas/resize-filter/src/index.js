@@ -18,4 +18,4 @@ async function resizeHandler(imageBuffer, _, params) {
         .toBuffer();
 }
 
-createFilterHandler('resize', resizeSchema, resizeHandler);
+createFilterHandler('resize', false, resizeSchema, resizeHandler);

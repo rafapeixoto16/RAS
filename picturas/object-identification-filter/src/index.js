@@ -68,6 +68,7 @@ async function objectIdentificationHandler(imageBuffer, params) {
 
 createFilterHandler(
     'object-identification',
+    true,
     objIdentificationSchema,
     objectIdentificationHandler
 );
