@@ -15,10 +15,10 @@
           Create a Project
         </router-link>
         <button
-          class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
+          class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-500 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
           @click="openPremiumModal">
           <i class="bi bi-gem mr-2"></i>
-          Try Pro for 30 days
+          Try Premium for 30 days
         </button>
       </div>
       <div class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow overflow-y-auto">
@@ -32,7 +32,7 @@
               class="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <Dropdown placement="right" trigger="..." :isSidebar="true" :project="project"
                 :options="getDropdownOptions(project)" @open-new-tab="openInNewTab" @rename="renameProject"
-                @move-to-trash="moveToTrash" append-to-body />
+                @move-to-trash="moveToTrash" append-to-body class="bg-blue-50"/>
             </div>
           </div>
           <button v-if="showSeeAllButton" @click="toggleSeeAll" class="mt-2 text-[#3B82F6] hover:underline">
@@ -42,7 +42,7 @@
       </div>
       <div class="px-4 py-2 border-t border-gray-200">
         <router-link
-          class="flex items-center px-4 py-3 w-full bg-blue-50 text-sm xl:text-base text-gray-400 font-semibold hover:text-gray-600"
+          class="flex items-center px-4 py-3 w-full bg-blue-50 text-sm xl:text-base text-gray-500 font-semibold hover:text-gray-600"
           to="/trash">
           <i class="bi bi-trash mr-2"></i>
           Trash

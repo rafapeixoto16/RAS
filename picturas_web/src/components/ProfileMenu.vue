@@ -5,18 +5,18 @@
       class="flex items-center justify-between cursor-pointer w-full p-4"
     >
       <div class="flex items-center">
-        <div v-if="!user.avatarUrl" class="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-blue-500 text-white text-2xl lg:text-3xl font-bold flex items-center justify-center uppercase shadow-lg">
-          {{ user.username.charAt(0) }}
+        <div v-if="!userStore.user?.avatarUrl" class="w-14 h-14 rounded-full bg-blue-500 text-white text-2xl lg:text-3xl font-bold flex items-center justify-center uppercase shadow-lg">
+          {{ userStore.user?.username.charAt(0) }}
         </div>
         <img
           v-else
-          :src="user.avatarUrl"
-          :alt="user.username"
-          class="w-12 h-12 lg:w-16 lg:h-16 rounded-full object-cover border-2 border-blue-200 shadow-lg"
+          :src="userStore.user?.avatarUrl"
+          :alt="userStore.user?.username"
+          class="w-14 h-14 rounded-full object-cover border-2 border-blue-200 shadow-lg"
         />
         <div class="ml-4">
-          <p class="text-gray-800 font-semibold">{{ user.username }}</p>
-          <p class="text-gray-600 text-sm">{{ user.email }}</p>
+          <p class="text-gray-800 font-semibold">{{ userStore.user?.username }}</p>
+          <p class="text-gray-600 text-sm">{{ userStore.user?.email }}</p>
         </div>
       </div>
       <i :class="['bi', isMenuOpen ? 'bi-chevron-down' : 'bi-chevron-up', 'text-gray-400']"></i>
@@ -47,50 +47,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 import { signOut } from '@/api/mutations/signout';
-import { getUserInfo } from '@/api';
+import { useUserStore } from '@/stores/userStore';
 
 const isLoggedIn = computed(() => authStore.isLoggedIn());
+const userStore = useUserStore()
 const router = useRouter();
 const isMenuOpen = ref(false);
-
-interface User {
-  username: string;
-  email: string;
-  fullName: string;
-  avatarUrl: string;
-  location: string;
-  bio: string;
-}
-
-const user = ref<User>({
-  username: '',
-  email: '',
-  fullName: '',
-  avatarUrl: '',
-  location: '',
-  bio: '',
-});
-
-onMounted(async () => {
-  try {
-    const resp = await getUserInfo();
-    const filteredUser = {
-      username: resp.username,
-      email: resp.email,
-      location: resp.location,
-      bio: resp.bio,
-      fullName: resp.name,
-      avatarUrl: resp.avatarUrl || '',
-    };
-    user.value = filteredUser;
-  } catch (error) {
-    console.error('Error fetching user info:', error);
-  }
-});
 
 const profileOptions = [
   { label: 'Profile', icon: 'bi bi-person-circle', action: () => router.push('/profile') },
@@ -118,6 +84,7 @@ const handelSignOut = async () => {
     const response = await signOut();
     console.log(response);
     authStore.clearTokens();
+    userStore.clearUser();
     router.push('/');
   } catch (error) {
     console.log(error);

@@ -4,18 +4,18 @@
       @click="toggleMenu"
       class="flex items-center cursor-pointer"
     >
-      <div v-if="!user.avatarUrl" class="w-10 h-10 rounded-full bg-blue-500 text-white text-xl font-bold flex items-center justify-center uppercase shadow-lg">
-        {{ user.username.charAt(0) }}
+      <div v-if="!userStore.user?.avatarUrl" class="w-10 h-10 rounded-full bg-blue-500 text-white text-xl font-bold flex items-center justify-center uppercase shadow-lg">
+        {{ userStore.user?.username.charAt(0) }}
       </div>
       <img
         v-else
-        :src="user.avatarUrl"
-        :alt="user.username"
+        :src="userStore.user?.avatarUrl"
+        :alt="userStore.user?.username"
         class="w-10 h-10 rounded-full object-cover border-2 border-blue-200 shadow-lg"
       />
       <div class="ml-4">
-        <p class="text-gray-800 font-semibold">{{ user.username }}</p>
-        <p class="text-gray-600 text-sm">{{ user.email }}</p>
+        <p class="text-gray-800 font-semibold">{{ userStore.user?.username }}</p>
+        <p class="text-gray-600 text-sm">{{ userStore.user?.email }}</p>
       </div>
     </div>
     <div 
@@ -49,13 +49,14 @@
 </template>
 
   <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, computed } from 'vue';
   import { useAuthStore } from '@/stores/authStore';
   import { useRouter } from 'vue-router';
   import { signOut} from '@/api/mutations/signout';
-  import { getUserInfo } from '@/api';
+  import { useUserStore } from '@/stores/userStore';
 
   const authStore = useAuthStore();
+  const userStore = useUserStore()
   const isLoggedIn = computed(() => authStore.isLoggedIn());
   
   const emit = defineEmits<{
@@ -66,41 +67,6 @@
   
   const isMenuOpen = ref(false);
   const show = ref(false);
-
-  interface User {
-  username: string;
-  email: string;
-  fullName: string;
-  avatarUrl: string;
-  location: string;
-  bio: string;
-}
-
-const user = ref<User>({
-  username: '',
-  email: '',
-  fullName: '',
-  avatarUrl: '',
-  location: '',
-  bio: '',
-});
-
-  onMounted(async () => {
-  try {
-    const resp = await getUserInfo();
-    const filteredUser = {
-      username: resp.username,
-      email: resp.email,
-      location: resp.location,
-      bio: resp.bio,
-      fullName: resp.name,
-      avatarUrl: resp.avatarUrl || '',
-    };
-    user.value = filteredUser;
-  } catch (error) {
-    console.error('Error fetching user info:', error);
-  }
-});
   
   const profileOptions = [
     { label: 'Profile', icon: 'bi bi-person-circle', action: () => router.push('/profile') },
@@ -136,6 +102,7 @@ const user = ref<User>({
       const response = await signOut();
       console.log(response);
       authStore.clearTokens();
+      userStore.clearUser();
       router.push('/');
     } catch (error) {
       console.log(error);
