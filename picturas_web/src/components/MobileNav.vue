@@ -5,9 +5,9 @@
       class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden z-20"
     >
       <router-link
-        to="/dashboard"
-        class="text-2xl font-bold text-gray-900"
-        style="font-family: 'Caveat', cursive;"
+        to="/dashboard" 
+        style="font-size: xx-large "
+        class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-purple-600 font-caveat px-4 py-2"
       >
         Picturas
       </router-link>
@@ -167,4 +167,13 @@ const closeMenu = () => {
 const openPremiumModal = () => {
   isOpenPremium.value = !isOpenPremium.value;
 };
+
 </script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+
+.font-caveat {
+  font-family: 'Caveat', sans-serif;
+}
+</style>

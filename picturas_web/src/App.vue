@@ -14,7 +14,6 @@
 
       <!-- Controla a exibição do TutorialModal -->
       <TutorialModal v-if="shouldShowTutorialModal" />
-      />
       <Footer />
     </div>
   </div>
