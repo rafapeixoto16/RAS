@@ -37,7 +37,7 @@ spec:
           ports:
             - containerPort: 3000
           volumeMounts:
-            - mountPath: /mnt/nfs
+            - mountPath: {{ $.Values.filter_shared_dir }}
               name: nfs-volume
       volumes:
         - name: nfs-volume # Simulated with hostPath (single node)

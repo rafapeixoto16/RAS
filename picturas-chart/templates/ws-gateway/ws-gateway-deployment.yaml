@@ -33,4 +33,13 @@ spec:
                   name: rabbitmq-auth-secret
                   key: password
             - name: RABBITMQ_QUEUE
-              value: {{ .Values.filter_output_queue | quote }}
+              value: {{ .Values.filter_output_queue }}
+            - name: NOTIFICATION_QUEUE
+              value: {{ .Values.notification_queue }}
+            - name: WS_REDIS_HOST
+              value: "ws-redis-master"
+            - name: WS_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ws-redis-auth-secret
+                  key: password

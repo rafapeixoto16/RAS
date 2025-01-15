@@ -34,4 +34,4 @@ async function borderHandler(imageBuffer, _, params) {
 }
 
 // regista o handler
-createFilterHandler('addBorder', borderSchema, borderHandler);
+createFilterHandler('addBorder', false, borderSchema, borderHandler);

@@ -14,6 +14,14 @@ dependencies:
     version: 20.6.1
     repository: https://charts.bitnami.com/bitnami
     alias: rate-limiter-redis
+  - name: redis
+    version: 20.6.1
+    repository: https://charts.bitnami.com/bitnami
+    alias: ws-redis
+  - name: redis
+    version: 20.6.1
+    repository: https://charts.bitnami.com/bitnami
+    alias: filter-redis
   - name: mongodb
     version: 16.4.0
     repository: https://charts.bitnami.com/bitnami

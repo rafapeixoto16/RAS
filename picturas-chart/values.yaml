@@ -38,10 +38,10 @@ refresh_jwt_secret: "refresh-secret"
 validate_jwt_secret: "validate-secret"
 
 filter_output_queue: "filters-output"
+notification_queue: "notification-output"
 
 # Dependencies Configuration
 
-# RabbitMQ
 rabbitmq:
   fullnameOverride: rabbitmq
   auth:
@@ -57,15 +57,40 @@ rabbitmq:
     serviceMonitor:
       enabled: true
 
-# Rate Limiter Redis
 rate-limiter-redis:
   fullnameOverride: rate-limiter-redis
   architecture: standalone
   auth:
     enabled: yes
     password: "rate-limit-password"
-  containerPorts:
-    mongodb: 27017
+  master:
+    persistence:
+      enabled: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+ws-redis:
+  fullnameOverride: ws-redis
+  architecture: standalone
+  auth:
+    enabled: yes
+    password: "ws-password"
+  master:
+    persistence:
+      enabled: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+filter-redis:
+  fullnameOverride: filter-redis
+  architecture: standalone
+  auth:
+    enabled: yes
+    password: "filter-password"
   master:
     persistence:
       enabled: false
@@ -83,6 +108,8 @@ users-ms-db:
     enabled: true
   containerPorts:
     mongodb: 27017
+  persistence:
+    enabled: false
   metrics:
     enabled: true
     serviceMonitor:
@@ -90,6 +117,9 @@ users-ms-db:
 
 projects-ms-db:
   fullnameOverride: projects-ms-db
+  architecture: replicaset
+  replicaSetName: replika
+  replicaCount: 1
   auth:
     rootUser: root
     rootPassword: projects-ms-db-password
@@ -97,6 +127,8 @@ projects-ms-db:
     enabled: true
   containerPorts:
     mongodb: 27017
+  persistence:
+    enabled: false
   metrics:
     enabled: true
     serviceMonitor:
@@ -111,6 +143,8 @@ subscriptions-ms-db:
     enabled: true
   containerPorts:
     mongodb: 27017
+  persistence:
+    enabled: false
   metrics:
     enabled: true
     serviceMonitor:
@@ -119,11 +153,18 @@ subscriptions-ms-db:
 stripe_private_key: "stripe-private-key"
 stripe_webhook_secret: "stripe-webhook-key"
 
+# TODO
+#s3_endpoint: "http://localhost/minio" # static from dev
+#s3_port: 80 # static from dev
 s3_endpoint: "minio" # static from dev
 s3_port: 9000 # static from dev
 s3_username: "s3-username" # access
 s3_password: "s3-password" # secret
 s3_profile_picture_bucket: "profile"
+s3_picture_bucket: "picture"
+s3_temp_bucket: "temp"
+
+filter_shared_dir: /mnt/nfs
 
 email_hostname: "mailhog-node"
 email_port: 1025

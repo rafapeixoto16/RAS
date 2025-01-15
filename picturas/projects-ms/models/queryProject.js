@@ -1,34 +1,30 @@
-import { z } from 'zod';
+import {schemaValidation} from '@picturas/schema-validation';
 
-export const queryProjectSchema = z.object({
-    name: z.string().optional(),
-    user_id: z.string().optional(),
-    _id: z.string().optional(),
-    limit: z.number().optional().default(10),
-    page: z.number().optional().default(1),
-    sort: z
-        .object({
-            name: z.number().optional(),
-            user_id: z.number().optional(),
-            _id: z.number().optional(),
-        })
-        .optional(),
-});
+export const queryProjectSchema = schemaValidation.object({
+    name: schemaValidation.string().optional(),
+    tool_filterName: schemaValidation.string().optional(),
+    image_format: schemaValidation.enum(['png', 'jpg', 'jpeg', 'bmp', 'webp', 'tiff']).optional(),
+    limit: schemaValidation.number().optional().default(10),
+    page: schemaValidation.number().optional().default(1),
+    sort: schemaValidation.string().regex(/^(name|tool_filterName|image_format|limit|page|createdAt|updatedAt)$/).optional(),
+    order: schemaValidation.enum(['asc', 'desc']).optional().default('asc')
+}).strict().optional();
+
 
 // in case the model changes, we might need to update this function
-export const buildQuery = ({ name, user_id, _id }) => {
+export const buildQuery = ({ name, tool_filterName, image_format, result_expireDate, _id }) => {
     const query = {};
 
     if (name) {
-        query.name = { $regex: name, $options: 'i' }; // Case-insensitive search for 'name'
+        query.name = { $regex: name, $options: 'i' }; // Case-insensitive search
     }
 
-    if (user_id) {
-        query.user_id = user_id;
+    if (tool_filterName) {
+        query['tools.filterName'] = { $regex: tool_filterName, $options: 'i' };
     }
 
-    if (_id) {
-        query._id = _id;
+    if (image_format) {
+        query['images.format'] = image_format;
     }
 
     return query;
@@ -39,12 +35,22 @@ export const buildPagination = ({ page, limit }) => ({
     limit,
 });
 
-export const buildSort = (sort) => {
-    const sortObject = {};
-    if (sort) {
-        if (sort.name) sortObject.name = sort.name;
-        if (sort.user_id) sortObject.user_id = sort.user_id;
-        if (sort._id) sortObject._id = sort._id;
+export const buildSort = (sort, order) => {
+    const names = {
+        name: 'name',
+        tool_filterName: 'tool.filterName',
+        image_format: 'image.format',
+        limit: 'limit',
+        page: 'page',
+        createdAt: 'createdAt',
+        updatedAt: 'updatedAt'
     }
+
+    const sortObject = {};
+    
+    if (sort) {
+        sortObject[names[sort]] = (!order || order === 'asc') ? 1 : -1;
+    }
+
     return sortObject;
 };

@@ -88,7 +88,7 @@ export function useGatewayAuth(req, res, next) {
         return;
     }
 
-    req.user = JSON.parse(req.headers.authorization);
+    req.user = JSON.parse(token);
     next();
 }
 
@@ -102,14 +102,6 @@ export const requiresAuth = (req, res, next) => {
 
 export const requiresNonGuest = (req, res, next) => {
     if (!req.user || req.user.isGuest) {
-        res.sendStatus(401);
-    } else {
-        next();
-    }
-}
-
-export const requiresGuest = (req, res, next) => {
-    if (!req.user || !req.user.isGuest) {
         res.sendStatus(401);
     } else {
         next();

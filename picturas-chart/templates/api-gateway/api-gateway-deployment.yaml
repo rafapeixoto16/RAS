@@ -28,5 +28,5 @@ spec:
             - name: RATE_LIMITER_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis-auth-secret
+                  name: rate-limiter-redis-auth-secret
                   key: password

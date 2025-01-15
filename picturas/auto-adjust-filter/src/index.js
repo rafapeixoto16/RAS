@@ -27,4 +27,4 @@ async function autoAdjustHandler(imageBuffer, _, params) {
 }
 
 // Regista o handler
-createFilterHandler('autoAdjust', autoAdjustSchema, autoAdjustHandler);
+createFilterHandler('autoAdjust', false, autoAdjustSchema, autoAdjustHandler);

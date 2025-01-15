@@ -14,4 +14,4 @@ async function removeBgHandler(imageBuffer, inputFormat, params) {
     });
 }
 
-createFilterHandler('remove-bg', removeBgSchema, removeBgHandler);
+createFilterHandler('remove-bg', true, removeBgSchema, removeBgHandler);

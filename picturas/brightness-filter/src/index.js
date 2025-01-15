@@ -12,4 +12,4 @@ async function brightnessHandler(imageBuffer, _, params) {
     return sharp(imageBuffer).modulate({ brightness }).toBuffer();
 }
 
-createFilterHandler('brightness', brightnessSchema, brightnessHandler);
+createFilterHandler('brightness', false, brightnessSchema, brightnessHandler);

@@ -2,9 +2,10 @@ import { z } from 'zod';
 import * as Image from '../models/imageModel.js';
 import { buildPagination, buildSort, buildQuery } from '../models/queryImage.js';
 
-export const imageSchema = z.object({
-    uri: z.string().min(1, 'URI is required'),
-    project_id: z.string().uuid('Invalid project ID'),
+// TODO: Eliminate this
+export const imageSchema = schemaValidation.object({
+    uri: schemaValidation.string().min(1, 'URI is required'),
+    project_id: schemaValidation.string().uuid('Invalid project ID'),
 });
 
 export const getImage = (id) => {

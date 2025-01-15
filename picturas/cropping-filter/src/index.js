@@ -22,4 +22,4 @@ async function croppingHandler(imageBuffer, _, params) {
         .toBuffer();
 }
 
-createFilterHandler('cropping', croppingSchema, croppingHandler);
+createFilterHandler('cropping', false, croppingSchema, croppingHandler);
