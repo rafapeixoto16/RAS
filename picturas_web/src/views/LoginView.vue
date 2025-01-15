@@ -136,8 +136,10 @@ const handleLogin = async () => {
 const handleGuest = async () => {
   try {
     errorMessage.value = '';
-    const response = await loginGuest()
-    authStore.setTokensGuest(response.accessToken);
+    if (!authStore.accessToken) {
+      const response = await loginGuest();
+      authStore.setTokensGuest(response.accessToken);
+    }
     router.push('/dashboard');
   } catch (error) {
     console.error('Login error:', error);
@@ -169,7 +171,7 @@ const carouselImages = [
 ];
 
 const currentImageIndex = ref(0);
-let carouselInterval: number | null = null;
+let carouselInterval: ReturnType<typeof setInterval> | null = null;
 
 const rotateCarousel = () => {
   currentImageIndex.value = (currentImageIndex.value + 1) % carouselImages.length;

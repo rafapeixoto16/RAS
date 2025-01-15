@@ -1,6 +1,5 @@
-
 import { createRouter, createWebHistory } from 'vue-router'
-
+import { useAuthStore } from '@/stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -97,6 +96,25 @@ const router = createRouter({
       meta: { fullWidth: true },
     }
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const publicPages = ['/', '/login', '/register', '/forgot-password', '/resetPassword', '/passwordRecovery-success', '/validateAccount', '/registration-success', '/:pathMatch(.*)*']
+  const authRequired = !publicPages.some(page => to.path.startsWith(page))
+  const loggedIn = authStore.accessToken
+  const restrictedPages = ['/settings', '/profile']
+  const hasTokens = authStore.accessToken && authStore.refreshToken
+
+  if (authRequired && !loggedIn) {
+    return next('/login')
+  }
+
+  if (restrictedPages.includes(to.path) && !hasTokens) {
+    return next('/login')
+  }
+
+  next()
 })
 
 export default router

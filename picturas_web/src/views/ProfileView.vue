@@ -9,7 +9,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
       <h1 class="text-5xl font-bold text-blue-800 mb-8 text-center font-caveat">PICTURAS</h1>
 
-      <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 lg:p-12 w-full mx-auto">
+      <div v-if="isLoading" class="flex justify-center items-center h-64">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+
+      <div v-else class="bg-white rounded-xl shadow-lg p-6 md:p-8 lg:p-12 w-full mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 lg:mb-12">
           <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-4 md:mb-0">
             Your Profile
@@ -158,6 +162,7 @@ const originalUser = ref<User>({ ...user.value });
 const isEditing = ref(false);
 const showConfirmationModal = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
+const isLoading = ref(true);
 
 const userInfoItems = computed(() => [
   { label: 'Username', value: user.value.username, key: 'username', editable: false },
@@ -234,6 +239,7 @@ const goHome = () => {
 };
 
 onMounted(async () => {
+  isLoading.value = true;
   try {
     const resp = await getUserInfo();
     const filteredUser = {
@@ -248,6 +254,8 @@ onMounted(async () => {
     originalUser.value = { ...filteredUser };
   } catch (error) {
     console.error('Error fetching user info:', error);
+  } finally {
+    isLoading.value = false;
   }
 });
 </script>

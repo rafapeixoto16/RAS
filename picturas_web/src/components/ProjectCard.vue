@@ -37,7 +37,6 @@
             <Dropdown
               placement="right"
               trigger="click"
-              :project="project"
               @open-new-tab="$emit('open-new-tab', $event)"
               @rename="$emit('rename', $event)"
               @move-to-trash="$emit('move-to-trash', $event)"
@@ -87,14 +86,7 @@ interface Project {
   lastEdited: string;
 }
 
-const emit = defineEmits([
-  'open-new-tab',
-  'rename',
-  'move-to-trash',
-  'edit',
-  'restore',
-  'remove-permanently',
-]);
+const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit", "restore", "remove-permanently"]);
 
 // Props
 const props = defineProps<{

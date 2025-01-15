@@ -50,22 +50,43 @@
     </ul>
 
     <button
+      @click="handleButtonClick"
+      :disabled="!buttonAvailability"
       class="w-full rounded-lg px-4 py-2 sm:py-3 text-center text-sm sm:text-base font-semibold transition-colors duration-200"
       :class="{
-        'bg-[#3B82F6] text-white hover:bg-[#2563EB]':
-          buttonVariant === 'primary',
-        'bg-gray-200 text-gray-800 hover:bg-gray-300':
-          buttonVariant === 'secondary',
-        'bg-gradient-to-r from-[#3B82F6] to-purple-600 text-white hover:from-[#2563EB] hover:to-purple-700':
-          buttonVariant === 'premium',
+      'bg-[#3B82F6] text-white hover:bg-[#2563EB]':
+        buttonVariant === 'primary' && buttonAvailability,
+      'bg-gray-200 text-gray-800 hover:bg-gray-300':
+        buttonVariant === 'secondary' && buttonAvailability,
+      'bg-gradient-to-r from-[#3B82F6] to-purple-600 text-white hover:from-[#2563EB] hover:to-purple-700':
+        buttonVariant === 'premium' && buttonAvailability,
+      'bg-gray-400 text-gray-500 cursor-not-allowed': !buttonAvailability,
       }"
     >
       {{ buttonText }}
     </button>
+
+    <SubscriptionModal
+      :is-open="isModalOpen"
+      :billing-cycle="billingCycle"
+      :price="price"
+      @close="closeModal"
+      @success="handleSubscriptionSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useAuthStore } from '@/stores/authStore';
+import SubscriptionModal from './SubscriptionModal.vue';
+import router from '@/router';
+
+const isModalOpen = ref(false);
+const authStore = useAuthStore();
+const subStore = useSubscriptionStore();
+
 interface Feature {
   text: string;
   included: boolean;
@@ -78,11 +99,33 @@ interface Props {
   billingCycle: "monthly" | "yearly";
   buttonText: string;
   buttonVariant: "primary" | "secondary" | "premium";
+  buttonAvailability: boolean;
   isPopular?: boolean;
   features: Feature[];
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   isPopular: false,
 });
+
+const handleButtonClick = () => {
+  if (!authStore.isLoggedIn()) {
+    router.push('/register');
+    return;
+  }
+
+  if (!subStore.isPremium && props.price > 0) {
+    isModalOpen.value = true;
+  } else if (props.title === 'Free Account' && !subStore.isPremium) {
+    console.log('Switching to free account');
+  }
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+};
+
+const handleSubscriptionSuccess = () => {
+  subStore.fetchSubscriptionStatus();
+};
 </script>

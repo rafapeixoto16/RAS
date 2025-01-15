@@ -7,3 +7,6 @@ export * from './queries/refreshToken';
 export * from './mutations/accessToken';
 export * from './queries/getUserInfo';
 export * from './mutations/signout';
+export * from './mutations/subscriptions';
+export * from './queries/subscriptions';
+export * from './mutations/changePassword';
