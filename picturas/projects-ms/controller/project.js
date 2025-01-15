@@ -1,4 +1,4 @@
-import * as Project from '../models/projectModel.js';
+import Project from '../models/projectModel.js';
 import { buildPagination, buildSort, buildQuery } from '../models/queryProject.js';
 import {schemaValidation} from '@picturas/schema-validation';
 import Image from '../models/imageModel.js'
@@ -30,8 +30,8 @@ export const projectSchema = schemaValidation.object({
     ttl: schemaValidation.date().nullable().optional(),
 });
 
-export const getProject = async (id) => {
-    return Project.findOne({ _id: id }).exec();
+export const getProject = async (userId, id) => {
+    return Project.findOne({ userId, _id: id }).exec();
 };
 
 export const getProjects = async (query) => {
@@ -57,6 +57,15 @@ export const updateProject = (id, info) => {
 export const deleteProject = (id) => {
     return Project.deleteOne({ _id: id }).exec();
 };
+
+export const filterProject = (project) => ({
+    name: project.name,
+    _id: project._id,
+    tools: project.tools,
+    images: project.images.map(img => img.id),
+    createdAt: project.createdAt,
+    updatedAt: project.updatedAt
+});
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Tools

@@ -14,7 +14,8 @@ import {
     removeImage,
     downloadImageLocally,
     uploadLocalImage,
-    objectIdSchema
+    objectIdSchema,
+    filterProject
 } from '../controller/project.js';
 import { queryProjectSchema } from '../models/queryProject.js';
 import { schemaValidation, validateRequest } from '@picturas/schema-validation';
@@ -49,43 +50,44 @@ const router = Router();
 router.use(getLimitsMiddleware);
 
 router.post('/', validateRequest({
-    body: projectSchema,
-    query: queryProjectSchema
+    body: schemaValidation.object({
+        name: schemaValidation.string()
+    })
 }), async (req, res) => {
-    const { body } = req;
-
     // TODO we can easily limit the number of project
-
     try {
-        if (req.user.limits.hasTtl) {
-            body.ttl = ttlStartTime;
+        const data = {
+            ...req.body,
+            userId: req.user._id
         }
-        const project = await addProject(body);
-        return res.status(200).json(project);
+
+        if (req.user.limits.hasTtl) {
+            data.ttl = ttlStartTime;
+        }
+
+        const project = await addProject(data);
+        return res.status(200).json(filterProject(project));
     } catch (error) {
+        console.error(error)
         return res.status(500).json({ error: 'Failed to add project' });
     }
 });
 
-router.get('/:id', validateRequest({
-    body: projectSchema,
-    query: queryProjectSchema
-}), async (req, res) => {
+router.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const project = await getProject(id);
+        const project = await getProject(req.user._id, id);
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
-        return res.status(200).json(project);
+        return res.status(200).json(filterProject(project));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 });
 
 router.get('/', validateRequest({
-    body: projectSchema,
     query: queryProjectSchema
 }), async (req, res) => {
     const { query } = req;
@@ -95,7 +97,7 @@ router.get('/', validateRequest({
         if (!projects) {
             return res.status(404).json({ error: 'Projects not found' });
         }
-        return res.status(200).json(projects);
+        return res.status(200).json(projects.map(p => filterProject(p)));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
@@ -103,34 +105,30 @@ router.get('/', validateRequest({
 
 router.put('/:id', validateRequest({
     body: projectSchema,
-    query: queryProjectSchema
 }), async (req, res) => {
     const { id } = req.params;
     const { body } = req;
 
     try {
-        const project = await updateProject(id, body);
+        const project = await updateProject(req.user._id, id, body);
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
-        return res.status(200).json(project);
+        return res.status(200).json(filterProject(project));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 });
 
-router.delete('/:id', validateRequest({
-    body: projectSchema,
-    query: queryProjectSchema
-}), async (req, res) => {
+router.delete('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const project = await deleteProject(id);
+        const project = await deleteProject(req.user._id, id);
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
-        return res.status(200).json(project);
+        return res.status(200).json(filterProject(project));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }

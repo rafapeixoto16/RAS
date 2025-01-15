@@ -5,7 +5,7 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
-        "generate-schemas": "cd filter-helper && npm run generate-schemas -- ../api-gateway/schemas.json $(ls -d ../*-filter | grep -v '../watermark-filter') && cp ../api-gateway/schemas.json ../projects-ms"
+        "generate-schemas": "cd filter-helper && npm run generate-schemas -- ../api-gateway/schemas.json ../*-filter && cp ../api-gateway/schemas.json ../projects-ms"
     },
     "workspaces": [
         "*/"

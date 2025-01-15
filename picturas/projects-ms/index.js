@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 import projectRouter from './routes/projects.js';
 import {setupBucket} from "./config/minioClient.js";
-import {devAuthMiddleware, requiresAuth, useGatewayAuth} from "@picturas/ms-helper";
+import {requiresAuth, useGatewayAuth} from "@picturas/ms-helper";
 import {getLimitsMiddleware, isPremiumMiddleware} from "./utils/premium.js";
 
 const app = express();
@@ -27,6 +27,20 @@ setupBucket().then(() => {});
 // Default configs
 app.use(morgan('dev'));
 app.use(express.json());
+
+// TODO dev
+const startTime = Math.floor(Date.now() / 1000);
+
+const devAuthMiddleware = (req, res, next) => {
+    req.user = {
+        isGuest: false,
+        _id: '678561df8f497bc6dbe757f2',
+        email: 'demo@demo.com',
+        username: 'demo',
+        iat: startTime
+    }
+    next();
+}
 
 // Auth from Gateway
 app.use(useGatewayAuth);

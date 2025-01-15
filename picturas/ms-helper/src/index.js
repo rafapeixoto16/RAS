@@ -88,7 +88,7 @@ export function useGatewayAuth(req, res, next) {
         return;
     }
 
-    req.user = JSON.parse(req.headers.authorization);
+    req.user = JSON.parse(token);
     next();
 }
 
@@ -105,18 +105,5 @@ export const requiresNonGuest = (req, res, next) => {
         res.sendStatus(401);
     } else {
         next();
-    }
-}
-
-const startTime = Math.floor(Date.now() / 1000);
-
-export const devAuthMiddleware = (req, res, next) => {
-    req.user = {
-        isGuest: false,
-        _id: '678561df8f497bc6dbe757f2',
-        email: 'demo@demo.com',
-        username: 'demo',
-        limits: {ttl: false, upload4k: true},
-        iat: startTime
     }
 }

@@ -25,5 +25,297 @@
       },
       "$schema": "http://json-schema.org/draft-07/schema#"
     }
+  },
+  "binarization": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/binarization",
+      "definitions": {
+        "binarization": {
+          "type": "object",
+          "properties": {
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 256,
+              "default": 128
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "addBorder": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/addBorder",
+      "definitions": {
+        "addBorder": {
+          "type": "object",
+          "properties": {
+            "color": {
+              "type": "string",
+              "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$",
+              "default": "#000000"
+            },
+            "size": {
+              "type": "number",
+              "default": 100
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "brightness": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/brightness",
+      "definitions": {
+        "brightness": {
+          "type": "object",
+          "properties": {
+            "brightness": {
+              "type": "number",
+              "minimum": 0,
+              "default": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "contrast": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/contrast",
+      "definitions": {
+        "contrast": {
+          "type": "object",
+          "properties": {
+            "contrast": {
+              "type": "number",
+              "default": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "cropping": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/cropping",
+      "definitions": {
+        "cropping": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "number",
+              "minimum": 1
+            },
+            "height": {
+              "type": "number",
+              "minimum": 1
+            },
+            "left": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0
+            },
+            "top": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          "required": [
+            "width",
+            "height"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "grayscale": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/grayscale",
+      "definitions": {
+        "grayscale": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "object-identification": {
+    "isPremium": true,
+    "schema": {
+      "$ref": "#/definitions/object-identification",
+      "definitions": {
+        "object-identification": {
+          "type": "object",
+          "properties": {
+            "minScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.3
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "ocr": {
+    "isPremium": true,
+    "schema": {
+      "$ref": "#/definitions/ocr",
+      "definitions": {
+        "ocr": {
+          "type": "object",
+          "properties": {
+            "language": {
+              "type": "string",
+              "default": "eng"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "person-count": {
+    "isPremium": true,
+    "schema": {
+      "$ref": "#/definitions/person-count",
+      "definitions": {
+        "person-count": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "remove-bg": {
+    "isPremium": true,
+    "schema": {
+      "$ref": "#/definitions/remove-bg",
+      "definitions": {
+        "remove-bg": {
+          "type": "object",
+          "properties": {
+            "fast": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "resize": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/resize",
+      "definitions": {
+        "resize": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "number",
+              "minimum": 1
+            },
+            "height": {
+              "type": "number",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "width",
+            "height"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "rotation": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/rotation",
+      "definitions": {
+        "rotation": {
+          "type": "object",
+          "properties": {
+            "angle": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          "required": [
+            "angle"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "saturation": {
+    "isPremium": false,
+    "schema": {
+      "$ref": "#/definitions/saturation",
+      "definitions": {
+        "saturation": {
+          "type": "object",
+          "properties": {
+            "saturation": {
+              "type": "number",
+              "minimum": 0,
+              "default": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "smart-crop": {
+    "isPremium": true,
+    "schema": {
+      "$ref": "#/definitions/smart-crop",
+      "definitions": {
+        "smart-crop": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
   }
 }
