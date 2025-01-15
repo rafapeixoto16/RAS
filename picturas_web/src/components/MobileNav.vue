@@ -70,25 +70,24 @@
               Create a Project
             </router-link>
 
-            <a
-              href="#"
-              class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
+            <button
+              class="flex items-center justify-center px-2 py-3 w-full bg-white hover:bg-azure-radiance-500 text-sm xl:text-base text-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
               @click="openPremiumModal"
             >
               <i class="bi bi-gem mr-2"></i>
-              Try Pro for 30 days
-            </a>
+              Try Premium for 30 days
+          </button>
           </div>
 
           <div class="mt-8 px-4 space-y-2">
             <h2 class="text-sm font-semibold">Projects</h2>
-            <MobileProjectList :projects="projects" @close-menu="closeMenu" />
+            <MobileProjectList :projects="projects" @close-menu="closeMenu" class="bg-blue-50" />
           </div>
         </div>
         
         <div class="px-4 py-2 border-t border-gray-200">
           <router-link
-            class="flex items-center px-4 py-3 w-full text-sm xl:text-base text-gray-500 hover:text-gray-700"
+            class="flex items-center px-4 py-3 w-full bg-blue-50 text-sm xl:text-base text-gray-500 font-semibold hover:text-gray-600"
             to="/trash"
             @click="closeMenu"
           >
@@ -99,7 +98,7 @@
 
         <div class="border-t border-gray-200 p-4">
           <div v-if="isLoggedIn">
-            <MobileProfileMenu @close-menu="closeMenu" />
+            <MobileProfileMenu @close-menu="closeMenu" class="bg-blue-50" />
           </div>
           <div v-else class="flex space-x-2">
             <router-link
