@@ -139,6 +139,7 @@ import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { updateProfile, updateProfilePic } from '@/api/mutations/updateProfile';
 import { getUserInfo } from '@/api/queries/getUserInfo';
+import { useUserStore } from '@/stores/userStore';
 
 interface User {
   username: string;
@@ -149,6 +150,7 @@ interface User {
   bio: string;
 }
 
+const userStore = useUserStore();
 const user = ref<User>({
   username: '',
   email: '',
@@ -165,8 +167,8 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const isLoading = ref(true);
 
 const userInfoItems = computed(() => [
-  { label: 'Username', value: user.value.username, key: 'username', editable: false },
   { label: 'Email', value: user.value.email, key: 'email', editable: false },
+  { label: 'Username', value: user.value.username, key: 'username', editable: true },
   { label: 'Full Name', value: user.value.fullName, key: 'fullName', editable: true },
   { label: 'Location', value: user.value.location, key: 'location', editable: true },
   { label: 'Bio', value: user.value.bio, key: 'bio', editable: true },
@@ -201,6 +203,7 @@ const confirmChanges = async () => {
   try {
     const updatedData = {
       fullName: user.value.fullName,
+      username: user.value.username,
       location: user.value.location,
       bio: user.value.bio,
     };
@@ -252,6 +255,7 @@ onMounted(async () => {
     };
     user.value = filteredUser;
     originalUser.value = { ...filteredUser };
+    userStore.updateUsername(resp.username);
   } catch (error) {
     console.error('Error fetching user info:', error);
   } finally {

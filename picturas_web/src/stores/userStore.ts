@@ -17,5 +17,10 @@ export const useUserStore = defineStore('userStore', {
     clearUser() {
       this.user = null;
     },
+    updateUsername(username: string) {
+      if (this.user) {
+        this.user.username = username;
+      }
+    }
   },
 });
