@@ -4,21 +4,12 @@ export const queryProjectSchema = schemaValidation.object({
     name: schemaValidation.string().optional(),
     tool_filterName: schemaValidation.string().optional(),
     image_format: schemaValidation.enum(['png', 'jpg', 'jpeg', 'bmp', 'webp', 'tiff']).optional(),
-    result_expireDate: schemaValidation.date().optional(), 
-    _id: schemaValidation.string().optional(),
     limit: schemaValidation.number().optional().default(10),
     page: schemaValidation.number().optional().default(1),
-    sort: schemaValidation.object({
-            name: schemaValidation.number().optional(),
-            _id: schemaValidation.number().optional(),
-            'tools.filterName': schemaValidation.number().optional(),
-            'images.format': schemaValidation.number().optional(),
-            'result.expireDate': schemaValidation.number().optional(),
-            createdAt: schemaValidation.date().optional(),
-            updatedAt: schemaValidation.date().optional(),
-        })
-        .optional(),
-});
+    sort: schemaValidation.string().regex(/^(name|tool_filterName|image_format|limit|page|createdAt|updatedAt)$/).optional(),
+    order: schemaValidation.enum(['asc', 'desc']).optional().default('asc')
+}).strict().optional();
+
 
 // in case the model changes, we might need to update this function
 export const buildQuery = ({ name, tool_filterName, image_format, result_expireDate, _id }) => {
@@ -36,14 +27,6 @@ export const buildQuery = ({ name, tool_filterName, image_format, result_expireD
         query['images.format'] = image_format;
     }
 
-    if (result_expireDate) {
-        query['result.expireDate'] = { $gte: new Date(result_expireDate) };
-    }
-
-    if (_id) {
-        query._id = _id;
-    }
-
     return query;
 };
 
@@ -52,16 +35,22 @@ export const buildPagination = ({ page, limit }) => ({
     limit,
 });
 
-export const buildSort = (sort) => {
-    const sortObject = {};
-    if (sort) {
-        if (sort.name) sortObject.name = sort.name;
-        if (sort._id) sortObject._id = sort._id;
-        if (sort['tools.filterName']) sortObject['tools.filterName'] = sort['tools.filterName'];
-        if (sort['images.format']) sortObject['images.format'] = sort['images.format'];
-        if (sort['result.expireDate']) sortObject['result.expireDate'] = sort['result.expireDate'];
-        if (sort.createdAt) sortObject.createdAt = sort.createdAt;
-        if (sort.updatedAt) sortObject.updatedAt = sort.updatedAt;
+export const buildSort = (sort, order) => {
+    const names = {
+        name: 'name',
+        tool_filterName: 'tool.filterName',
+        image_format: 'image.format',
+        limit: 'limit',
+        page: 'page',
+        createdAt: 'createdAt',
+        updatedAt: 'updatedAt'
     }
+
+    const sortObject = {};
+    
+    if (sort) {
+        sortObject[names[sort]] = (!order || order === 'asc') ? 1 : -1;
+    }
+
     return sortObject;
 };

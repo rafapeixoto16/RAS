@@ -18,7 +18,7 @@ const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'MongoDB Connection Error'));
 
-db.once('open', () => {
+db.once('open', async () => {
     console.log('MongoDB connection established');
 });
 

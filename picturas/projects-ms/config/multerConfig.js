@@ -8,16 +8,16 @@ const upload = multer({
         const extension = path.extname(file.originalname).toLowerCase();
         const mimetype = file.mimetype;
         if (
-            extension !== '.png' || mimetype !== 'image/png' ||
-            extension !== '.jpg' || mimetype !== 'image/jpg' ||
-            extension !== '.jpeg' || mimetype !== 'image/jpeg' ||
-            extension !== '.bmp' || mimetype !== 'image/bmp' ||
-            extension !== '.webp' || mimetype !== 'image/webp' ||
-            extension !== '.tiff' || mimetype !== 'image/tiff'
+            extension === '.png' || mimetype === 'image/png' ||
+            extension === '.jpg' || mimetype === 'image/jpg' ||
+            extension === '.jpeg' || mimetype === 'image/jpeg' ||
+            extension === '.bmp' || mimetype === 'image/bmp' ||
+            extension === '.webp' || mimetype === 'image/webp' ||
+            extension === '.tiff' || mimetype === 'image/tiff'
         ) {
-            cb('Invalid format, only png, jpg, jpeg, bmp webp and tiff are accepted', false);
-        } else {
             cb(null, true);
+        } else {
+            cb('Invalid format, only png, jpg, jpeg, bmp webp and tiff are accepted', false);
         }
     },
     storage,

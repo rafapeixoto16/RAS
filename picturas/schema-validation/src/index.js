@@ -8,33 +8,37 @@ export function toJsonSchema(name, schema) {
     return zodToJsonSchema(schema, name);
 }
 
-export function fromJsonSchema(schema) {
-    return jsonSchemaToZod(schema);
+export function fromJsonSchema(name, schema) {
+    return eval(jsonSchemaToZod(schema.definitions[name]));
 }
 
-export const validateRequest = (schemas) => {
+const defaultSettings = {strict: true}
+
+export const validateRequest = (schemas, settings={}) => {
+    const finalSettings = {...defaultSettings, ...settings};
+
     return (req, res, next) => {
         const errors = [];
         const { params, query, body } = schemas;
 
-        if (params) {
-            const parsed = params.safeParse(req.params);
-            if (!parsed.success) {
-                errors.push({ type: 'Params', errors: parsed.error });
-            }
-        }
-        if (query) {
-            const parsed = query.safeParse(req.query);
-            if (!parsed.success) {
-                errors.push({ type: 'Query', errors: parsed.error });
-            }
-        }
-        if (body) {
-            const parsed = body.safeParse(req.body);
-            if (!parsed.success) {
-                errors.push({ type: 'Body', errors: parsed.error });
-            }
-        }
+        const validations = [
+            { type: 'Params', schema: params, data: req.params },
+            { type: 'Query', schema: query, data: req.query },
+            { type: 'Body', schema: body, data: req.body }
+        ];
+          
+        validations.forEach(({ type, schema, data }) => {
+            if (!schema) return;
+
+            let val = schema;
+            
+            if (finalSettings.strict) val.strict();
+            
+            const parsed = val.safeParse(data);
+
+            if (!parsed.success) errors.push({ type, errors: parsed.error.issues });
+        });
+
         if (errors.length > 0) {
             return res
                 .status(400)

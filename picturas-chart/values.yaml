@@ -108,6 +108,8 @@ users-ms-db:
     enabled: true
   containerPorts:
     mongodb: 27017
+  persistence:
+    enabled: false
   metrics:
     enabled: true
     serviceMonitor:
@@ -125,6 +127,8 @@ projects-ms-db:
     enabled: true
   containerPorts:
     mongodb: 27017
+  persistence:
+    enabled: false
   metrics:
     enabled: true
     serviceMonitor:
@@ -139,6 +143,8 @@ subscriptions-ms-db:
     enabled: true
   containerPorts:
     mongodb: 27017
+  persistence:
+    enabled: false
   metrics:
     enabled: true
     serviceMonitor:
@@ -147,6 +153,9 @@ subscriptions-ms-db:
 stripe_private_key: "stripe-private-key"
 stripe_webhook_secret: "stripe-webhook-key"
 
+# TODO
+#s3_endpoint: "http://localhost/minio" # static from dev
+#s3_port: 80 # static from dev
 s3_endpoint: "minio" # static from dev
 s3_port: 9000 # static from dev
 s3_username: "s3-username" # access

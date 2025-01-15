@@ -6,10 +6,6 @@ const imageSchema = new mongoose.Schema({
         required: true,
         ref: 'Image'
     },
-    project: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
-    },
     url: {
         type: String,
         required: true

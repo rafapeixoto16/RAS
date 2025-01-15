@@ -53,14 +53,29 @@ const projectSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const Project = mongoose.model('Project', projectSchema); 
+const Project = mongoose.model('Project', projectSchema);
+
+async function listObjectsPromise(bucketName, prefix, recursive) {
+    return new Promise((resolve, reject) => {
+        const files = [];
+        const stream = minioClient.listObjects(bucketName, prefix, recursive);
+        stream.on('data', (data) => {
+            files.push(data.name);
+        });
+        stream.on('end', () => resolve(files));
+        stream.on('error', (err) => reject(err));
+    });
+}
 
 Project.watch([
     { $match: {operationType: 'delete'} }
 ]).on('change', async (change) => {
-    const lock = await redisLock(redisClient, `delete_${change._id}`, 0);
+    console.log(change.documentKey._id)
 
-    await minioClient.removeObjects(process.env.S3_IMAGE_BUCKET, change.images.map((img) => `${img.id}.${img.format}`));
+    const lock = await redisLock(change.documentKey._id, 0);
+
+    const files = await listObjectsPromise(process.env.S3_PICTURE_BUCKET, change.documentKey._id.toString(), true);
+    await minioClient.removeObjects(process.env.S3_PICTURE_BUCKET, files);
 
     await lock();
 });

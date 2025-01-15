@@ -1,36 +1,20 @@
-const DEFAULT_TIMEOUT = 5000;
-const DEFAULT_RETRY_DELAY = 50;
+import Redlock from 'redlock';
+import redisClient from '../config/redisConfig.js';
 
-async function acquireLock (client, lockName, retires, maxRertries, onLockAcquired) {
-    function retry () {
-        setTimeout(() => {
-            acquireLock(client, lockName, retires + 1, maxRertries, onLockAcquired);
-        }, DEFAULT_RETRY_DELAY);
+const redlock = new Redlock(
+    [redisClient],
+    {
+        driftFactor: 0.01,
+        retryDelay: 200,
+        retryJitter: 200,
+        automaticExtensionThreshold: 500,
     }
+);
 
-    const lockTimeoutValue = Date.now() + DEFAULT_TIMEOUT + 1;
-    try {
-        const result = await client.set(lockName, lockTimeoutValue, {
-            PX: DEFAULT_TIMEOUT,
-            NX: true
-        });
-        if (result === null) {
-            throw new Error("Lock failed");
-        }
-        onLockAcquired(lockTimeoutValue);
-    } catch (err) {
-        if (retires + 1 < maxRertries) retry();
-    }
-}
-
-export default function redisLock (client, lockName, maxRetries=Infinity) {
-    return new Promise(resolve => {
-        acquireLock(client, lockName, 0, maxRetries, lockTimeoutValue => {
-            resolve(async () => {
-                if (lockTimeoutValue > Date.now()) {
-                    return client.del(lockName);
-                }
-            });
-        });
-    });
+export default async function redisLock(lockName, retryCount=-1) {
+    const lock = await redlock.acquire([`locks:${lockName}`], 10000, { retryCount });
+  
+    return async function unlock() {
+        await lock.release();
+    };
 }

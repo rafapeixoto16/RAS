@@ -13,7 +13,7 @@ const baseSchemas = JSON.parse(
 const schemas = Object.entries(baseSchemas).reduce((acc, [filterName, { isPremium, schema }]) => {
     acc[filterName] = {
         isPremium,
-        schema: fromJsonSchema(schema),
+        schema: fromJsonSchema(filterName, schema),
     };
     return acc;
 }, {});

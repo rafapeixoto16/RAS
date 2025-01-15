@@ -5,41 +5,20 @@ import Image from '../models/imageModel.js'
 import minioClient from '../config/minioClient.js';
 import sharp from 'sharp';
 import path from 'node:path';
+import mongoose from 'mongoose';
 
 export const objectIdSchema = schemaValidation.string().refine((val) => mongoose.Types.ObjectId.isValid(val));
-
-export const projectSchema = schemaValidation.object({
-    name: schemaValidation.string().min(1, 'Name is required'),
-    user_id: schemaValidation.string().uuid('Invalid user ID'),
-    tools: schemaValidation.array(
-        schemaValidation.object({
-            filterName: schemaValidation.string().min(1, 'Filter name is required'),
-            args: schemaValidation.record(schemaValidation.any()),
-        })
-    ).optional(),
-    images: schemaValidation.array(
-        schemaValidation.object({
-            id: objectIdSchema, 
-            format: schemaValidation.enum(['png', 'jpg', 'jpeg', 'bmp', 'webp', 'tiff']),
-        })
-    ).optional(),
-    result: schemaValidation.object({
-        expireDate: schemaValidation.date().optional(),
-        output: objectIdSchema.optional(),  // S3 filename 
-    }).optional(),
-    ttl: schemaValidation.date().nullable().optional(),
-});
 
 export const getProject = async (userId, id) => {
     return Project.findOne({ userId, _id: id }).exec();
 };
 
-export const getProjects = async (query) => {
-    const { page, limit, sort } = query;
+export const getProjects = async (userId, query) => {
+    const { page, limit, sort, order } = query;
     const pagination = buildPagination({ page, limit });
-    const sortObject = buildSort(sort);
+    const sortObject = buildSort(sort, order);
     const queryObject = buildQuery(query);
-    return Project.find(queryObject)
+    return Project.find({...queryObject, userId})
         .sort(sortObject)
         .skip(pagination.skip)
         .limit(pagination.limit)
@@ -50,19 +29,19 @@ export const addProject = async (u) => {
     return new Project(u).save();
 };
 
-export const updateProject = (id, info) => {
-    return Project.updateOne({ _id: id }, info).exec();
+export const updateProject = (userId, id, info) => {
+    return Project.updateOne({ userId, _id: id }, info).exec();
 };
 
-export const deleteProject = (id) => {
-    return Project.deleteOne({ _id: id }).exec();
+export const deleteProject = (userId, id) => {
+    return Project.deleteOne({ userId, _id: id }).exec();
 };
 
 export const filterProject = (project) => ({
     name: project.name,
     _id: project._id,
     tools: project.tools,
-    images: project.images.map(img => img.id),
+    images: project.images,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt
 });
@@ -71,8 +50,8 @@ export const filterProject = (project) => ({
 // Tools
 //////////////////////////////////////////////////////////////////////////////////////////
 
-export const addTool = async (projectId, tool) => {
-    const project = await getProject(projectId);
+export const addTool = async (userId, projectId, tool) => {
+    const project = await getProject(userId, projectId);
 
     if (!project) {
         throw new Error('Project not found');
@@ -80,16 +59,13 @@ export const addTool = async (projectId, tool) => {
 
     project.tools.push(tool);
     const addedToolIndex = project.tools.length - 1;
-    const updatedProject = await updateProject(projectId, project);
+    const updatedProject = await updateProject(userId, projectId, project);
 
-    return {
-        updatedProject,
-        addedToolIndex
-    };
+    return addedToolIndex;
 };
 
-export const removeTool = async (projectId, toolIdx) => {
-    const project = await getProject(projectId);
+export const removeTool = async (userId, projectId, toolIdx) => {
+    const project = await getProject(userId, projectId);
 
     if (!project) {
         throw new Error('Project not found');
@@ -100,7 +76,7 @@ export const removeTool = async (projectId, toolIdx) => {
     }
 
     const removedTool = project.tools.splice(toolIdx, 1)[0];
-    const updatedProject = await updateProject(projectId, project);
+    const updatedProject = await updateProject(userId, projectId, project);
 
     return {
         updatedProject,
@@ -108,8 +84,8 @@ export const removeTool = async (projectId, toolIdx) => {
     };
 }
 
-export const reorderTool = async (projectId, toolIdx, toolIdxAfter) => {
-    const project = await getProject(projectId);
+export const reorderTool = async (userId, projectId, toolIdx, toolIdxAfter) => {
+    const project = await getProject(userId, projectId);
 
     if (!project) {
         throw new Error('Project not found');
@@ -127,10 +103,9 @@ export const reorderTool = async (projectId, toolIdx, toolIdxAfter) => {
     const [movedTool] = project.tools.splice(toolIdx, 1);
     project.tools.splice(toolIdxAfter, 0, movedTool);
 
-    const updatedProject = await updateProject(projectId, project);
+    await updateProject(userId, projectId, project);
 
     return {
-        updatedProject,
         movedTool,
         toolIdx
     };
@@ -141,13 +116,13 @@ export const reorderTool = async (projectId, toolIdx, toolIdxAfter) => {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 // file = req.file from multer
-export const addImage = async (projectId, file, userLimits) => {
+export const addImage = async (userId, projectId, file, userLimits) => {
     const extensionName = path.extname(file.originalname);
     const objectId = new mongoose.Types.ObjectId();
-    const imageName = `${objectId}${extensionName}`;
+    const imageName = `${projectId}/${objectId}${extensionName}`;
     const is4kAllowed = userLimits.has4kUpload;
-
-    const project = await getProject(projectId);
+    
+    const project = await getProject(userId, projectId);
     if (!project) {
         throw new Error('Project not found');
     }
@@ -168,18 +143,17 @@ export const addImage = async (projectId, file, userLimits) => {
 
     const imageDocument = new Image({
         _id: objectId,
-        project: projectId,
         url: publicUrl,
     });
 
     await imageDocument.save();
 
-    const { updatedProject, idx } = await addImageToProject(projectId, {
+    const { updatedProject, idx } = await addImageToProject(userId, projectId, {
         id: objectId,
         format: extensionName.replace('.', ''),
     });
 
-    return { updatedProject, imageIdx: idx, imageUrl: publicUrl };
+    return { imageIdx: idx, imageUrl: publicUrl };
 };
 
 const isImage4k = async (image) => {
@@ -196,21 +170,21 @@ const isImage4k = async (image) => {
     return (width >= 3840 && height >= 2160) || (width >= 2160 && height >= 3840);
 }
 
-const addImageToProject = async (projectId, image) => {
-    const project = await getProject(projectId);
+const addImageToProject = async (userId, projectId, image) => {
+    const project = await getProject(userId, projectId);
     if (!project) {
         throw new Error('Project not found');
     }
     const idx = project.images.push(image);
-    const updatedProject = await updateProject(projectId, project);
+    const updatedProject = await updateProject(userId, projectId, {images: project.images});
     return {
         updatedProject,
         idx
     };
 };
 
-export const removeImage = async (projectId, imageIdx) => {
-    const project = await getProject(projectId);
+export const removeImage = async (userId, projectId, imageIdx) => {
+    const project = await getProject(userId, projectId);
     if (!project) {
         throw new Error('Project not found');
     }
@@ -219,22 +193,19 @@ export const removeImage = async (projectId, imageIdx) => {
     }
 
     const removedImage = project.images.splice(imageIdx, 1)[0];
-    const updatedProject = await updateProject(projectId, project);
-    const imageName = removedImage.id; // S3 location
+    const updatedProject = await updateProject(userId, projectId, {images: project.images});
+    const imageName = `${projectId}/${removedImage.id}.${removedImage.format}`; // S3 location
 
     await minioClient.removeObject(
         process.env.S3_PICTURE_BUCKET,
         imageName,
     );
 
-    return {
-        updatedProject,
-        removedImage
-    };
+    return removedImage;
 };
 
-export const getImage = async (projectId, imageIdx) => {
-    const project = await getProject(projectId);
+export const getImage = async (userId, projectId, imageIdx) => {
+    const project = await getProject(userId, projectId);
     if (!project) {
         throw new Error('Project not found');
     }
@@ -250,12 +221,11 @@ export const getImage = async (projectId, imageIdx) => {
     if (!image) {
         const extensionName = imageRef.format.startsWith('.') ? imageRef.format : `.${imageRef.format}`;
         const bucketName = process.env.S3_PICTURE_BUCKET;
-        const imageName = `${imageRef.id}${extensionName}`;
+        const imageName = `${projectId}/${imageRef.id}${extensionName}`;
         const publicUrl = await minioClient.presignedGetObject(bucketName, imageName, 24 * 60 * 60);
 
         image = new Image({
             _id: imageRef.id,
-            project: projectId,
             url: publicUrl,
         });
 
@@ -267,6 +237,33 @@ export const getImage = async (projectId, imageIdx) => {
     return image.url;
 };
 
+export const reorderImage = async (userId, projectId, imageIdx, imageIdxAfter) => {
+    const project = await getProject(userId, projectId);
+
+    if (!project) {
+        throw new Error('Project not found');
+    }
+
+    const imageLength = project.images.length;
+    if (imageIdx < 0 || imageIdx >= imageLength) {
+        throw new Error('Invalid current image index');
+    }
+    
+    if (imageIdxAfter < 0 || imageIdxAfter >= imageLength) {
+        throw new Error('Invalid target image index');
+    }
+
+    const [movedImage] = project.images.splice(imageIdx, 1);
+    project.images.splice(imageIdxAfter, 0, movedImage);
+
+    await updateProject(userId, projectId, project);
+
+    return {
+        movedImage,
+        imageIdx
+    };
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // S3 Specific
 ///////////////////////////////////////////////////////////////////////////
@@ -276,7 +273,7 @@ export const downloadImageLocally = async (imageName, targetPath) => {
 
     const objectStream = await minioClient.getObject(
         process.env.S3_PICTURE_BUCKET,
-        imageName
+        `${projectId}/${imageName.id}.${imageName.ext}`
     );
 
     return new Promise((resolve, reject) => {

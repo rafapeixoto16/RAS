@@ -160,7 +160,7 @@ async function filterTerminated(msg) {
     const data = JSON.parse(msg);
     const {projectId, imageId, stage} = fromMessageId(data.correlationId);
 
-    const lock = await redisLock(redisClient, getRedisKey(projectId, 'lock'));
+    const lock = await redisLock(getRedisKey(projectId, 'lock'));
     let runNext = true;
 
     // Errors
@@ -282,7 +282,7 @@ async function runPipelineInternal(userId, projectId, imageInfoList, filterInfoL
 }
 
 export async function cancelPipeline(projectId) {
-    const lock = await redisLock(redisClient, getRedisKey(projectId, 'lock'));
+    const lock = await redisLock(getRedisKey(projectId, 'lock'));
     await redisClient.set(getRedisKey(projectId, 'cancel'), 0);
     await lock();
 }

@@ -5,7 +5,6 @@ import {
     getProjects,
     deleteProject,
     getProject,
-    projectSchema,
     addTool,
     removeTool,
     reorderTool,
@@ -15,7 +14,8 @@ import {
     downloadImageLocally,
     uploadLocalImage,
     objectIdSchema,
-    filterProject
+    filterProject,
+    reorderImage
 } from '../controller/project.js';
 import { queryProjectSchema } from '../models/queryProject.js';
 import { schemaValidation, validateRequest } from '@picturas/schema-validation';
@@ -87,13 +87,27 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.get('/:id/output', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const project = await getProject(req.user._id, id);
+        if (!project || !project.result.output) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+        return res.status(200).json({output: project.result.output});
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+
 router.get('/', validateRequest({
     query: queryProjectSchema
-}), async (req, res) => {
+}, { strict: false }), async (req, res) => {
     const { query } = req;
 
     try {
-        const projects = await getProjects(query);
+        const projects = await getProjects(req.user._id, query);
         if (!projects) {
             return res.status(404).json({ error: 'Projects not found' });
         }
@@ -104,7 +118,9 @@ router.get('/', validateRequest({
 });
 
 router.put('/:id', validateRequest({
-    body: projectSchema,
+    body: schemaValidation.object({
+        name: schemaValidation.string()
+    }),
 }), async (req, res) => {
     const { id } = req.params;
     const { body } = req;
@@ -141,9 +157,14 @@ router.delete('/:id', async (req, res) => {
 router.post('/:id/tool', validateRequest({
     body: schemaValidation.object({
         filterName: schemaValidation.enum(Object.keys(schemas)),
-        parameters: schemaValidation.unknown(),
-    }).refine((data) => schemas[data.filterName].safeParse(data.parameters).success)
-}), async (req, res) => {
+        args: schemaValidation.unknown(),
+    })
+    .strict()
+    .refine((data) => {
+        console.error(schemas[data.filterName])
+        return schemas[data.filterName].schema.safeParse(data.args).success
+    })
+}, {strict: false}), async (req, res) => {
     const { id } = req.params;
     const toolInformation = req.body;
 
@@ -156,11 +177,8 @@ router.post('/:id/tool', validateRequest({
     }
 
     try {
-        const { project, index } = await addTool(id, toolInformation);
-        return res.status(200).json({
-            project,
-            index
-        })
+        const index = await addTool(req.user._id, id, toolInformation);
+        return res.status(200).json({index})
     } catch(error) {
         return res.status(500).json({ error: error.message });
     } 
@@ -170,7 +188,7 @@ router.delete('/:id/tool/:idxTool', async (req, res) => {
     const { id, idxTool } = req.params;
 
     try {
-        const { project, removedTool } = await removeTool(id, idxTool);
+        const { project, removedTool } = await removeTool(req.user._id, id, idxTool);
         return res.status(200).json({
             project,
             removedTool
@@ -189,11 +207,10 @@ router.put('/:id/tool/:idxTool', validateRequest({
     const { idxToolAfter } = req.body;
     
     try {
-        const { project, reorderedTool, newToolIdx } = await reorderTool(id, idxTool, idxToolAfter);
+        const { reorderedTool, toolIdx } = await reorderTool(req.user._id, id, idxTool, idxToolAfter);
         return res.status(200).json({
-            project,
             reorderedTool,
-            newToolIdx
+            toolIdx
         });
     } catch(error) {
         return res.status(500).json({ error: error.message });
@@ -208,7 +225,7 @@ router.get('/:id/image/:idxImage', async (req, res) => {
     const { id, idxImage } = req.params;
 
     try {
-        const { imageUrl } = await getImage(id, idxImage);
+        const imageUrl = await getImage(req.user._id, id, idxImage);
         return res.status(200).json({
             imageUrl
         });
@@ -229,9 +246,8 @@ router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
     }
 
     try {
-        const { project, index, imageUrl } = await addImage(id, image, userLimits);
+        const { index, imageUrl } = await addImage(req.user._id, id, image, userLimits);
         return res.status(200).json({
-            project,
             index,
             imageUrl
         })
@@ -240,15 +256,31 @@ router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
     } 
 })
 
+router.put('/:id/image/:idxImage', validateRequest({
+    body: schemaValidation.object({
+      idxImageAfter: schemaValidation.number().min(0)
+    })
+  }), async (req, res) => {
+      const { id, idxImage } = req.params;
+      const { idxImageAfter } = req.body;
+      
+      try {
+          const { reorderedImage, imageIdx } = await reorderImage(req.user._id, id, idxImage, idxImageAfter);
+          return res.status(200).json({
+              reorderedImage,
+              imageIdx
+          });
+      } catch(error) {
+          return res.status(500).json({ error: error.message });
+      }
+  })
+
 router.delete('/:id/image/:idxImage', async (req, res) => {
     const { id, idxImage } = req.params;
 
     try {
-        const { project, removedImage } = await removeImage(id, idxImage);
-        return res.status(200).json({
-            project,
-            removedImage
-        });
+        const removedImage = await removeImage(req.user._id, id, idxImage);
+        return res.status(200).json({removedImage});
     } catch(error) {
         return res.status(500).json({ error: error.message });
     }
