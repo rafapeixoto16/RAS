@@ -2,8 +2,9 @@
   <div class="flex h-screen">
     <div
       class="fixed left-0 flex flex-col w-1/6 h-full bg-azure-radiance-100 text-gray-700 border-r border-gray-200 shadow-lg">
-      <router-link class="flex items-center justify-center px-8 py-4 w-full" to="/">
-        <h1 class="text-3xl xl:text-5xl font-bold text-gray-900" style="font-family: 'Caveat', cursive;">
+      <router-link class="flex items-center justify-center px-8 py-4 w-full" to="/dashboard">
+        <h1
+          class="text-3xl xl:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-purple-600 font-caveat px-4 py-2">
           Picturas
         </h1>
       </router-link>
@@ -198,6 +199,8 @@ const openPremiumModal = () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+
 .flex-grow {
   flex-grow: 1;
 }
@@ -223,5 +226,9 @@ const openPremiumModal = () => {
 .overflow-y-auto {
   scrollbar-width: thin;
   scrollbar-color: #3B82F6 #F5F7FA;
+}
+
+.font-caveat {
+  font-family: 'Caveat', sans-serif;
 }
 </style>

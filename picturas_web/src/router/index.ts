@@ -79,6 +79,11 @@ const router = createRouter({
       component: () => import('../views/ProjectsView.vue'),
     },
     {
+      path: '/tutorial',
+      name: 'tutorial',
+      component: () => import('../views/TutorialView.vue'),
+    },
+    {
       path: '/trash',
       name: 'Trash',
       component: () => import('../views/TrashView.vue'),

@@ -23,8 +23,9 @@
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="relative inset-0 z-20">
                 <div class="mx-auto max-w-2xl lg:text-center">
-                    <h1 class="text-3xl sm:text-5xl md:text-7xl lg:text-9xl font-bold text-azure-radiance-700 "
-                        style="font-family: 'Caveat', cursive;">
+                    <h1
+                        class="text-3xl sm:text-5xl md:text-7xl lg:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-purple-600 font-caveat px-4 py-2">
+
                         Picturas
                     </h1>
                     <h2 class="text-base/7 font-semibold text-azure-radiance-800 ">Design faster</h2>
@@ -59,7 +60,7 @@
 
 <script setup lang="ts">
 import router from '@/router';
-import { ref, onMounted, onUnmounted, computed} from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
@@ -106,6 +107,8 @@ const redirector = () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 1s ease;
@@ -173,22 +176,30 @@ const redirector = () => {
 }
 
 .text-3xl {
-    font-size: 9.875rem; /* Desktop grande */
+    font-size: 9.875rem;
+    /* Desktop grande */
     line-height: 7.25rem;
 }
 
-@media (max-width: 1024px) { /* Tablets */
+@media (max-width: 1024px) {
+
+    /* Tablets */
     .text-3xl {
         font-size: 6rem;
         line-height: 5rem;
     }
 }
 
-@media (max-width: 768px) { /* Smartphones */
+@media (max-width: 768px) {
+
+    /* Smartphones */
     .text-3xl {
         font-size: 3rem;
         line-height: 4rem;
     }
 }
 
+.font-caveat {
+    font-family: 'Caveat', cursive;
+}
 </style>
