@@ -70,14 +70,13 @@
               Create a Project
             </router-link>
 
-            <a
-              href="#"
+            <button
               class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
               @click="openPremiumModal"
             >
               <i class="bi bi-gem mr-2"></i>
               Try Pro for 30 days
-            </a>
+          </button>
           </div>
 
           <div class="mt-8 px-4 space-y-2">
@@ -88,7 +87,7 @@
         
         <div class="px-4 py-2 border-t border-gray-200">
           <router-link
-            class="flex items-center px-4 py-3 w-full text-sm xl:text-base text-gray-500 hover:text-gray-700"
+            class="flex items-center px-4 py-3 w-full bg-blue-50 text-sm xl:text-base text-gray-400 font-semibold hover:text-gray-600"
             to="/trash"
             @click="closeMenu"
           >
