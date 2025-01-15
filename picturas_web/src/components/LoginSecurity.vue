@@ -17,16 +17,6 @@
           <button @click="showPasswordModal = true" class="text-blue-600 hover:text-blue-800">Change</button>
         </div>
       </div>
-
-      <div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Two-Factor Authentication</h3>
-        <div class="flex items-center justify-between">
-          <p class="text-gray-600">{{ user.twoFactorEnabled ? 'Enabled' : 'Disabled' }}</p>
-          <button @click="toggleTwoFactor" class="text-blue-600 hover:text-blue-800">
-            {{ user.twoFactorEnabled ? 'Disable' : 'Enable' }}
-          </button>
-        </div>
-      </div>
     </div>
 
     <Modal v-if="showPasswordModal" @close="showPasswordModal = false">
@@ -49,14 +39,12 @@ import Modal from '@/components/CustomModal.vue';
 const user = ref({
   email: '',
   password: '',
-  twoFactorEnabled: false,
 });
 
 onMounted(async () => {
   try {
     const userInfo = await getUserInfo();
     user.value.email = userInfo.email;
-    user.value.twoFactorEnabled = userInfo.twoFactorEnabled;
   } catch (error) {
     console.error('Failed to fetch user info:', error);
   }
@@ -75,9 +63,5 @@ const changePassword = async () => {
   } catch(error){
     console.error('Failed to change password', error);
   }
-};
-
-const toggleTwoFactor = () => {
-  user.value.twoFactorEnabled = !user.value.twoFactorEnabled;
 };
 </script>

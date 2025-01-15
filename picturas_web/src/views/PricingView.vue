@@ -17,11 +17,12 @@
   
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           <PricingCard
-            title="Anonymous"
+            title="Guest"
             description="Try basic features without an account"
             :price="0"
             :billing-cycle="billingCycle"
-            button-text="Start Now"
+            :button-text="authStore.isLoggedIn() ? 'Unavailable' : 'Current Plan'"
+            :button-availability="false"
             button-variant="secondary"
             :features="anonymousFeatures"
           />
@@ -31,7 +32,8 @@
             description="Perfect for getting started with photo editing"
             :price="0"
             :billing-cycle="billingCycle"
-            button-text="Sign Up Free"
+            :button-text="authStore.isLoggedIn() ? (subscriptionStore.isPremium ? 'Unavailable' : 'Current Plan') : 'Sign up For Free'"
+            :button-availability="authStore.isLoggedIn() ? (subscriptionStore.isPremium ? false : false) : true"
             button-variant="primary"
             :features="freeFeatures"
           />
@@ -41,7 +43,8 @@
             description="Advanced tools for serious creators"
             :price="billingCycle === 'monthly' ? monthlyPrice : yearlyPrice"
             :billing-cycle="billingCycle"
-            button-text="Upgrade Now"
+            :button-text="authStore.isLoggedIn() ? (subscriptionStore.isPremium ? 'Current Plan' : (subscriptionStore.hasTrialAvailable ? 'Start 30-Day Free Trial' : 'Upgrade Now')) : 'Sign Up For Free'"
+            :button-availability="authStore.isLoggedIn() ? (subscriptionStore.isPremium ? false : (subscriptionStore.hasTrialAvailable ? true : true)) : true"
             button-variant="premium"
             :is-popular="true"
             :features="premiumFeatures"
@@ -62,8 +65,12 @@
   import PlanToggle from '@/components/PlanToggle.vue'
   import FeatureComparison from '@/components/FeatureComparison.vue'
   import { getPlans } from '@/api/queries/subscriptions.ts'
+  import { useSubscriptionStore } from '@/stores/subscriptionStore'
+  import { useAuthStore } from '@/stores/authStore'
   
-  const billingCycle = ref<'monthly' | 'yearly'>('monthly')
+  const billingCycle = ref<'monthly' | 'yearly'>('monthly');
+  const subscriptionStore = useSubscriptionStore();
+  const authStore = useAuthStore();
   
   const anonymousFeatures = [
     { text: 'Basic photo editing tools', included: true },
@@ -146,5 +153,7 @@
       if (plans["year"]) {
           yearlyPrice.value = plans["year"].amount / 100
       }
+
+      if(authStore.isLoggedIn()) await subscriptionStore.fetchSubscriptionStatus()
   })
   </script> 

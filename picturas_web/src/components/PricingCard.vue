@@ -51,14 +51,16 @@
 
     <button
       @click="handleButtonClick"
+      :disabled="!buttonAvailability"
       class="w-full rounded-lg px-4 py-2 sm:py-3 text-center text-sm sm:text-base font-semibold transition-colors duration-200"
       :class="{
-        'bg-[#3B82F6] text-white hover:bg-[#2563EB]':
-          buttonVariant === 'primary',
-        'bg-gray-200 text-gray-800 hover:bg-gray-300':
-          buttonVariant === 'secondary',
-        'bg-gradient-to-r from-[#3B82F6] to-purple-600 text-white hover:from-[#2563EB] hover:to-purple-700':
-          buttonVariant === 'premium',
+      'bg-[#3B82F6] text-white hover:bg-[#2563EB]':
+        buttonVariant === 'primary' && buttonAvailability,
+      'bg-gray-200 text-gray-800 hover:bg-gray-300':
+        buttonVariant === 'secondary' && buttonAvailability,
+      'bg-gradient-to-r from-[#3B82F6] to-purple-600 text-white hover:from-[#2563EB] hover:to-purple-700':
+        buttonVariant === 'premium' && buttonAvailability,
+      'bg-gray-400 text-gray-500 cursor-not-allowed': !buttonAvailability,
       }"
     >
       {{ buttonText }}
@@ -97,6 +99,7 @@ interface Props {
   billingCycle: "monthly" | "yearly";
   buttonText: string;
   buttonVariant: "primary" | "secondary" | "premium";
+  buttonAvailability: boolean;
   isPopular?: boolean;
   features: Feature[];
 }
@@ -106,8 +109,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const handleButtonClick = () => {
-  if (!authStore.isLoggedIn) {
-    router.push('/login');
+  if (!authStore.isLoggedIn()) {
+    router.push('/register');
     return;
   }
 

@@ -136,8 +136,10 @@ const handleLogin = async () => {
 const handleGuest = async () => {
   try {
     errorMessage.value = '';
-    const response = await loginGuest()
-    authStore.setTokensGuest(response.accessToken);
+    if (!authStore.accessToken) {
+      const response = await loginGuest();
+      authStore.setTokensGuest(response.accessToken);
+    }
     router.push('/dashboard');
   } catch (error) {
     console.error('Login error:', error);

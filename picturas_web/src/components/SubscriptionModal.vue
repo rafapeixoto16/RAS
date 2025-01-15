@@ -64,12 +64,19 @@
 
                 <button
                   type="submit"
-                  :disabled="isLoading"
-                  class="mt-4 w-full inline-flex justify-center items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  :disabled="isLoading || status === 'success' || status === 'error'"
+                  :class="buttonClass"
+                  class="mt-4 w-full inline-flex justify-center items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
                 >
                   <template v-if="isLoading">
                     <Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4" />
                     Processing...
+                  </template>
+                  <template v-else-if="status === 'success'">
+                    <CheckIcon class="h-5 w-5" />
+                  </template>
+                  <template v-else-if="status === 'error'">
+                    <XIcon class="h-5 w-5" />
                   </template>
                   <template v-else>
                     Subscribe - ${{ price }}/{{ billingCycle }}
@@ -89,9 +96,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, nextTick, computed } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import { CreditCard, Loader2 } from 'lucide-vue-next'
+import { CreditCard, Loader2, CheckIcon, XIcon } from 'lucide-vue-next'
 import { subscribe } from '@/api/mutations/subscriptions'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { loadStripe, type Stripe, type StripeElements } from '@stripe/stripe-js'
@@ -199,10 +206,11 @@ const handleSubmit = async () => {
     setTimeout(() => {
       emit('success')
       closeModal()
-    }, 3000)
+    }, 2000)
   } catch (error) {
+    console.error('Subscription error:', error)
     status.value = 'error'
-    message.value = error instanceof Error ? error.message : 'Something went wrong. Please try again.'
+    message.value = 'Something went wrong. Please try again.'
   } finally {
     isLoading.value = false
   }
@@ -211,6 +219,16 @@ const handleSubmit = async () => {
 const closeModal = () => {
   emit('close')
 }
+
+const buttonClass = computed(() => {
+  if (status.value === 'success') {
+    return 'bg-green-600 hover:bg-green-700 text-white'
+  } else if (status.value === 'error') {
+    return 'bg-red-600 hover:bg-red-700 text-white'
+  } else {
+    return 'bg-blue-600 hover:bg-blue-700 text-white'
+  }
+})
 </script>
 
 <style scoped>
