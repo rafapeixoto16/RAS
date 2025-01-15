@@ -102,9 +102,11 @@ import { getUserInfo, login, loginSecondFactor } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserStore } from '@/stores/userStore';
 import { loginGuest } from '@/api/mutations/login';
+import { useProjectStore } from '@/stores/projectsStore';
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const projectsStore = useProjectStore()
 const router = useRouter();
 const email = ref('');
 const password = ref('');
@@ -129,6 +131,7 @@ const handleLogin = async () => {
       authStore.setTokens(finalResponse.accessToken, finalResponse.refreshToken);
       const { username, email, profilePic } = await getUserInfo()
       userStore.setUser({username: username, email: email, avatarUrl: profilePic})
+      await projectsStore.fetchProjects();
       router.push('/dashboard');
     }
   } catch (error) {
@@ -143,6 +146,7 @@ const handleGuest = async () => {
     if (!authStore.accessToken) {
       const response = await loginGuest();
       authStore.setTokensGuest(response.accessToken);
+      await projectsStore.fetchProjects();
     }
     router.push('/dashboard');
   } catch (error) {

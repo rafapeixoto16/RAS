@@ -141,12 +141,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue';
+import { ref, reactive, watch, computed, onMounted } from 'vue';
 import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
 import type { Tool } from '@/components/ToolButton.vue';
-import JSZip from 'jszip';
+import { useProjectStore } from '@/stores/projectsStore';
+import { useRoute } from 'vue-router';
 
 
 interface Page {
@@ -154,8 +155,18 @@ interface Page {
   imageUrl: string | null;
 }
 
+const route = useRoute();
+const projectStore = useProjectStore();
 
+const projectId = computed(() => Number(route.params.id));
+const project = computed(() => projectStore.getProjectById(projectId.value));
+const projectTitle = ref("");
 const isGridView = ref(false);
+
+onMounted(async () => {
+  await projectStore.fetchProject(projectId.value);
+  projectTitle.value = project.value?.name || "";
+});
 
 const toggleGridView = () => {
   isGridView.value = !isGridView.value;
@@ -166,16 +177,17 @@ const goToImage = (index: number) => {
   isGridView.value = false;   
 };
 
-
-const projectTitle = ref("Projects");
 const isEditingTitle = ref(false);
 
 const editTitle = () => {
   isEditingTitle.value = true;
 };
 
-const saveTitle = () => {
+const saveTitle = async () => {
   isEditingTitle.value = false;
+  if (project.value) {
+    await projectStore.updateProject(project.value.id, { name: projectTitle.value });
+  }
 };
 
 const pages = ref<Page[]>([{ id: 1, imageUrl: null }]);
@@ -300,12 +312,16 @@ const addNewPage = () => {
 const handleFilesDropped = async (files: File[]) => {
   const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
   
-  if (imageFiles.length === 0) return;
+  if (imageFiles.length === 0 || !project.value) return;
 
   const newPages = await Promise.all(imageFiles.map(async (file) => ({
     id: Date.now() + Math.random(),
     imageUrl: URL.createObjectURL(file)
   })));
+
+  for (const file of imageFiles) {
+    await projectStore.addProjectImage(project.value.id, file);
+  }
 
   if (pages.value[currentPage.value].imageUrl === null) {
     pages.value.splice(currentPage.value, 1, newPages[0]);
@@ -319,8 +335,9 @@ const handleFilesDropped = async (files: File[]) => {
   currentPage.value = pages.value.indexOf(newPages[0]);
 };
 
-const deleteCurrentPage = () => {
-  if (pages.value.length > 1) {
+const deleteCurrentPage = async () => {
+  if (project.value && project.value.images.length > 0) {
+    await projectStore.removeProjectImage(project.value.id, currentPage.value);
     pages.value.splice(currentPage.value, 1);
     if (currentPage.value >= pages.value.length) {
       currentPage.value = pages.value.length - 1;

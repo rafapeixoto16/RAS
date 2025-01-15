@@ -61,13 +61,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
-
-interface Project {
-  id: number;
-  title: string;
-  imageUrl: string;
-  lastEdited: string;
-}
+import type { Project } from "@/types/project";
 
 interface Option {
   label: string;
@@ -85,7 +79,7 @@ interface Props {
   isSidebar?: boolean;
   project?: Project;
   appendToBody?: boolean;
-  menuColor?: string; // Add a new prop for menu color
+  menuColor?: string;
 }
 
 const props = defineProps<Props>();
@@ -97,7 +91,7 @@ const project = props.project;
 const options = props.options;
 const isIcon = props.isIcon;
 const appendToBody = props.appendToBody;
-const menuColor = props.menuColor || "#F5F7FA"; // Default to a light color if no menuColor prop is passed
+const menuColor = props.menuColor || "#F5F7FA";
 
 const isOpen = ref(false);
 const triggerElement = ref<HTMLElement | null>(null);

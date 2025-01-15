@@ -8,12 +8,12 @@
         </h1>
       </router-link>
       <div class="px-4 space-y-4">
-        <router-link
+        <button
           class="flex items-center justify-center px-2 py-3 w-full bg-azure-radiance-500 text-sm xl:text-base text-white font-bold hover:bg-azure-radiance-800  rounded-xl"
-          to="/create-project">
+          @click="handleCreateProject">
           <i class="bi bi-plus mr-2 fs-5 text-[20px]"></i>
           Create a Project
-        </router-link>
+      </button>
         <button
           class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-500 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
           @click="openPremiumModal">
@@ -24,9 +24,9 @@
       <div class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow overflow-y-auto">
         <h2 class="text-sm font-semibold">Projects</h2>
         <div class="flex flex-col w-full relative">
-          <div v-for="project in visibleProjects" :key="project.title" class="relative group w-full">
+          <div v-for="project in visibleProjects" :key="project.name" class="relative group w-full">
             <router-link class="block p-4 rounded w-full" :to="'project' + project.id">
-              {{ project.title }}
+              {{ project.name }}
             </router-link>
             <div
               class="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -77,68 +77,14 @@ import { useAuthStore } from '@/stores/authStore';
 import Dropdown from './CustomDropdown.vue'
 import ProfileMenu from './ProfileMenu.vue';
 import PremiumUpgrade from './PremiumUpgrade.vue';
+import type { Project } from '@/types/project';
+import { useProjectStore } from '@/stores/projectsStore';
+import router from '@/router';
 
 const authStore = useAuthStore();
+const projectStore = useProjectStore()
 const isLoggedIn = computed(() => authStore.isLoggedIn());
 const emit = defineEmits(["open-new-tab", "rename", "move-to-trash"]);
-
-interface Project {
-  id: number;
-  title: string;
-  imageUrl: string;
-  lastEdited: string;
-}
-
-const projects = ref<Project[]>([
-  {
-    id: 1,
-    title: "Beautiful Nature",
-    imageUrl: "https://picsum.photos/id/10/800/600",
-    lastEdited: "2 days ago",
-  },
-  {
-    id: 2,
-    title: "Mountain Sunset",
-    imageUrl: "https://picsum.photos/id/29/800/600",
-    lastEdited: "1 week ago",
-  },
-  {
-    id: 3,
-    title: "City Skyline",
-    imageUrl: "https://picsum.photos/id/41/800/600",
-    lastEdited: "3 days ago",
-  },
-  {
-    id: 4,
-    title: "Calm Beach",
-    imageUrl: "https://picsum.photos/id/152/800/600",
-    lastEdited: "5 days ago",
-  },
-  {
-    id: 5,
-    title: "Forest Pathway",
-    imageUrl: "https://picsum.photos/id/110/800/600",
-    lastEdited: "1 day ago",
-  },
-  {
-    id: 6,
-    title: "Sunny Day",
-    imageUrl: "https://picsum.photos/id/106/800/600",
-    lastEdited: "4 days ago",
-  },
-  {
-    id: 7,
-    title: "Snowy Peaks",
-    imageUrl: "https://picsum.photos/id/65/800/600",
-    lastEdited: "2 weeks ago",
-  },
-  {
-    id: 8,
-    title: "Desert Dunes",
-    imageUrl: "https://picsum.photos/id/111/800/600",
-    lastEdited: "6 days ago",
-  },
-]);
 
 const getDropdownOptions = (project: Project) => {
   return [
@@ -161,7 +107,7 @@ const getDropdownOptions = (project: Project) => {
 };
 
 const openInNewTab = (id: number) => {
-  const fullUrl = window.location.origin + "/project" + id;
+  const fullUrl = window.location.origin + "/project/" + id;
   window.open(fullUrl, "_blank");
 };
 
@@ -171,9 +117,14 @@ const renameProject = (id: number) => {
   console.log(`renaming project with id: ${id} `);
 };
 
+const handleCreateProject = async () => {
+  const newProject = await projectStore.createProject({ name: "ola" });
+  router.push(`/project/${newProject.id}`);
+};
+
 const moveToTrash = (id: number) => {
   console.log(`Moving project with id: ${id} to trash`);
-  projects.value = projects.value.filter((project) => project.id !== id);
+  projectStore.projects = projectStore.projects.filter((project) => project.id !== id);
 };
 
 
@@ -181,11 +132,11 @@ const seeAll = ref(false);
 const isOpenPremium = ref(false);
 
 const visibleProjects = computed<Project[]>(() => {
-  return seeAll.value ? projects.value : projects.value.slice(0, 7);
+  return seeAll.value ? projectStore.projects : projectStore.projects.slice(0, 7);
 });
 
 const showSeeAllButton = computed(() => {
-  return projects.value.length > 7;
+  return projectStore.projects.length > 7;
 });
 
 const toggleSeeAll = () => {

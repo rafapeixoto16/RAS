@@ -61,14 +61,13 @@
       >
         <div class="flex-grow overflow-y-auto">
           <div class="pt-20 px-4 space-y-4">
-            <router-link
+            <button
               class="flex items-center justify-center px-2 py-3 w-full bg-azure-radiance-500 text-sm xl:text-base text-white font-bold hover:bg-azure-radiance-800  rounded-xl"
-              to="/create-project"
-              @click="closeMenu"
+              @click="handleCreateProject"
             >
               <i class="bi bi-plus mr-2 fs-5 text-[20px]"></i>
               Create a Project
-            </router-link>
+          </button>
 
             <button
               class="flex items-center justify-center px-2 py-3 w-full bg-white hover:bg-azure-radiance-500 text-sm xl:text-base text-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
@@ -81,7 +80,7 @@
 
           <div class="mt-8 px-4 space-y-2">
             <h2 class="text-sm font-semibold">Projects</h2>
-            <MobileProjectList :projects="projects" @close-menu="closeMenu" class="bg-blue-50" />
+            <MobileProjectList :projects="projectStore.projects" @close-menu="closeMenu" class="bg-blue-50" />
           </div>
         </div>
         
@@ -132,7 +131,10 @@ import MobileProfileMenu from "./MobileProfileMenu.vue";
 import PremiumUpgrade from "./PremiumUpgrade.vue";
 import { useAuthStore } from '@/stores/authStore';
 import { ref, computed } from "vue";
+import { useProjectStore } from "@/stores/projectsStore";
+import router from "@/router";
 
+const projectStore = useProjectStore();
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn());
 
@@ -144,16 +146,6 @@ const emit = defineEmits<{
   (e: "update:isOpen", value: boolean): void;
 }>();
 const isOpenPremium = ref(false);
-const projects = [
-  { id: 1, name: "Project 1", link: "/project1" },
-  { id: 2, name: "Project 2", link: "/project2" },
-  { id: 3, name: "Project 3", link: "/project3" },
-  { id: 4, name: "Project 4", link: "/project4" },
-  { id: 5, name: "Project 5", link: "/project5" },
-  { id: 6, name: "Project 6", link: "/project6" },
-  { id: 7, name: "Project 7", link: "/project7" },
-  { id: 8, name: "Project 8", link: "/project8" },
-];
 
 const toggleMenu = () => {
   emit("update:isOpen", !props.isOpen);
@@ -161,6 +153,12 @@ const toggleMenu = () => {
 
 const closeMenu = () => {
   emit("update:isOpen", false);
+};
+
+const handleCreateProject = async () => {
+  const newProject = await projectStore.createProject({ name: "ola" });
+  emit("update:isOpen", false);
+  router.push(`/project/${newProject.id}`);
 };
 
 const openPremiumModal = () => {

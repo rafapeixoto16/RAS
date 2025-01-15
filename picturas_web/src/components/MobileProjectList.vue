@@ -6,7 +6,7 @@
       class="relative group w-full"
     >
       <router-link
-        :to="project.link"
+        :to="`/project/${project.id}`"
         class="block p-4 rounded w-full"
         @click="$emit('close-menu')"
       >
@@ -50,12 +50,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import MobileProjectOptions from "./MobileProjectOptions.vue";
-
-interface Project {
-  id: number;
-  name: string;
-  link: string;
-}
+import type { Project } from "@/types/project";
 
 const props = defineProps<{
   projects: Project[];

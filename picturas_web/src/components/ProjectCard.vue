@@ -2,27 +2,31 @@
   <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105">
     <div class="relative pb-[75%] sm:pb-2/3">
       <!-- Display multiple images in a grid if more than one is provided -->
-      <div v-if="project.imageUrls.length > 1" class="absolute h-full w-full grid grid-cols-2 gap-1">
+      <div v-if="project.images.length > 1" class="absolute h-full w-full grid grid-cols-2 gap-1">
         <img
-          v-for="(imageUrl, index) in project.imageUrls.slice(0, 4)"
-          :key="index"
-          :src="imageUrl"
-          :alt="`Image ${index + 1} of ${project.title}`"
+          v-for="(image, index) in project.images.slice(0, 4)"
+          :key="image.id"
+          :src="imageUrls[index]"
+          :alt="`Image ${index + 1} of ${project.name}`"
           class="object-cover w-full h-full"
         />
       </div>
       <!-- Display a single image if only one is provided -->
       <img
-        v-else
-        :src="project.imageUrls[0]"
-        :alt="project.title"
+        v-else-if="project.images.length === 1"
+        :src="imageUrls[0]"
+        :alt="project.name"
         class="absolute h-full w-full object-cover"
       />
+      <!-- Display a placeholder if no images are available -->
+      <div v-else class="absolute h-full w-full bg-gray-200 flex items-center justify-center">
+        <span class="text-gray-500">No image</span>
+      </div>
     </div>
     <div class="p-3 sm:p-4">
-      <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 line-clamp-1">{{ project.title }}</h3>
+      <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 line-clamp-1">{{ project.name }}</h3>
       <div class="flex justify-between items-center">
-        <span class="text-xs sm:text-sm text-gray-500">{{ project.lastEdited }}</span>
+        <span class="text-xs sm:text-sm text-gray-500">{{ formatDate(project.updatedAt) }}</span>
         <div v-if="isLargeScreen" class="relative">
           <!-- Dropdown for Large Screens -->
           <button
@@ -73,18 +77,12 @@
   />
 </template>
 
-
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Dropdown from './CustomDropdown.vue';
 import MobileProjectOptions from './MobileProjectOptions.vue';
-
-interface Project {
-  id: number;
-  title: string;
-  imageUrls: string[]; // Updated to an array of URLs
-  lastEdited: string;
-}
+import { type Project } from '@/types/project';
+import { useProjectStore } from '@/stores/projectsStore';
 
 const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit", "restore", "remove-permanently"]);
 
@@ -96,8 +94,10 @@ const props = defineProps<{
 }>();
 
 const mode = props.mode;
+const projectStore = useProjectStore();
 
 // Reactive State
+const imageUrls = ref<string[]>([]);
 const isLargeScreen = ref(window.innerWidth >= 1024);
 const activeMobileProjectId = ref<number | null>(null);
 
@@ -139,6 +139,15 @@ const getDropdownOptions = computed(() => {
   return [];
 });
 
+// Fetch image URLs
+Promise.all(props.project.images.map((_, index) => getImageUrl(props.project.id, index)))
+  .then(urls => {
+    imageUrls.value = urls;
+  })
+  .catch(error => {
+    console.error('Error fetching image URLs:', error);
+  });
+  
 // Handle Screen Size Changes
 const updateScreenSize = () => {
   isLargeScreen.value = window.innerWidth >= 1024;
@@ -152,7 +161,12 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', updateScreenSize);
 });
+
+const formatDate = (date: Date) => {
+  return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+const getImageUrl = (projectId: number, imageIndex: number) => {
+  return projectStore.getProjectImage(projectId, imageIndex);
+};
 </script>
-
-
-
