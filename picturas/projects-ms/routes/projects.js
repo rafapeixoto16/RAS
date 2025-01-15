@@ -292,16 +292,16 @@ router.post('/:id/process', async (req, res) => {
 
         const updatedPipeline = await addProjectToPipeline(userId, id, userLimits);
         const project = await getProject(userId, id);
-
-        await runPipeline(userId, id, project.images, project.tools, !req.user.limits.noWatermark)
+        
+        const tools = project.tools.map(tool => ({filterName: tool._doc.filterName, args: tool._doc.args ?? {}}));
+        await runPipeline(userId, id, project.images, tools, !req.user.limits.noWatermark)
 
         res.status(200).json({
             message: 'Pipeline processing started.',
             pipeline: updatedPipeline
         });
     } catch (error) {
-        console.error(error)
-        res.status(500).json({ message: `Error processing pipeline: ${error.message}` });
+        return res.status(500).json({ message: `Error processing pipeline: ${error.message}` });
     }
 });
 

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Pipeline from '../models/pipelineModel.js';
 import Limits from '../models/limitsModel.js';
+import { getProject } from './project.js';
 
 export const isPipelineActive = async (projectId) => {
     const pipeline = await Pipeline.findOne({ projects: projectId }).exec();
@@ -50,7 +51,8 @@ export const addProjectToPipeline = async (userId, projectId, userLimits) => {
     return pipeline;
 };
 
-export const removeProjectFromPipeline = async (projectId) => {
+export const removeProjectFromPipeline = async (userId, projectId, outputUrl) => {
+    console.log(projectId)
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -66,6 +68,11 @@ export const removeProjectFromPipeline = async (projectId) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    // TODO store outputUrl in Project
+    const project = await getProject(userId, projectId);
+    project.result.output = outputUrl;
+    await project.save();
 
     return pipeline;
 };

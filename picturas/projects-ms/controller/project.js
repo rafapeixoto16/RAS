@@ -296,36 +296,21 @@ export const downloadImageLocally = async (projectId, imageName, targetPath) => 
     });
 };
 
-export const uploadLocalImage = async (projectId, filePath, isPreview) => {
-    if (!fs.existsSync(filePath)) {
-        throw new Error('File does not exist');
-    }
-
-    const fileStream = fs.createReadStream(filePath);
-    const extensionName = pathModule.extname(filePath);
-    const contentType = mime.lookup(extensionName);
+export const uploadLocalImage = async (userId, projectId, buffer, isPreview) => {
     const objectId = new mongoose.Types.ObjectId();
-
-    const fileName = `${objectId}${extensionName}`;
-    
+    const fileName = `${objectId}.zip`;
     const bucketName = process.env.S3_TEMP_BUCKET
 
-    const metaData = {
-        'Content-Type': contentType,
-    };
-
-    await minioClient.putObject(bucketName, fileName, fileStream, metaData);
-    await minioClient.setObjectTagging(bucketName);
+    await minioClient.putObject(bucketName, fileName, buffer);
     const imageUrl = await minioClient.presignedGetObject(bucketName, fileName, 24 * 60 * 60);
 
     // save the result in the project
     if(!isPreview){
-        const project = await getProject(projectId);
-        project.result = {
+        const result = {
             output: imageUrl,
             expireDate:  Date.now()
         };
-        await updateProject(projectId, project);
+        await updateProject(userId, projectId, {result});
     }
     
     return imageUrl;

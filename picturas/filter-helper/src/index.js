@@ -23,8 +23,7 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
     const inputQueue = filterName;
     const outputQueue = process.env.FILTER_OUTPUT_QUEUE;
 
-    async function processMessage(message) {
-        const content = JSON.parse(message.content.toString());
+    async function processMessage(content) {
         const { messageId, parameters } = content;
         const { inputImageURI, outputImageURI, ...args } = parameters;
 
@@ -60,7 +59,7 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
                 }
 
                 const kind = outputFormat === 'json' ? 'text' : 'image';
-                const outputPath = inputImageURI.split('.').first();
+                const outputPath = outputImageURI.split('.')[0];
                 const uploadedImageURI = `${outputPath}.${outputFormat}`;
 
                 await writeFileSync(uploadedImageURI, output);
@@ -71,7 +70,7 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
                 };
             } catch (err) {
                 error = true;
-                data = err;
+                data = err.message;
             }
         }
 
