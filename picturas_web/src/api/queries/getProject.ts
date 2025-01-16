@@ -1,7 +1,7 @@
 import axiosInstance from '../axiosConfig';
 import { useAuthStore } from '@/stores/authStore';
 
-export const getProject = async (id: number) => {
+export const getProject = async (id: string) => {
   const authStore = useAuthStore();
   try {
     const accessToken = authStore.accessToken;

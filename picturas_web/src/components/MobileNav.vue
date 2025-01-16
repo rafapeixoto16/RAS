@@ -156,9 +156,15 @@ const closeMenu = () => {
 };
 
 const handleCreateProject = async () => {
-  const newProject = await projectStore.createProject({ name: "ola" });
-  emit("update:isOpen", false);
-  router.push(`/project/${newProject.id}`);
+  try{
+    const newProject = await projectStore.createProject({ name: "ola" });
+    emit("update:isOpen", false);
+    if (newProject) {
+      router.push(`/project/${newProject._id}`);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const openPremiumModal = () => {

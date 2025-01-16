@@ -131,6 +131,7 @@ const handleLogin = async () => {
       authStore.setTokens(finalResponse.accessToken, finalResponse.refreshToken);
       const { username, email, profilePic } = await getUserInfo()
       userStore.setUser({username: username, email: email, avatarUrl: profilePic})
+      projectsStore.clearEverything();
       await projectsStore.fetchProjects();
       router.push('/dashboard');
     }
@@ -146,6 +147,7 @@ const handleGuest = async () => {
     if (!authStore.accessToken) {
       const response = await loginGuest();
       authStore.setTokensGuest(response.accessToken);
+      projectsStore.clearEverything();
       await projectsStore.fetchProjects();
     }
     router.push('/dashboard');

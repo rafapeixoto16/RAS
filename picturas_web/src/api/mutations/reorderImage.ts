@@ -1,7 +1,7 @@
 import axiosInstance from '../axiosConfig';
 import { useAuthStore } from '@/stores/authStore';
 
-export const reorderImage = async (projectId: number, imageIndex: number, newIndex: number) => {
+export const reorderImage = async (projectId: string, imageIndex: number, newIndex: number) => {
   const authStore = useAuthStore();
   try {
     const accessToken = authStore.accessToken;

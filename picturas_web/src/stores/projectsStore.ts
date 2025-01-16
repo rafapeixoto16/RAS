@@ -9,6 +9,7 @@ import { addImage } from '@/api/mutations/addImage';
 import { reorderImage } from '@/api/mutations/reorderImage';
 import { removeImage } from '@/api/mutations/removeImage';
 import { type Project } from '@/types/project';
+import { useAuthStore } from './authStore';
 
 interface ProjectState {
   projects: Project[];
@@ -29,7 +30,12 @@ export const useProjectStore = defineStore('projectStore', {
     async fetchProjects() {
       this.loading = true;
       try {
-        this.projects = await getProjects();
+        const authStore = useAuthStore();
+        if (authStore.accessToken) {
+          this.projects = await getProjects(authStore.accessToken);
+        } else {
+          throw new Error('Access token is null');
+        }
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while fetching projects';
       } finally {
@@ -37,7 +43,7 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
-    async fetchProject(projectId: number) {
+    async fetchProject(projectId: string) {
       this.loading = true;
       try {
         this.currentProject = await getProject(projectId);
@@ -52,7 +58,7 @@ export const useProjectStore = defineStore('projectStore', {
       this.loading = true;
       try {
         const newProject = await createProject(projectData);
-        this.projects.unshift(newProject);
+        this.projects = [newProject, ...this.projects];
         return newProject;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while creating the project';
@@ -62,15 +68,15 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
-    async updateProject(projectId: number, projectData: { name: string }) {
+    async updateProject(projectId: string, projectData: { name: string }) {
       this.loading = true;
       try {
         const updatedProject = await updateProject(projectId, projectData);
-        const index = this.projects.findIndex(p => p.id === projectId);
+        const index = this.projects.findIndex(p => p._id === projectId);
         if (index !== -1) {
           this.projects[index] = updatedProject;
         }
-        if (this.currentProject && this.currentProject.id === projectId) {
+        if (this.currentProject && this.currentProject._id === projectId) {
           this.currentProject = updatedProject;
         }
         return updatedProject;
@@ -82,12 +88,12 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
-    async deleteProject(projectId: number) {
+    async deleteProject(projectId: string) {
       this.loading = true;
       try {
         await deleteProject(projectId);
-        this.projects = this.projects.filter(p => p.id !== projectId);
-        if (this.currentProject && this.currentProject.id === projectId) {
+        this.projects = this.projects.filter(p => p._id !== projectId);
+        if (this.currentProject && this.currentProject._id === projectId) {
           this.currentProject = null;
         }
       } catch (error) {
@@ -98,7 +104,7 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
-    async getProjectImage(projectId: number, imageIndex: number) {
+    async getProjectImage(projectId: string, imageIndex: number) {
       this.loading = true;
       try {
         const imageUrl = await getImage(projectId, imageIndex);
@@ -111,15 +117,15 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
-    async addProjectImage(projectId: number, imageFile: File) {
+    async addProjectImage(projectId: string, imageFile: File) {
       this.loading = true;
       try {
         const { index, imageUrl } = await addImage(projectId, imageFile);
-        const project = this.projects.find(p => p.id === projectId);
+        const project = this.projects.find(p => p._id === projectId);
         if (project) {
           project.images.push({ id: index.toString(), format: imageFile.type.split('/')[1] });
         }
-        if (this.currentProject && this.currentProject.id === projectId) {
+        if (this.currentProject && this.currentProject._id === projectId) {
           this.currentProject.images.push({ id: index.toString(), format: imageFile.type.split('/')[1] });
         }
         return { index, imageUrl };
@@ -131,16 +137,16 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
-    async reorderProjectImage(projectId: number, oldIndex: number, newIndex: number) {
+    async reorderProjectImage(projectId: string, oldIndex: number, newIndex: number) {
       this.loading = true;
       try {
         const { reorderedImage, imageIdx } = await reorderImage(projectId, oldIndex, newIndex);
-        const project = this.projects.find(p => p.id === projectId);
+        const project = this.projects.find(p => p._id === projectId);
         if (project) {
           const [removedImage] = project.images.splice(oldIndex, 1);
           project.images.splice(newIndex, 0, removedImage);
         }
-        if (this.currentProject && this.currentProject.id === projectId) {
+        if (this.currentProject && this.currentProject._id === projectId) {
           const [removedImage] = this.currentProject.images.splice(oldIndex, 1);
           this.currentProject.images.splice(newIndex, 0, removedImage);
         }
@@ -153,15 +159,15 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
-    async removeProjectImage(projectId: number, imageIndex: number) {
+    async removeProjectImage(projectId: string, imageIndex: number) {
       this.loading = true;
       try {
         const removedImage = await removeImage(projectId, imageIndex);
-        const project = this.projects.find(p => p.id === projectId);
+        const project = this.projects.find(p => p._id === projectId);
         if (project) {
           project.images = project.images.filter((_, index) => index !== imageIndex);
         }
-        if (this.currentProject && this.currentProject.id === projectId) {
+        if (this.currentProject && this.currentProject._id === projectId) {
           this.currentProject.images = this.currentProject.images.filter((_, index) => index !== imageIndex);
         }
         return removedImage;
@@ -173,14 +179,25 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
+    setProjects(projects: Project[]) {
+      this.projects = projects;
+    },
+
     clearError() {
+      this.error = null;
+    },
+
+    clearEverything() {
+      this.projects = [];
+      this.currentProject = null;
+      this.loading = false;
       this.error = null;
     },
   },
 
   getters: {
     getProjectById: (state) => {
-      return (id: number) => state.projects.find(project => project.id === id);
+      return (id: string) => state.projects.find(project => project._id === id);
     },
   },
 });

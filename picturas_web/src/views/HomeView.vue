@@ -95,23 +95,28 @@
       No projects found. Start by creating a new project!
     </div>
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4">
-      <ProjectCard
+      <router-link
         v-for="project in filteredProjects"
-        :key="project.id"
-        :project="project"
-        :dropdown-options="[]"
-        mode="default"
-        @open-new-tab="openInNewTab"
-        @rename="renameProject"
-        @move-to-trash="moveToTrash"
-        @edit="editProject"
-      />
+        :key="project._id"
+        :to="{ name: 'project', params: { id: project._id } }"
+        class="block"
+      >
+        <ProjectCard
+          :project="project"
+          :dropdown-options="[]"
+          mode="default"
+          @open-new-tab="openInNewTab"
+          @rename="renameProject"
+          @move-to-trash="moveToTrash"
+          @edit="editProject"
+        />
+    </router-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from 'vue-router';
 import ProjectCard from "@/components/ProjectCard.vue";
 import { useProjectStore } from "@/stores/projectsStore";
@@ -132,10 +137,6 @@ const filteredProjects = computed(() => {
   );
 });
 
-onMounted(async () => {
-  await projectStore.fetchProjects();
-});
-
 const editProject = (id: number) => {
   router.push(`/project/${id}`);
 };
@@ -145,7 +146,7 @@ const openInNewTab = (id: number) => {
   window.open(fullUrl, "_blank");
 };
 
-const renameProject = async (id: number, newName: string) => {
+const renameProject = async (id: string, newName: string) => {
   try {
     await projectStore.updateProject(id, { name: newName });
     showNotification('Project renamed successfully');
@@ -154,7 +155,7 @@ const renameProject = async (id: number, newName: string) => {
   }
 };
 
-const moveToTrash = async (id: number) => {
+const moveToTrash = async (id: string) => {
   try {
     await projectStore.deleteProject(id);
     showNotification('Project moved to trash');
@@ -217,7 +218,7 @@ const saveProject = async () => {
     const newProject = await projectStore.createProject({ name: titleInput.value });
 
     for (const file of newImageFiles.value) {
-      await projectStore.addProjectImage(newProject.id, file);
+      await projectStore.addProjectImage(newProject._id, file);
     }
 
     showNotification("Project created successfully!");

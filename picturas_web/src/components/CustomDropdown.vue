@@ -128,11 +128,11 @@ const handleClick = (action: () => void, project: Project) => {
   if (typeof action === "function" && !isSidebar) {
     action();
   } else if (String(action).includes("open-new-tab")) {
-    emit("open-new-tab", project.id);
+    emit("open-new-tab", project._id);
   } else if (String(action).includes("rename")) {
-    emit("rename", project.id);
+    emit("rename", project._id);
   } else if (String(action).includes("move-to-trash")) {
-    emit("move-to-trash", project.id);
+    emit("move-to-trash", project._id);
   }
 };
 

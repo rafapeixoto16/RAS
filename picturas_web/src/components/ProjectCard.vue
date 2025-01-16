@@ -30,7 +30,7 @@
         <div v-if="isLargeScreen" class="relative">
           <!-- Dropdown for Large Screens -->
           <button
-            @click="$emit('edit', project.id)"
+            @click="$emit('edit', project._id)"
             class="px-2 py-1 sm:px-3 sm:py-1 bg-blue-500 text-white text-xs sm:text-sm rounded-full hover:bg-blue-600 transition-colors duration-300"
           >
             <i class="bi bi-three-dots"></i>
@@ -53,7 +53,7 @@
         <div v-else>
           <!-- Mobile Project Options Trigger -->
           <button
-            @click="openMobileOptions(project.id)"
+            @click="openMobileOptions(project._id)"
             class="px-2 py-1 sm:px-3 sm:py-1 bg-blue-500 text-white text-xs sm:text-sm rounded-full hover:bg-blue-600 transition-colors duration-300"
           >
             <i class="bi bi-three-dots"></i>
@@ -99,10 +99,10 @@ const projectStore = useProjectStore();
 // Reactive State
 const imageUrls = ref<string[]>([]);
 const isLargeScreen = ref(window.innerWidth >= 1024);
-const activeMobileProjectId = ref<number | null>(null);
+const activeMobileProjectId = ref<string | null>(null);
 
 // Methods
-const openMobileOptions = (projectId: number) => {
+const openMobileOptions = (projectId: string) => {
   activeMobileProjectId.value = projectId;
 };
 
@@ -117,22 +117,22 @@ const getDropdownOptions = computed(() => {
       {
         label: 'Open in New Tab',
         icon: 'bi-box-arrow-up-right',
-        action: () => emit('open-new-tab', props.project.id),
+        action: () => emit('open-new-tab', props.project._id),
       },
-      { label: 'Rename', icon: 'bi-pencil', action: () => emit('rename', props.project.id) },
-      { label: 'Move to Trash', icon: 'bi-trash', action: () => emit('move-to-trash', props.project.id) },
+      { label: 'Rename', icon: 'bi-pencil', action: () => emit('rename', props.project._id) },
+      { label: 'Move to Trash', icon: 'bi-trash', action: () => emit('move-to-trash', props.project._id) },
     ];
   } else if (mode === 'trash') {
     return [
       {
         label: 'Restore',
         icon: 'bi-arrow-counterclockwise',
-        action: () => emit('restore', props.project.id),
+        action: () => emit('restore', props.project._id),
       },
       {
         label: 'Remove Permanently',
         icon: 'bi-trash-fill',
-        action: () => emit('remove-permanently', props.project.id),
+        action: () => emit('remove-permanently', props.project._id),
       },
     ];
   }
@@ -140,7 +140,7 @@ const getDropdownOptions = computed(() => {
 });
 
 // Fetch image URLs
-Promise.all(props.project.images.map((_, index) => getImageUrl(props.project.id, index)))
+Promise.all(props.project.images.map((_, index) => getImageUrl(props.project._id, index)))
   .then(urls => {
     imageUrls.value = urls;
   })
@@ -166,7 +166,7 @@ const formatDate = (date: Date) => {
   return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
-const getImageUrl = (projectId: number, imageIndex: number) => {
+const getImageUrl = (projectId: string, imageIndex: number) => {
   return projectStore.getProjectImage(projectId, imageIndex);
 };
 </script>

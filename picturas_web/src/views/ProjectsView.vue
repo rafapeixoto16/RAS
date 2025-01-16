@@ -9,7 +9,7 @@
                 v-model="projectTitle" 
                 @keyup.enter="saveTitle" 
                 @blur="saveTitle" 
-                class="text-xl md:text-2xl font-bold text-gray-900 bg-gray-100 px-2 border-b border-gray-300 focus:outline-none"
+                class="text-xl md:text-2xl font-bold text-gray-900 px-2 focus:outline-none"
                 autofocus
               />
             </template>
@@ -158,13 +158,12 @@ interface Page {
 const route = useRoute();
 const projectStore = useProjectStore();
 
-const projectId = computed(() => Number(route.params.id));
+const projectId = computed<string>(() => route.params.id as string);
 const project = computed(() => projectStore.getProjectById(projectId.value));
 const projectTitle = ref("");
 const isGridView = ref(false);
 
 onMounted(async () => {
-  await projectStore.fetchProject(projectId.value);
   projectTitle.value = project.value?.name || "";
 });
 
@@ -186,7 +185,7 @@ const editTitle = () => {
 const saveTitle = async () => {
   isEditingTitle.value = false;
   if (project.value) {
-    await projectStore.updateProject(project.value.id, { name: projectTitle.value });
+    await projectStore.updateProject(project.value._id, { name: projectTitle.value });
   }
 };
 
@@ -320,7 +319,7 @@ const handleFilesDropped = async (files: File[]) => {
   })));
 
   for (const file of imageFiles) {
-    await projectStore.addProjectImage(project.value.id, file);
+    await projectStore.addProjectImage(project.value._id, file);
   }
 
   if (pages.value[currentPage.value].imageUrl === null) {
@@ -337,7 +336,7 @@ const handleFilesDropped = async (files: File[]) => {
 
 const deleteCurrentPage = async () => {
   if (project.value && project.value.images.length > 0) {
-    await projectStore.removeProjectImage(project.value.id, currentPage.value);
+    await projectStore.removeProjectImage(project.value._id, currentPage.value);
     pages.value.splice(currentPage.value, 1);
     if (currentPage.value >= pages.value.length) {
       currentPage.value = pages.value.length - 1;

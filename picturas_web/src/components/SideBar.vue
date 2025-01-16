@@ -25,7 +25,7 @@
         <h2 class="text-sm font-semibold">Projects</h2>
         <div class="flex flex-col w-full relative">
           <div v-for="project in visibleProjects" :key="project.name" class="relative group w-full">
-            <router-link class="block p-4 rounded w-full" :to="'project' + project.id">
+            <router-link class="block p-4 rounded w-full" :to="'project/' + project._id">
               {{ project.name }}
             </router-link>
             <div
@@ -91,17 +91,17 @@ const getDropdownOptions = (project: Project) => {
     {
       label: "Open in New Tab",
       icon: "bi-box-arrow-up-right",
-      action: () => emit("open-new-tab", project.id),
+      action: () => emit("open-new-tab", project._id),
     },
     {
       label: "Rename",
       icon: "bi-pencil",
-      action: () => emit("rename", project.id),
+      action: () => emit("rename", project._id),
     },
     {
       label: "Move to Trash",
       icon: "bi-trash",
-      action: () => emit("move-to-trash", project.id),
+      action: () => emit("move-to-trash", project._id),
     },
   ];
 };
@@ -118,15 +118,19 @@ const renameProject = (id: number) => {
 };
 
 const handleCreateProject = async () => {
-  const newProject = await projectStore.createProject({ name: "ola" });
-  router.push(`/project/${newProject.id}`);
+  try{
+    const newProject = await projectStore.createProject({ name: "ola" });
+    if (newProject) {
+      router.push(`/project/${newProject._id}`);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-const moveToTrash = (id: number) => {
-  console.log(`Moving project with id: ${id} to trash`);
-  projectStore.projects = projectStore.projects.filter((project) => project.id !== id);
+const moveToTrash = async (id: string) => {
+  await projectStore.deleteProject(id);
 };
-
 
 const seeAll = ref(false);
 const isOpenPremium = ref(false);

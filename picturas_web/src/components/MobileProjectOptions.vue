@@ -63,17 +63,17 @@
 import { ref, onMounted } from 'vue';
 
 const props = defineProps<{
-  projectId: number;
+  projectId: string;
   mode: 'default' | 'trash';
 }>();
 
 defineEmits<{
   (e: 'close'): void;
-  (e: 'open-new-tab', id: number): void;
-  (e: 'rename', id: number): void;
-  (e: 'move-to-trash', id: number): void;
-  (e: 'restore', id: number): void;
-  (e: 'remove-permanently', id: number): void;
+  (e: 'open-new-tab', id: string): void;
+  (e: 'rename', id: string): void;
+  (e: 'move-to-trash', id: string): void;
+  (e: 'restore', id: string): void;
+  (e: 'remove-permanently', id: string): void;
 }>();
 
 const show = ref(false);

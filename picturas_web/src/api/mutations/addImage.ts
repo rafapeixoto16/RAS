@@ -1,7 +1,7 @@
 import axiosInstance from '../axiosConfig';
 import { useAuthStore } from '@/stores/authStore';
 
-export const addImage = async (projectId: number, imageFile: File) => {
+export const addImage = async (projectId: string, imageFile: File) => {
   const authStore = useAuthStore();
   try {
     const accessToken = authStore.accessToken;

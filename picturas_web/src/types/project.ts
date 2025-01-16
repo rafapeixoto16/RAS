@@ -4,7 +4,7 @@ export interface Image {
   }
   
   export interface Project {
-    id: number;
+    _id: string;
     userId: string;
     name: string;
     tools: {
