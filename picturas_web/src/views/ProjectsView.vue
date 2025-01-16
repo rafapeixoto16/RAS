@@ -8,7 +8,6 @@
               <input 
                 v-model="projectTitle" 
                 @keyup.enter="saveTitle" 
-                @blur="saveTitle" 
                 class="text-xl md:text-2xl font-bold text-gray-900 px-2 focus:outline-none"
                 autofocus
               />
@@ -218,7 +217,7 @@ let draggedIndex: number | null = null;
 
 const onDragStart = (index: number, event: DragEvent | TouchEvent) => {
   if (event instanceof TouchEvent) {
-    event.preventDefault(); // Prevent default touch behavior
+    event.preventDefault();
   }
   draggedIndex = index;
 };

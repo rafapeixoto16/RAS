@@ -68,7 +68,8 @@ const showOptionsMenu = ref(false);
 const selectedProjectId = ref<string | null>(null);
 
 const visibleProjects = computed(() => {
-  return seeAll.value ? props.projects : props.projects.slice(0, 5);
+  const sortedProjects = [...props.projects].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  return seeAll.value ? sortedProjects : sortedProjects.slice(0, 5);
 });
 
 onMounted(() => {

@@ -1,19 +1,11 @@
 <template>
   <div class="flex-1 flex flex-col p-4 sm:p-6 md:p-8 z-10">
-    <transition name="slide-fade">
-      <div
-        v-if="notification"
-        class="fixed top-4 left-1/4 md:left-1/2 transform bg-azure-radiance-500 text-white px-4 py-2 rounded-lg shadow-lg z-50"
-        style="will-change: transform;"
-      >
-        {{ notification }}
-      </div>
-    </transition>
+    <Notification :message="notification" />
 
     <h1 class="text-3xl font-bold text-azure-radiance-500 mb-8">
       Your Projects
     </h1>
-    <div class="w-full flex justify-center mb-6 sm:mb-8 mt-16 md:mt-0">
+    <div class="w-full flex justify-center mb-6 sm:mb-8 mt-16 md:mt-0 z-10">
       <div class="relative w-full max-w-2xl px-4">
         <input
           v-model="searchQuery"
@@ -95,22 +87,17 @@
       No projects found. Start by creating a new project!
     </div>
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4">
-      <router-link
+      <ProjectCard
         v-for="project in filteredProjects"
         :key="project._id"
-        :to="{ name: 'project', params: { id: project._id } }"
-        class="block"
-      >
-        <ProjectCard
-          :project="project"
-          :dropdown-options="[]"
-          mode="default"
-          @open-new-tab="openInNewTab"
-          @rename="renameProject"
-          @move-to-trash="moveToTrash"
-          @edit="editProject"
-        />
-    </router-link>
+        :project="project"
+        :dropdown-options="[]"
+        mode="default"
+        @open-new-tab="openInNewTab"
+        @rename="renameProject"
+        @move-to-trash="moveToTrash"
+        @edit="editProject"
+      />
     </div>
   </div>
 </template>
@@ -120,7 +107,7 @@ import { ref, computed } from "vue";
 import { useRouter } from 'vue-router';
 import ProjectCard from "@/components/ProjectCard.vue";
 import { useProjectStore } from "@/stores/projectsStore";
-
+import Notification from '@/components/CustomNotification.vue';
 const projectStore = useProjectStore();
 const router = useRouter();
 
@@ -132,9 +119,11 @@ const titleInput = ref("");
 const newImageFiles = ref<File[]>([]);
 
 const filteredProjects = computed(() => {
-  return projectStore.projects.filter((project) =>
-    project.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  return projectStore.projects
+    .filter((project) =>
+      project.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 });
 
 const editProject = (id: number) => {
@@ -236,26 +225,5 @@ const closeTitleModal = () => {
 <style scoped>
 .drag-drop-area {
   transition: background-color 0.2s ease;
-}
-
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.5s ease;
-}
-.slide-fade-enter-from {
-  transform: translateY(-50%);
-  opacity: 0;
-}
-.slide-fade-enter-to {
-  transform: translateY(0);
-  opacity: 1;
-}
-.slide-fade-leave-from {
-  transform: translateY(0);
-  opacity: 1;
-}
-.slide-fade-leave-to {
-  transform: translateY(-50%);
-  opacity: 0;
 }
 </style>

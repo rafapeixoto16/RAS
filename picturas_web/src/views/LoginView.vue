@@ -147,9 +147,9 @@ const handleGuest = async () => {
     if (!authStore.accessToken) {
       const response = await loginGuest();
       authStore.setTokensGuest(response.accessToken);
-      projectsStore.clearEverything();
-      await projectsStore.fetchProjects();
     }
+    projectsStore.clearEverything();
+    await projectsStore.fetchProjects();
     router.push('/dashboard');
   } catch (error) {
     console.error('Login error:', error);

@@ -25,7 +25,7 @@
         <h2 class="text-sm font-semibold">Projects</h2>
         <div class="flex flex-col w-full relative">
           <div v-for="project in visibleProjects" :key="project.name" class="relative group w-full">
-            <router-link class="block p-4 rounded w-full" :to="'project/' + project._id">
+            <router-link class="block p-4 rounded w-full" :to="'project/' + project._id" :key="project._id">
               {{ project.name }}
             </router-link>
             <div
@@ -66,6 +66,11 @@
         </router-link>
       </div>
       <premium-upgrade :open="isOpenPremium" @close="openPremiumModal"></premium-upgrade>
+      <ProjectNameModal 
+        :is-open="isProjectModalOpen"
+        @create="createProject"
+        @cancel="isProjectModalOpen = false"
+      />
     </div>
   </div>
 </template>
@@ -77,6 +82,7 @@ import { useAuthStore } from '@/stores/authStore';
 import Dropdown from './CustomDropdown.vue'
 import ProfileMenu from './ProfileMenu.vue';
 import PremiumUpgrade from './PremiumUpgrade.vue';
+import ProjectNameModal from './ProjectNameModal.vue';
 import type { Project } from '@/types/project';
 import { useProjectStore } from '@/stores/projectsStore';
 import router from '@/router';
@@ -85,6 +91,9 @@ const authStore = useAuthStore();
 const projectStore = useProjectStore()
 const isLoggedIn = computed(() => authStore.isLoggedIn());
 const emit = defineEmits(["open-new-tab", "rename", "move-to-trash"]);
+const seeAll = ref(false);
+const isOpenPremium = ref(false);
+const isProjectModalOpen = ref(false);
 
 const getDropdownOptions = (project: Project) => {
   return [
@@ -117,14 +126,19 @@ const renameProject = (id: number) => {
   console.log(`renaming project with id: ${id} `);
 };
 
-const handleCreateProject = async () => {
-  try{
-    const newProject = await projectStore.createProject({ name: "ola" });
+const handleCreateProject = () => {
+  isProjectModalOpen.value = true;
+};
+
+const createProject = async (name: string) => {
+  try {
+    const newProject = await projectStore.createProject({ name: name });
+    isProjectModalOpen.value = false;
     if (newProject) {
       router.push(`/project/${newProject._id}`);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -132,11 +146,9 @@ const moveToTrash = async (id: string) => {
   await projectStore.deleteProject(id);
 };
 
-const seeAll = ref(false);
-const isOpenPremium = ref(false);
-
 const visibleProjects = computed<Project[]>(() => {
-  return seeAll.value ? projectStore.projects : projectStore.projects.slice(0, 7);
+  const sortedProjects = [...projectStore.projects].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  return seeAll.value ? sortedProjects : sortedProjects.slice(0, 7);
 });
 
 const showSeeAllButton = computed(() => {

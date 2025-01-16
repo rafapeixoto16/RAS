@@ -14,6 +14,7 @@
   
   <script setup lang="ts">
   import { ref } from 'vue';
+  import JSZip from 'jszip';
   
   const emit = defineEmits<{
     (e: 'files-dropped', files: File[]): void;
@@ -21,21 +22,41 @@
   
   const fileInput = ref<HTMLInputElement | null>(null);
   
-  const handleDrop = (e: DragEvent) => {
-    const files = e.dataTransfer?.files;
-    if (files) {
-      emit('files-dropped', Array.from(files));
-    }
+  const handleDrop = async (e: DragEvent) => {
+  const files = e.dataTransfer?.files;
+  if (files) {
+    await processFiles(Array.from(files));
+  }
   };
   
-  const handleFileInput = (e: Event) => {
+  const handleFileInput = async (e: Event) => {
     const files = (e.target as HTMLInputElement).files;
     if (files) {
-      emit('files-dropped', Array.from(files));
+      await processFiles(Array.from(files));
     }
   };
   
   const triggerFileInput = () => {
     fileInput.value?.click();
   };
-  </script>  
+
+  const processFiles = async (files: File[]) => {
+    const imageFiles: File[] = [];
+    for (const file of files) {
+      if (file.type === 'application/zip') {
+      const zip = await JSZip.loadAsync(file);
+      for (const filename in zip.files) {
+        if (zip.files[filename].dir) continue;
+        const fileData = await zip.files[filename].async('blob');
+        const imageFile = new File([fileData], filename, { type: fileData.type });
+        if (imageFile.type.startsWith('image/')) {
+        imageFiles.push(imageFile);
+        }
+    }
+    } else if (file.type.startsWith('image/')) {
+    imageFiles.push(file);
+    }
+  }
+  emit('files-dropped', imageFiles);
+  };
+  </script>

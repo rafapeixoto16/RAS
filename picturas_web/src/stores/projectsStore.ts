@@ -56,6 +56,8 @@ export const useProjectStore = defineStore('projectStore', {
 
     async createProject(projectData: { name: string }) {
       this.loading = true;
+      const authStore = useAuthStore();
+      console.log(authStore.accessToken);
       try {
         const newProject = await createProject(projectData);
         this.projects = [newProject, ...this.projects];
@@ -71,15 +73,8 @@ export const useProjectStore = defineStore('projectStore', {
     async updateProject(projectId: string, projectData: { name: string }) {
       this.loading = true;
       try {
-        const updatedProject = await updateProject(projectId, projectData);
-        const index = this.projects.findIndex(p => p._id === projectId);
-        if (index !== -1) {
-          this.projects[index] = updatedProject;
-        }
-        if (this.currentProject && this.currentProject._id === projectId) {
-          this.currentProject = updatedProject;
-        }
-        return updatedProject;
+        await updateProject(projectId, projectData);
+        await this.fetchProjects()
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while updating the project';
         throw error;

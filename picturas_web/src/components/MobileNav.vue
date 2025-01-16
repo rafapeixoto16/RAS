@@ -121,6 +121,11 @@
         :open="isOpenPremium"
         @close="openPremiumModal"
       ></premium-upgrade>
+      <ProjectNameModal 
+        :is-open="isProjectModalOpen"
+        @create="createProject"
+        @cancel="isProjectModalOpen = false"
+      />
     </div>
   </div>
 </template>
@@ -133,6 +138,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { ref, computed } from "vue";
 import { useProjectStore } from "@/stores/projectsStore";
 import router from "@/router";
+import ProjectNameModal from './ProjectNameModal.vue';
 
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
@@ -146,6 +152,7 @@ const emit = defineEmits<{
   (e: "update:isOpen", value: boolean): void;
 }>();
 const isOpenPremium = ref(false);
+const isProjectModalOpen = ref(false);
 
 const toggleMenu = () => {
   emit("update:isOpen", !props.isOpen);
@@ -155,15 +162,20 @@ const closeMenu = () => {
   emit("update:isOpen", false);
 };
 
-const handleCreateProject = async () => {
-  try{
-    const newProject = await projectStore.createProject({ name: "ola" });
+const handleCreateProject = () => {
+  isProjectModalOpen.value = true;
+};
+
+const createProject = async (name: string) => {
+  try {
+    const newProject = await projectStore.createProject({ name: name });
+    isProjectModalOpen.value = false;
     emit("update:isOpen", false);
     if (newProject) {
       router.push(`/project/${newProject._id}`);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
