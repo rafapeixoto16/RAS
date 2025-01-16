@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import v1Router from './v1/index.js';
 import rateLimiterMiddleware from './utils/limiter.js';
+import {serverIsReady, startPLServer} from "@picturas/ms-helper";
 
 const app = express();
 const port = 3000;
@@ -32,5 +33,8 @@ app.use((err, req, res) => {
 
 // Listen
 app.listen(port, () => {
+    serverIsReady();
     console.log(`Server started on port ${port}`);
 });
+
+startPLServer();

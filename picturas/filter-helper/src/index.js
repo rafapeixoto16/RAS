@@ -1,6 +1,7 @@
 import amqp from 'amqplib';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { toJsonSchema } from '@picturas/schema-validation';
+import {serverIsReady, startPLServer} from "@picturas/ms-helper";
 
 export function createFilterHandler(filterName, isPremium, paramsSchema, imageHandler) {
     if (process.env.EXPORT_SCHEMA === 'true') {
@@ -114,5 +115,9 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
                 channel.ack(message);
             }
         });
+
+        serverIsReady();
     })();
+
+    startPLServer();
 }
