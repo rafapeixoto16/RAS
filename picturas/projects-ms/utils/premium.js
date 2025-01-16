@@ -8,8 +8,7 @@ export const isPremiumMiddleware = async (req, res, next) => {
         // TODO endpoint though environments
         axios.get('http://subscriptions-ms:3000/', {
             headers: {
-                // TODO Authorization: req.headers.authorization
-                Authorization: JSON.stringify(req.user)
+                Authorization: req.headers.authorization
             }
         })
             .then(response => {
