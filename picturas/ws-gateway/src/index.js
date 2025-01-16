@@ -14,7 +14,7 @@ const io = new SocketIo(server, {
         origin: '*'
     },
     path: '/'
-}); // TODO frontend const socket = io("http://192.168.49.2", {path: '/api/ws/'});
+});
 const userSessions = {};
 
 const redisClient = new Redis({
@@ -24,7 +24,7 @@ const redisClient = new Redis({
 
 io.adapter(createAdapter(redisClient));
 
-/* io.use((socket, next) => {
+io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
         return next(new Error("Authentication error"));
@@ -37,12 +37,10 @@ io.adapter(createAdapter(redisClient));
     } catch (err) {
         next(new Error("Invalid token"));
     }
-}); */
+});
 
 io.on("connection", (socket) => {
-    console.log(`User connected`);
-
-    /* socket.join(socket.user._id); */
+    socket.join(socket.user._id);
 });
 
 (async () => {
@@ -60,9 +58,7 @@ io.on("connection", (socket) => {
                 const content = JSON.parse(msg.content.toString());
                 const { userId, projectId, message } = content;
 
-                //io.to(userId).emit("notification", { project: projectId, message });
-                console.log(projectId)
-                io.emit("notification", { project: projectId, message })
+                io.to(userId).emit("notification", { project: projectId, message });
                 channel.ack(msg);
             }
         });

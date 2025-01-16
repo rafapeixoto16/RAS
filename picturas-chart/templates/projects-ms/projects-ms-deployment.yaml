@@ -79,6 +79,8 @@ spec:
                 secretKeyRef:
                   name: filter-redis-auth-secret
                   key: password
+            - name: FRONTEND_URL
+              value: {{ .Values.frontend_url }}
           volumeMounts:
             - mountPath: {{ .Values.filter_shared_dir }}
               name: nfs-volume

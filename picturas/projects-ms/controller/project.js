@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import path from 'node:path';
 import mongoose from 'mongoose';
 import fs from 'node:fs';
+import { rewriteS3Url } from '../config/minioClient.js'
 
 export const objectIdSchema = schemaValidation.string().refine((val) => mongoose.Types.ObjectId.isValid(val));
 
@@ -154,7 +155,7 @@ export const addImage = async (userId, projectId, file, userLimits) => {
         format: extensionName.replace('.', ''),
     });
 
-    return { imageIdx: idx, imageUrl: publicUrl };
+    return { imageIdx: idx, imageUrl: rewriteS3Url(publicUrl) };
 };
 
 const isImage4k = async (image) => {
@@ -232,10 +233,10 @@ export const getImage = async (userId, projectId, imageIdx) => {
 
         await image.save();
 
-        return publicUrl;
+        return rewriteS3Url(publicUrl);
     }
 
-    return image.url;
+    return rewriteS3Url(image.url);
 };
 
 export const reorderImage = async (userId, projectId, imageIdx, imageIdxAfter) => {
@@ -313,5 +314,5 @@ export const uploadLocalImage = async (userId, projectId, buffer, isPreview) => 
         await updateProject(userId, projectId, {result});
     }
     
-    return imageUrl;
+    return rewriteS3Url(imageUrl);
 };
