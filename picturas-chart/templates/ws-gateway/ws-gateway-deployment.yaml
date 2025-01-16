@@ -43,3 +43,5 @@ spec:
                 secretKeyRef:
                   name: ws-redis-auth-secret
                   key: password
+            - name: FRONTEND_URL
+              value: {{ .Values.frontend_url }}

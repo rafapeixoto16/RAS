@@ -11,11 +11,10 @@ const port = 3000;
 const server = createServer();
 const io = new SocketIo(server, {
     cors: {
-        origin: '*'
+        origin: process.env.FRONTEND_URL
     },
     path: '/'
 });
-const userSessions = {};
 
 const redisClient = new Redis({
     host: process.env.WS_REDIS_HOST,
