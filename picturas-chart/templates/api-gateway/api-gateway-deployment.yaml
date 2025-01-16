@@ -30,3 +30,5 @@ spec:
                 secretKeyRef:
                   name: rate-limiter-redis-auth-secret
                   key: password
+            - name: FRONTEND_URL
+              value: {{ .Values.frontend_url }}
