@@ -24,7 +24,7 @@ export const addProjectToPipeline = async (userId, projectId, userLimits) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    let pipeline = await Pipeline.findOne({ userId }).session(session);
+    let pipeline = await Pipeline.findOne({ _id: userId }).session(session);
     if (!pipeline) {
         pipeline = new Pipeline({ _id: userId, projects: [] });
     }
@@ -51,7 +51,7 @@ export const addProjectToPipeline = async (userId, projectId, userLimits) => {
     return pipeline;
 };
 
-export const removeProjectFromPipeline = async (userId, projectId, outputUrl) => {
+export const removeProjectFromPipeline = async (projectId, outputUrl) => {
     console.log(projectId)
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -68,11 +68,6 @@ export const removeProjectFromPipeline = async (userId, projectId, outputUrl) =>
 
     await session.commitTransaction();
     session.endSession();
-
-    // TODO store outputUrl in Project
-    const project = await getProject(userId, projectId);
-    project.result.output = outputUrl;
-    await project.save();
 
     return pipeline;
 };

@@ -12,8 +12,9 @@ const server = createServer();
 const io = new SocketIo(server, {
     cors: {
         origin: '*'
-    }
-});
+    },
+    path: '/'
+}); // TODO frontend const socket = io("http://192.168.49.2", {path: '/api/ws/'});
 const userSessions = {};
 
 const redisClient = new Redis({
@@ -39,13 +40,9 @@ io.adapter(createAdapter(redisClient));
 }); */
 
 io.on("connection", (socket) => {
-    /* console.log(`User connected: ${socket.user._id}`);
+    console.log(`User connected`);
 
-    socket.join(socket.user._id); */
-
-    socket.on("disconnect", () => {
-        console.log(`User disconnected: ${socket.user._id}`);
-    });
+    /* socket.join(socket.user._id); */
 });
 
 (async () => {
@@ -64,7 +61,8 @@ io.on("connection", (socket) => {
                 const { userId, projectId, message } = content;
 
                 //io.to(userId).emit("notification", { project: projectId, message });
-                io.broadcast("notification", { project: projectId, message })
+                console.log(projectId)
+                io.emit("notification", { project: projectId, message })
                 channel.ack(msg);
             }
         });
