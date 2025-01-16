@@ -1,7 +1,6 @@
 import { execa } from 'execa';
 import * as fs from 'fs/promises';
-import * as path from 'path';
-import { findSystemPython, isWindows, venvDir } from './utils.js';
+import { findSystemPython, venvDir, venvPythonPath } from './utils.js';
 
 (async () => {
     const systemPythonPath = await findSystemPython();
@@ -15,11 +14,6 @@ import { findSystemPython, isWindows, venvDir } from './utils.js';
         stdout: 'inherit',
         stderr: 'inherit',
     });
-
-    const venvPythonPath = path.resolve(
-        venvDir,
-        isWindows ? 'Scripts/python.exe' : 'bin/python'
-    );
 
     await execa(venvPythonPath, ['-m', 'pip', 'install', 'poetry==1.8'], {
         stdout: 'inherit',

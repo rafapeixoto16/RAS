@@ -9,7 +9,12 @@ import { createAdapter } from "@socket.io/redis-streams-adapter";
 const port = 3000;
 
 const server = createServer();
-const io = new SocketIo(server);
+const io = new SocketIo(server, {
+    cors: {
+        origin: '*'
+    },
+    path: '/'
+});
 const userSessions = {};
 
 const redisClient = new Redis({
@@ -35,13 +40,7 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.user._id}`);
-
     socket.join(socket.user._id);
-
-    socket.on("disconnect", () => {
-        console.log(`User disconnected: ${socket.user._id}`);
-    });
 });
 
 (async () => {
@@ -55,13 +54,13 @@ io.on("connection", (socket) => {
         await channel.assertQueue(queue, { durable: true });
 
         channel.consume(queue, (msg) => {
-        if (msg !== null) {
-            const content = JSON.parse(msg.content.toString());
-            const { userId, projectId, message } = content;
+            if (msg !== null) {
+                const content = JSON.parse(msg.content.toString());
+                const { userId, projectId, message } = content;
 
-            io.to(userId).emit("notification", { project: projectId, message });
-            channel.ack(msg);
-        }
+                io.to(userId).emit("notification", { project: projectId, message });
+                channel.ack(msg);
+            }
         });
 
         console.log(`Listening to RabbitMQ queue: ${queue}`);

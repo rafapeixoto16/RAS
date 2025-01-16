@@ -9,6 +9,7 @@
     "dependencies": {
         "@picturas/filter-helper": "file:../filter-helper",
         "@picturas/schema-validation": "file:../schema-validation",
+        "amqplib": "^0.10.5",
         "execa": "^9.5.2"
     }
 }
