@@ -32,3 +32,15 @@ spec:
                   key: password
             - name: FRONTEND_URL
               value: {{ .Values.frontend_url }}
+            - name: USERS_MS
+              value: users-ms
+            - name: USERS_MS_PORT
+              value: '3000'
+            - name: SUBSCRIPTIONS_MS
+              value: subscriptions-ms
+            - name: SUBSCRIPTIONS_MS_PORT
+              value: '3000'
+            - name: PROJECTS_MS
+              value: projects-ms
+            - name: PROJECTS_MS_PORT
+              value: '3000'
