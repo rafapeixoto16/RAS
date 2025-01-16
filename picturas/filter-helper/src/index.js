@@ -21,7 +21,8 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
     }
 
     const inputQueue = filterName;
-    const outputQueue = process.env.FILTER_OUTPUT_QUEUE;
+    const outputExchange = process.env.FILTER_OUTPUT_EXCHANGE;
+    const routingKey = process.env.FILTER_OUTPUT_ROUTING_KEY;
 
     async function processMessage(content) {
         const { messageId, parameters } = content;
@@ -94,15 +95,16 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
         const channel = await connection.createChannel();
 
         await channel.assertQueue(inputQueue, { durable: true });
-        await channel.assertQueue(outputQueue, { durable: true });
+        await channel.assertExchange(outputExchange, 'direct', { durable: true });
 
         channel.consume(inputQueue, async (message) => {
             if (message) {
                 const content = JSON.parse(message.content.toString());
                 const result = await processMessage(content);
 
-                channel.sendToQueue(
-                    outputQueue,
+                channel.publish(
+                    outputExchange,
+                    routingKey,
                     Buffer.from(JSON.stringify(result)),
                     {
                         persistent: true,

@@ -25,7 +25,7 @@ SUBPROJECTS=(
 #  "smart-crop-filter"
   "subscriptions-ms"
   "users-ms"
-#  "watermark-filter"
+  "watermark-filter"
   "ws-gateway"
 )
 

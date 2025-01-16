@@ -10,7 +10,8 @@ const {
     RABBITMQ_PORT,
     RABBITMQ_USERNAME,
     RABBITMQ_PASSWORD,
-    FILTER_OUTPUT_QUEUE,
+    FILTER_OUTPUT_EXCHANGE,
+    FILTER_OUTPUT_ROUTING_KEY,
     NOTIFICATION_QUEUE,
 } = process.env;
 
@@ -25,7 +26,7 @@ function startProcessingOutputQueue() {
     }
 
     channel.consume(
-        FILTER_OUTPUT_QUEUE,
+        FILTER_OUTPUT_EXCHANGE + '-queue',
         (msg) => {
             if (msg !== null) {
                 console.log('message received')
@@ -41,7 +42,9 @@ export async function connectToRabbitMQ() {
     const connection = await amqp.connect(RABBITMQ_URL);
     channel = await connection.createChannel();
 
-    await channel.assertQueue(FILTER_OUTPUT_QUEUE, { durable: true });
+    await channel.assertExchange(FILTER_OUTPUT_EXCHANGE, 'direct', { durable: true });
+    await channel.assertQueue(FILTER_OUTPUT_EXCHANGE + '-queue', { durable: true });
+    await channel.bindQueue(FILTER_OUTPUT_EXCHANGE + '-queue', FILTER_OUTPUT_EXCHANGE, FILTER_OUTPUT_ROUTING_KEY);
     await channel.assertQueue(NOTIFICATION_QUEUE, { durable: true });
 
     startProcessingOutputQueue();
@@ -265,7 +268,7 @@ async function filterTerminated(msg) {
 }
 
 async function runPipelineInternal(userId, projectId, imageInfoList, filterInfoList, applyWatermark, isPreview) {
-    // TODO if (applyWatermark) filterInfoList.push({filterName: 'watermark', args: {}});
+    if (applyWatermark) filterInfoList.push({filterName: 'watermark', args: {}});
 
     const images = [];
 
