@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
-echo "$SSH_PRIVATE_KEY" > private_key
-chmod 0600 private_key
-ssh-add private_key
+mkdir ~/.ssh
+echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+chmod 0600 ~/.ssh/id_rsa
+ssh-keyscan -H $SSH_HOST > ~/.ssh/known_hosts
 
 # Install kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
