@@ -115,7 +115,8 @@ router.put('/:id', validateRequest({
     const { body } = req;
 
     try {
-        const project = await updateProject(req.user._id, id, body);
+        await updateProject(req.user._id, id, body);
+        const project = await getProject(req.user._id, id);
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
