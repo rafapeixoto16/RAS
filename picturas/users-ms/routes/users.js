@@ -510,7 +510,7 @@ router.put(
     }
 );
 
-router.delete('/:id/softDelete', async (req, res) => {
+router.delete('/softDelete', async (req, res) => {
     const userId = req.user._id; 
     try {
         const user = await User.softDeleteUser(userId); 
