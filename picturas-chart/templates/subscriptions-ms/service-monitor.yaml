@@ -9,5 +9,5 @@ spec:
       interval: 30s
   selector:
     matchLabels:
-      name: subscriptions-ms-metrics
+      app: subscriptions-ms
 {{- end }}

@@ -9,5 +9,5 @@ spec:
       interval: 30s
   selector:
     matchLabels:
-      name: api-gateway-metrics
+      app: api-gateway
 {{- end }}

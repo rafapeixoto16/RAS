@@ -9,5 +9,5 @@ spec:
       interval: 30s
   selector:
     matchLabels:
-      name: projects-ms-metrics
+      app: projects-ms
 {{- end }}

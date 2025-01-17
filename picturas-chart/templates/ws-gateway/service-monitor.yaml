@@ -9,5 +9,5 @@ spec:
       interval: 30s
   selector:
     matchLabels:
-      name: ws-gateway-metrics
+      app: ws-gateway
 {{- end }}

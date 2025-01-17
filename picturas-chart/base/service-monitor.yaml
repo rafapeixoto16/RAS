@@ -9,5 +9,5 @@ spec:
       interval: 30s
   selector:
     matchLabels:
-      name: EXAMPLE-metrics
+      app: EXAMPLE
 {{- end }}

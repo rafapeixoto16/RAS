@@ -10,6 +10,6 @@ spec:
       interval: 30s
   selector:
     matchLabels:
-      name: {{ . }}-metrics
+      app: {{ . }}
 {{- end }}
 {{- end }}
