@@ -12,7 +12,7 @@ const lifecycleConfig = {
     Rule: [{
         ID: 'DeleteAfter2Days',
         Status: 'Enabled',
-        Expiration: { Days: 2 },
+        Expiration: { Minutes: 2 },
         Filter: {
             Prefix: ''
         }
