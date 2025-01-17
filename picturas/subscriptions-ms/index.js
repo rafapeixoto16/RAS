@@ -41,7 +41,6 @@ initStripe().then(() => {
 app.use(morgan('dev'));
 app.use(express.json({
     verify: (req, res, buf, _) => {
-        console.error(buf.length, req.originalUrl)
         if (req.originalUrl.startsWith('/webhook')) {
             req.rawBody = buf; // Save raw body for Stripe webhook verification
         }
