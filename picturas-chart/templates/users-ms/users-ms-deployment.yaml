@@ -79,3 +79,7 @@ spec:
                   key: password
             - name: S3_PROFILE_PICTURE_BUCKET
               value: {{ .Values.s3_profile_picture_bucket }}
+            - name: PROJECT_MS
+              value: "projects-ms"
+            - name: PROJECT_MS_PORT
+              value: "3000"

@@ -25,6 +25,45 @@ const kinds = {
 
 const issuer = 'Picturas - Stolen from UMinho Students Work';
 
+router.get('/export', async (req, res) => {
+    try {
+    const user = await User.getUser(req.user._id);
+
+    if (!user) {
+        return res.sendStatus(404);
+    }
+    console.log({proj_ms: process.env.PROJECT_MS, proj_ms_port: process.env.PROJECT_MS_PORT})
+
+    // TODO: get the information on the other ms
+    /*
+    const projects = await axios.get(`http://${process.env.PROJECT_MS}:${process.env.PROJECT_MS_PORT}`, {
+            headers: {
+                Authorization: req.headers.authorization
+            }
+        })
+    */
+
+    const userObj = user.toObject();
+    delete userObj.password;
+    delete userObj.otpSecret;
+    delete userObj.refresh;
+
+    const result = {
+        user: userObj,
+        projects,
+    }
+
+    return res.status(200).json(result);
+
+    } catch(error) {
+        console.error('Error exporting data:', error);
+        res.status(500).json({
+            error: 'Failed to export data',
+            details: error.message,
+        });
+    }
+});
+
 router.post('/register', validateRequest({
     body: schemaValidation.object({
         name: schemaValidation.string(),
