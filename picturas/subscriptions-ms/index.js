@@ -8,7 +8,7 @@ import {useGatewayAuth} from "@picturas/ms-helper";
 import {initStripe} from "./config/stripe.js";
 
 const app = express();
-const port = 3000; //TODO
+const port = 3000;
 
 // Inits
 const mongoBD = `mongodb://${process.env.SUBS_DB_USERNAME}:${process.env.SUBS_DB_PASSWORD}@${process.env.SUBS_DB_HOST}:${process.env.SUBS_DB_PORT}/subscriptions?authSource=admin`;

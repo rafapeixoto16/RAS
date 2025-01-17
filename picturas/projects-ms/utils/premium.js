@@ -5,11 +5,9 @@ export const isPremiumMiddleware = async (req, res, next) => {
         req.user.isPremium = false;
         next();
     } else {
-        // TODO endpoint though environments
-        axios.get('http://subscriptions-ms:3000/', {
+        axios.get(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}`, {
             headers: {
-                // TODO Authorization: req.headers.authorization
-                Authorization: JSON.stringify(req.user)
+                Authorization: req.headers.authorization
             }
         })
             .then(response => {

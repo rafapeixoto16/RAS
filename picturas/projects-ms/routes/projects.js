@@ -52,7 +52,7 @@ router.post('/', validateRequest({
         }
 
         if (req.user.limits.hasTtl) {
-            data.ttl = ttlStartTime;
+            data.ttl = req.user.limits.ttlStartTime;
         }
 
         const project = await addProject(data);
