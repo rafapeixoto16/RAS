@@ -399,7 +399,6 @@ router.put('/profilePic', multer.single('profilePic'), (req, res) => {
         metaData,
         (err, etag) => {
             if (err) {
-                console.error(err);
                 return res
                     .status(500)
                     .json({
@@ -421,7 +420,6 @@ router.put('/profilePic', multer.single('profilePic'), (req, res) => {
                         })
                 )
                 .catch((err) => {
-                    console.error(err);
                         res
                             .status(500)
                             .json({
@@ -543,7 +541,6 @@ router.put(
                 emailPreferences: out.emailPreferences
             });
         } catch (error) {
-            console.error('Error updating email preferences:', error);
             res.status(500).json({
                 error: 'Failed to update email preferences',
                 details: error.message,

@@ -4,23 +4,24 @@ import ResponseTime from 'response-time';
 
 // Prometheus & Kubernetes Probes
 
-const port = 9091;
+const port = 9121;
 const app = express();
 let isReady = false;
+const requestDurationBuckets = [0.1, 0.5, 1, 1.5];
 
-export function promMiddleware(requestDurationBuckets = [0.1, 0.5, 1, 1.5]) {
+export function promMiddleware() {
     const labels = ['route', 'method', 'status'];
 
     const requestCount = new Prometheus.Counter({
-        name: 'http_requests_total',
+        name: 'picturas_http_requests_total',
         help: 'Counter for total requests received',
-        labels,
+        labelNames: labels,
     });
     const requestDuration = new Prometheus.Histogram({
-        name: 'http_request_duration_seconds',
+        name: 'picturas_http_request_duration_seconds',
         help: 'Duration of HTTP requests in seconds',
-        labels,
-        requestDurationBuckets,
+        labelNames: labels,
+        buckets: requestDurationBuckets
     });
 
     const middleware = ResponseTime((req, res, time) => {
@@ -29,21 +30,61 @@ export function promMiddleware(requestDurationBuckets = [0.1, 0.5, 1, 1.5]) {
             method,
         } = req;
         const status = `${Math.floor(res.statusCode / 100)}XX`;
-        const labels = {
+        const labelsDef = {
             route: originalUrl,
             method,
             status,
         };
 
-        requestCount.inc(labels);
-        requestDuration.observe(labels, time / 1000);
+        requestCount.inc(labelsDef);
+        requestDuration.observe(labelsDef, time / 1000);
     });
 
-    Prometheus.collectDefaultMetrics({
-        prefix: options.prefix,
-    });
+    Prometheus.collectDefaultMetrics();
 
     return middleware;
+}
+
+export function recordRabbitMQMetrics() {
+    const labels = [];
+
+    const requestCount = new Prometheus.Counter({
+        name: 'picturas_filter_requests_total',
+        help: 'Counter for total requests received',
+        labelNames: labels,
+    });
+    const successCount = new Prometheus.Counter({
+        name: 'picturas_filter_success_total',
+        help: 'Counter for successful Filter processing',
+        labelNames: labels,
+    });
+    const failCount = new Prometheus.Counter({
+        name: 'picturas_filter_fail_total',
+        help: 'Counter for failed Filter processing',
+        labelNames: labels,
+    });
+    const filterDuration = new Prometheus.Histogram({
+        name: 'picturas_filter_duration_seconds',
+        help: 'Duration of Filter processing in seconds',
+        labelNames: labels,
+        buckets: requestDurationBuckets,
+    });
+
+    Prometheus.collectDefaultMetrics();
+
+    return function processMetrics({ success, duration }) {
+        requestCount.inc();
+
+        if (success) {
+            successCount.inc();
+        } else {
+            failCount.inc();
+        }
+
+        if (typeof duration === 'number') {
+            filterDuration.observe(duration);
+        }
+    };
 }
 
 export function serverIsReady() {
@@ -58,11 +99,6 @@ app.get('/metrics', async (req, res) => {
 app.get('/healthz', (req, res) => {
     res.status(200)
         .send('I am healthy');
-});
-
-app.get('/liveness', (req, res) => {
-    res.status(200)
-        .send('I am alive');
 });
 
 app.get('/readiness', (req, res) => {

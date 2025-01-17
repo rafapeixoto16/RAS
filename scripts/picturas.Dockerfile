@@ -1,6 +1,6 @@
-FROM alpine:3.21.2
+FROM python:3.13.1-alpine3.21
 
-RUN apk add nodejs npm python3
+RUN apk add nodejs npm
 
 WORKDIR /app
 
