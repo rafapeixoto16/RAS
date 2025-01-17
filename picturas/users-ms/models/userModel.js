@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema(
             projectCollaborations: { type: Boolean, default: true },
             comments: { type: Boolean, default: true },
         },
+        deletedAt: {
+            type: Date,
+            default: null,
+            index: { expires: '30d' } 
+        },
         expireAt: {
             type: Date,
             default: Date.now,
