@@ -16,6 +16,8 @@
       <TutorialModal v-if="shouldShowTutorialModal" />
       <Footer />
     </div>
+
+    <div id="modal-target"></div>
   </div>
 </template>
 

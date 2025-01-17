@@ -5,13 +5,13 @@
     <h1 class="text-3xl font-bold text-azure-radiance-500 mb-8">
       Your Projects
     </h1>
-    <div class="w-full flex justify-center mb-6 sm:mb-8 mt-16 md:mt-0 z-10">
+    <div class="w-full flex justify-center mb-6 sm:mb-8 mt-16 md:mt-0">
       <div class="relative w-full max-w-2xl px-4">
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Search for project titles..."
-          class="w-full bg-white text-gray-800 font-medium py-2 sm:py-3 px-4 pr-12 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+          class="w-full bg-white text-gray-800 font-medium py-2 sm:py-3 px-4 pr-12 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base z-10"
         />
         <div
           class="absolute inset-y-0 right-0 flex items-center pr-6 pointer-events-none"

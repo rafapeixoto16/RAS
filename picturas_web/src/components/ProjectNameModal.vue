@@ -1,5 +1,6 @@
 <template>
-    <div v-if="isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <teleport to="#modal-target">
+    <div v-if="isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1001]">
       <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
         <h2 class="text-xl font-bold mb-4">Create New Project</h2>
         <input
@@ -25,31 +26,32 @@
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref } from 'vue';
-  
-  defineProps<{
-    isOpen: boolean
-  }>();
-  
-  const emit = defineEmits<{
-    (e: 'create', projectName: string): void
-    (e: 'cancel'): void
-  }>();
-  
-  const projectName = ref('');
-  
-  const createProject = () => {
-    if (projectName.value.trim()) {
-      emit('create', projectName.value.trim());
-      projectName.value = '';
-    }
-  };
-  
-  const cancel = () => {
+  </teleport>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+defineProps<{
+  isOpen: boolean
+}>();
+
+const emit = defineEmits<{
+  (e: 'create', projectName: string): void
+  (e: 'cancel'): void
+}>();
+
+const projectName = ref('');
+
+const createProject = () => {
+  if (projectName.value.trim()) {
+    emit('create', projectName.value.trim());
     projectName.value = '';
-    emit('cancel');
-  };
-  </script>  
+  }
+};
+
+const cancel = () => {
+  projectName.value = '';
+  emit('cancel');
+};
+</script>
