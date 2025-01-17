@@ -12,7 +12,7 @@ import {
     getImage,
     removeImage,
     downloadImageLocally,
-    uploadLocalImage,
+    uploadArtifact,
     objectIdSchema,
     filterProject,
     reorderImage
@@ -34,7 +34,7 @@ import {
     setHooks
 } from '../utils/filterCall.js'
 
-setHooks(downloadImageLocally, uploadLocalImage, removeProjectFromPipeline);
+setHooks(downloadImageLocally, uploadArtifact, removeProjectFromPipeline);
 
 const router = Router();
 router.use(getLimitsMiddleware);

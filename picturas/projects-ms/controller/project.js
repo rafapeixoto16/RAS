@@ -297,13 +297,13 @@ export const downloadImageLocally = async (projectId, imageName, targetPath) => 
     });
 };
 
-export const uploadLocalImage = async (userId, projectId, buffer, isPreview) => {
+export const uploadArtifact = async (userId, projectId, buffer, isPreview) => {
     const objectId = new mongoose.Types.ObjectId();
     const fileName = `${objectId}.zip`;
     const bucketName = process.env.S3_TEMP_BUCKET
 
     await minioClient.putObject(bucketName, fileName, buffer);
-    const imageUrl = await minioClient.presignedGetObject(bucketName, fileName, 24 * 60 * 60);
+    const imageUrl = rewriteS3Url(await minioClient.presignedGetObject(bucketName, fileName, 24 * 60 * 60));
 
     // save the result in the project
     if(!isPreview){
@@ -314,5 +314,5 @@ export const uploadLocalImage = async (userId, projectId, buffer, isPreview) => 
         await updateProject(userId, projectId, {result});
     }
     
-    return rewriteS3Url(imageUrl);
+    return imageUrl;
 };
