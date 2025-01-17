@@ -92,7 +92,6 @@ router.post('/webhook', async (req, res) => {
             await webhookInvoiceSubscriptionDeleted(req, res, subscription)
         }
     } catch (err) {
-        console.error(err)
         return res.sendStatus(500);
     }
 
@@ -190,7 +189,6 @@ router.post('/subscribe', validateRequest({
             });
         }
     } catch (err) {
-        console.error(err)
         return res.status(500).json({error: 'Failed to create subscription'});
     }
 });

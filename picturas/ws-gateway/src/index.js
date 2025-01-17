@@ -5,8 +5,17 @@ import {createServer} from 'node:http';
 import amqp from 'amqplib';
 import Redis from 'ioredis';
 import { createAdapter } from "@socket.io/redis-streams-adapter";
+import {serverIsReady, startPLServer} from "@picturas/ms-helper";
 
 const port = 3000;
+
+let connections = 0;
+const maxConnections = 3; // io redis rabbit
+
+function incConnections() {
+    connections++;
+    if (connections === maxConnections) serverIsReady();
+}
 
 const server = createServer();
 const io = new SocketIo(server, {
@@ -19,6 +28,11 @@ const io = new SocketIo(server, {
 const redisClient = new Redis({
     host: process.env.WS_REDIS_HOST,
     password: process.env.WS_REDIS_PASSWORD
+});
+
+redisClient.on('connect', () => {
+    incConnections();
+    console.log('Connected to Redis');
 });
 
 io.adapter(createAdapter(redisClient));
@@ -62,6 +76,7 @@ io.on("connection", (socket) => {
             }
         });
 
+        incConnections();
         console.log(`Listening to RabbitMQ queue: ${queue}`);
     } catch (err) {
         console.error("RabbitMQ connection error:", err);
@@ -70,5 +85,8 @@ io.on("connection", (socket) => {
 })();
 
 server.listen(port, () => {
+    incConnections();
     console.log(`Server running on port ${port}`);
 });
+
+startPLServer();

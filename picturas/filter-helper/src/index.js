@@ -1,6 +1,7 @@
 import amqp from 'amqplib';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { toJsonSchema } from '@picturas/schema-validation';
+import {recordRabbitMQMetrics, serverIsReady, startPLServer} from "@picturas/ms-helper";
 
 export function createFilterHandler(filterName, isPremium, paramsSchema, imageHandler) {
     if (process.env.EXPORT_SCHEMA === 'true') {
@@ -23,6 +24,7 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
     const inputQueue = filterName;
     const outputExchange = process.env.FILTER_OUTPUT_EXCHANGE;
     const routingKey = process.env.FILTER_OUTPUT_ROUTING_KEY;
+    const metrics = recordRabbitMQMetrics();
 
     async function processMessage(content) {
         const { messageId, parameters } = content;
@@ -75,6 +77,11 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
             }
         }
 
+        metrics({
+            success: error,
+            duration: processingTime
+        });
+
         return {
             messageId: `completion-${messageId}`,
             correlationId: messageId,
@@ -82,7 +89,7 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
             status: error ? 'error' : 'success',
             [error ? 'error' : 'output']: data,
             metadata: {
-                processingTime: 0,
+                processingTime,
                 microservice: filterName,
             },
         };
@@ -114,5 +121,9 @@ export function createFilterHandler(filterName, isPremium, paramsSchema, imageHa
                 channel.ack(message);
             }
         });
+
+        serverIsReady();
     })();
+
+    startPLServer();
 }

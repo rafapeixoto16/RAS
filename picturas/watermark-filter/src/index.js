@@ -5,6 +5,7 @@ import { venvPythonPath } from './utils.js';
 import amqp from 'amqplib';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import {serverIsReady, startPLServer} from "@picturas/ms-helper";
 
 const toolName = 'watermark';
 
@@ -18,6 +19,8 @@ if (process.env.EXPORT_SCHEMA === 'true') {
     await channel.assertQueue(toolName, { durable: true });
     await channel.close();
     await connection.close();
+
+    serverIsReady();
 
     await execa(venvPythonPath, ['-m', 'picturas_watermark_tool_ms.main'], {
         stdout: 'inherit',
@@ -37,3 +40,5 @@ if (process.env.EXPORT_SCHEMA === 'true') {
         },
     });
 })();
+
+startPLServer();

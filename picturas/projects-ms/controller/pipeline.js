@@ -52,7 +52,6 @@ export const addProjectToPipeline = async (userId, projectId, userLimits) => {
 };
 
 export const removeProjectFromPipeline = async (projectId, outputUrl) => {
-    console.log(projectId)
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -135,7 +134,7 @@ export const isUserLimitReached = async (userId, limits) => {
     if (!userLimits) {
         userLimits = new Limits({
             _id: userId,
-            qtdRunnedPipelines: 1 
+            qtdRunnedPipelines: 1
         });
         await userLimits.save();
         return false;
