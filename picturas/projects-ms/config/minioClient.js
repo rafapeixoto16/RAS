@@ -29,4 +29,8 @@ export async function setupBucket() {
     }
 }
 
+export function rewriteS3Url(url) {
+    return url.replace("http://minio:9000", process.env.FRONTEND_URL + '/s3');
+}
+
 export default minioClient;

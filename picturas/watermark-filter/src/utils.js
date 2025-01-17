@@ -4,16 +4,16 @@ import * as path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-export const isWindows = os.platform() === 'win32';
+const isWindows = os.platform() === 'win32';
 
 export const venvDir = path.resolve(
     dirname(fileURLToPath(import.meta.url)),
     '../venv'
 );
 
-export const watermarkPath = path.resolve(
+export const venvPythonPath = path.resolve(
     venvDir,
-    isWindows ? 'Scripts/watermark.exe' : 'bin/watermark'
+    isWindows ? 'Scripts/python.exe' : 'bin/python'
 );
 
 export async function findSystemPython() {

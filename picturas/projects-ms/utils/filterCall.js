@@ -10,7 +10,8 @@ const {
     RABBITMQ_PORT,
     RABBITMQ_USERNAME,
     RABBITMQ_PASSWORD,
-    FILTER_OUTPUT_QUEUE,
+    FILTER_OUTPUT_EXCHANGE,
+    FILTER_OUTPUT_ROUTING_KEY,
     NOTIFICATION_QUEUE,
 } = process.env;
 
@@ -25,10 +26,11 @@ function startProcessingOutputQueue() {
     }
 
     channel.consume(
-        FILTER_OUTPUT_QUEUE,
+        FILTER_OUTPUT_EXCHANGE + '-queue',
         (msg) => {
             if (msg !== null) {
-                filterTerminated(msg.toString());
+                console.log('message received')
+                filterTerminated(msg.content.toString());
                 channel.ack(msg);
             }
         },
@@ -36,11 +38,13 @@ function startProcessingOutputQueue() {
     );
 }
 
-async function connectToRabbitMQ() {
+export async function connectToRabbitMQ() {
     const connection = await amqp.connect(RABBITMQ_URL);
     channel = await connection.createChannel();
 
-    await channel.assertQueue(FILTER_OUTPUT_QUEUE, { durable: true });
+    await channel.assertExchange(FILTER_OUTPUT_EXCHANGE, 'direct', { durable: true });
+    await channel.assertQueue(FILTER_OUTPUT_EXCHANGE + '-queue', { durable: true });
+    await channel.bindQueue(FILTER_OUTPUT_EXCHANGE + '-queue', FILTER_OUTPUT_EXCHANGE, FILTER_OUTPUT_ROUTING_KEY);
     await channel.assertQueue(NOTIFICATION_QUEUE, { durable: true });
 
     startProcessingOutputQueue();
@@ -51,7 +55,9 @@ async function sendMessage(queueName, message) {
         throw new Error('Channel is not initialized. Connect to RabbitMQ first.');
     }
 
-    const sent = channel.sendToQueue(queueName, Buffer.from(message), {
+    console.log(queueName, typeof message, message)
+
+    channel.sendToQueue(queueName, Buffer.from(message), {
         persistent: true,
     });
 }
@@ -71,9 +77,9 @@ async function sendMessage(queueName, message) {
 // filterInfo: {filterName: string, filterProps: {}}
 
 const hooks = {
-    downloadResource: (imageInfo, path) => {},
-    uploadResource: (projectId, path, isPreview) => {},
-    terminated: (projectId) => {}
+    downloadResource: (projectId, imageInfo, path) => {},
+    uploadResource: (userId, projectId, path, isPreview) => {},
+    terminated: (projectId, uploadUrl) => {}
 }
 
 export function setHooks(downloadResource, uploadResource, terminated) {
@@ -83,28 +89,27 @@ export function setHooks(downloadResource, uploadResource, terminated) {
 }
 
 function toMessageId(projectId, imageId, stage) {
-    return `${projectId}_${imageId}_${stage}`;
+    return `${stage}_${projectId}_${imageId}`;
 }
 
 function fromMessageId(messageId) {
     const splited = messageId.split('_');
 
     return {
-        projectId: splited[0],
-        imageId: splited[1],
-        stage: splited[2]
+        stage: Number(splited[0]),
+        projectId: splited[1],
+        imageId: splited[2]
     }
 }
 
 function getTempName(imageInfo, stage) {
-    return path.join(BASE_PATH, `${stage}-${imageInfo.imageId}.${imageInfo.extensionName}`);
+    return path.join(BASE_PATH, `${stage}-${imageInfo.id}.${imageInfo.format}`);
 }
 
 function getTempNameStage(imagePath, stage) {
-    const { dir, name, ext } = path.parse(tempName);
+    const { dir, name, ext } = path.parse(imagePath);
     
     const regex = /^(\d+)-/;
-    const match = name.match(regex);
     const newName = name.replace(regex, `${stage}-`);
 
     return path.format({ dir, name: newName, ext });
@@ -119,7 +124,7 @@ async function allocRedis(userId, projectId, isPreview, filterInfo, images) {
     await redisClient.set(getRedisKey(projectId, 'meta'), JSON.stringify({userId, isPreview, extraUpload: []}));
     await redisClient.set(getRedisKey(projectId, 'term'), 0);
     await redisClient.set(getRedisKey(projectId, 'filters'), JSON.stringify(filterInfo));
-    await redisClient.set(getRedisKey(projectId, 'images'), JSON.stringify(images.map((info) => info.imageId)).toArray());
+    await redisClient.set(getRedisKey(projectId, 'images'), JSON.stringify(images.map((info) => info.imageId)));
 
     for (let imageInfo of images) {
         await redisClient.set(getRedisKey(projectId, 'images', imageInfo.imageId), imageInfo.path);
@@ -145,7 +150,7 @@ async function applyFilter(projectId, imageId, inPath, outPath, filterInfo, stag
     const msg = {
         messageId: toMessageId(projectId, imageId, stage),
         timestamp: Date.now(),
-        procedure: filterInfo.filter,
+        procedure: filterInfo.filterName,
         parameters: {
             inputImageURI: inPath,
             outputImageURI: outPath,
@@ -153,63 +158,62 @@ async function applyFilter(projectId, imageId, inPath, outPath, filterInfo, stag
         }
     }
 
-    await sendMessage(filterInfo.filter, JSON.stringify(msg));
+    await sendMessage(filterInfo.filterName, JSON.stringify(msg));
 }
 
 async function filterTerminated(msg) {
+    console.log(msg)
     const data = JSON.parse(msg);
     const {projectId, imageId, stage} = fromMessageId(data.correlationId);
 
     const lock = await redisLock(getRedisKey(projectId, 'lock'));
-    let runNext = true;
+    const cancelKey = getRedisKey(projectId, 'cancel');
 
     // Errors
     if (data.status === 'error') {
-        runNext = false;
         const k = getRedisKey(projectId, 'meta');
         const dt = JSON.parse(await redisClient.get(k));
-        await sendMessage(NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'error', error: data.error}}));
+        await sendMessage(process.env.NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'error', error: data.error}}));
+        await redisClient.set(cancelKey, 0);
     }
 
     // Cancelation
-    const cancelKey = getRedisKey(projectId, 'cancel');
     if (await redisClient.exists(cancelKey)) {
         const nImages = JSON.parse(await redisClient.get(getRedisKey(projectId, 'images'))).length;
-        const cancelCount = await redisClient.get(cancelKey) + 1;
-        runNext = false;
+        const cancelCount = Number(await redisClient.get(cancelKey)) + 1;
 
         if (nImages === cancelCount) {
             const k = getRedisKey(projectId, 'meta');
             const dt = JSON.parse(await redisClient.get(k));
-            await sendMessage(NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'canceled'}}));
+            await sendMessage(process.env.NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'canceled'}}));
             await hooks.terminated(projectId);
         } else {
             await redisClient.set(cancelKey, cancelCount);
         }
+
+        await lock();
+        return;
     }
 
-    let filterInfoList;
+    // Check if there is a next
+    const filterInfoList = JSON.parse(await redisClient.get(getRedisKey(projectId, 'filters')));
+    console.error(filterInfoList, filterInfoList.length, stage)
+    const runNext = filterInfoList.length !== stage;
 
-    if (runNext) {
-        // Check if there is a next
-        filterInfoList = JSON.parse(redisClient.get(getRedisKey(projectId, 'filters')));
-        runNext = filterInfoList.length !== stage;
+    // Update base image (deal with non image outputs)
+    const key = getRedisKey(projectId, 'images', imageId);
+    let inPath = await redisClient.get(key);
+    let outPath = getTempNameStage(inPath, stage + 1);
 
-        // Update base image (deal with non image outputs)
-        const key = getRedisKey(projectId, 'images', imageId);
-        let inPath = await redisClient.get(key);
-        const outPath = getTempNameStage(inPath, stage + 1);
-    
-        if (data.output.type === 'image') {
-            fs.unlink(inPath);
-            inPath = getTempNameStage(inPath, stage);
-            await redisClient.set(key, inPath);
-        } else if (data.output.type === 'text') {
-            const k = getRedisKey(projectId, 'meta');
-            const dt = JSON.parse(await redisClient.get(k));
-            dt.extraUpload.push(data.output.imageURI);
-            await redisClient.set(k, JSON.stringify(dt));
-        }
+    if (data.output.type === 'image') {
+        fs.unlinkSync(inPath);
+        inPath = getTempNameStage(inPath, stage);
+        await redisClient.set(key, inPath);
+    } else if (data.output.type === 'text') {
+        const k = getRedisKey(projectId, 'meta');
+        const dt = JSON.parse(await redisClient.get(k));
+        dt.extraUpload.push(data.output.imageURI);
+        await redisClient.set(k, JSON.stringify(dt));
     }
     
     // Next stage        
@@ -218,10 +222,11 @@ async function filterTerminated(msg) {
     } else {
         // Termination
         const termKey = getRedisKey(projectId, 'term');
-        const allImages = await redisClient.get(getRedisKey(projectId, 'images'));
-        const nImages = JSON.parse(allImages).length;
-        const termCount = await redisClient.get(termKey) + 1;
-        runNext = false;
+        const allImages = JSON.parse(await redisClient.get(getRedisKey(projectId, 'images')));
+        const nImages = allImages.length;
+        const termCount = Number(await redisClient.get(termKey)) + 1;
+
+        console.log('hello1', allImages)
 
         if (nImages === termCount) {
             const k = getRedisKey(projectId, 'meta');
@@ -232,25 +237,28 @@ async function filterTerminated(msg) {
                 upload.push(await redisClient.get(getRedisKey(projectId, 'images', image)));
             }
 
-            upload = new Array(new Set(upload));
+            upload = Array.from(new Set(upload));
 
             // Create zip & upload
             const zip = new JSZip();
 
-            for (const file of filesToZip) {
-                const filePath = path.join(__dirname, file);
-                const fileData = await fs.readFile(filePath);
+            console.error(upload)
+
+            for (const file of upload) {
+                const fileData = fs.readFileSync(file);
                 zip.file(file, fileData);
             }
 
             const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-            const uploadUrl = await hooks.uploadResource(projectId, zipBuffer, dt.isPreview);
+            const uploadUrl = await hooks.uploadResource(dt.userId, projectId, zipBuffer, dt.isPreview);
 
             // Delete temporary files
-            for (let file of upload) fs.unlink(file);
+            for (let file of upload) fs.unlinkSync(file);
 
-            await sendMessage(NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'finished', url: uploadUrl}}));
-            await hooks.terminated(projectId);
+            await freeRedis(projectId);
+
+            await sendMessage(process.env.NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'finished', url: uploadUrl}}));
+            await hooks.terminated(projectId, uploadUrl);
         } else {
             await redisClient.set(termKey, termCount);
         }
@@ -260,7 +268,7 @@ async function filterTerminated(msg) {
 }
 
 async function runPipelineInternal(userId, projectId, imageInfoList, filterInfoList, applyWatermark, isPreview) {
-    if (applyWatermark) filterInfoList.push({filter: 'watermark', args: {}});
+    if (applyWatermark) filterInfoList.push({filterName: 'watermark', args: {}});
 
     const images = [];
 
@@ -268,16 +276,15 @@ async function runPipelineInternal(userId, projectId, imageInfoList, filterInfoL
         const imageInfo = imageInfoList[i];
 
         const tempName = getTempName(imageInfo, 0);
-        await hooks.downloadResource(imageInfo, tempName);
-        names.push(tempName);
+        await hooks.downloadResource(projectId, imageInfo, tempName);
         
-        images.push({imageId: imageInfo.imageId, path: tempName});
+        images.push({imageId: imageInfo.id, path: tempName});
     }
 
     await allocRedis(userId, projectId, isPreview, filterInfoList, images);
 
     for (let image of images) {
-        await applyFilter(projectId, image.imageId, image.paths[0], image.paths[1], filterInfoList[0], 1);
+        await applyFilter(projectId, image.imageId, image.path, getTempNameStage(image.path, 1), filterInfoList[0], 1);
     }
 }
 
@@ -288,9 +295,9 @@ export async function cancelPipeline(projectId) {
 }
 
 export async function runPipeline(userId, projectId, imageInfoList, filterInfoList, applyWatermark) {
-    await runPipelineInternal(projectId, [imageInfo], [filterInfo], applyWatermark, false);
+    await runPipelineInternal(userId, projectId, imageInfoList, filterInfoList, applyWatermark, false);
 }
 
 export async function runPreview(userId, projectId, imageInfo, filterInfo, applyWatermark) {
-    await runPipelineInternal(projectId, [imageInfo], [filterInfo], applyWatermark, true);
+    await runPipelineInternal(userId, projectId, [imageInfo], [filterInfo], applyWatermark, true);
 }

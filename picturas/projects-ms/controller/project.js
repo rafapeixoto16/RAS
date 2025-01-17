@@ -6,6 +6,8 @@ import minioClient from '../config/minioClient.js';
 import sharp from 'sharp';
 import path from 'node:path';
 import mongoose from 'mongoose';
+import fs from 'node:fs';
+import { rewriteS3Url } from '../config/minioClient.js'
 
 export const objectIdSchema = schemaValidation.string().refine((val) => mongoose.Types.ObjectId.isValid(val));
 
@@ -153,7 +155,7 @@ export const addImage = async (userId, projectId, file, userLimits) => {
         format: extensionName.replace('.', ''),
     });
 
-    return { imageIdx: idx, imageUrl: publicUrl };
+    return { imageIdx: idx, imageUrl: rewriteS3Url(publicUrl) };
 };
 
 const isImage4k = async (image) => {
@@ -231,10 +233,10 @@ export const getImage = async (userId, projectId, imageIdx) => {
 
         await image.save();
 
-        return publicUrl;
+        return rewriteS3Url(publicUrl);
     }
 
-    return image.url;
+    return rewriteS3Url(image.url);
 };
 
 export const reorderImage = async (userId, projectId, imageIdx, imageIdxAfter) => {
@@ -268,12 +270,12 @@ export const reorderImage = async (userId, projectId, imageIdx, imageIdxAfter) =
 // S3 Specific
 ///////////////////////////////////////////////////////////////////////////
 
-export const downloadImageLocally = async (imageName, targetPath) => {
-    const localFilePath = path.resolve(targetPath, imageName);
+export const downloadImageLocally = async (projectId, imageName, targetPath) => {
+    const localFilePath = path.resolve(targetPath);
 
     const objectStream = await minioClient.getObject(
         process.env.S3_PICTURE_BUCKET,
-        `${projectId}/${imageName.id}.${imageName.ext}`
+        `${projectId}/${imageName.id}.${imageName.format}`
     );
 
     return new Promise((resolve, reject) => {
@@ -281,54 +283,36 @@ export const downloadImageLocally = async (imageName, targetPath) => {
 
         objectStream.pipe(fileStream);
 
-        objectStream.on('error', (err) => {
-            console.error('Error downloading the image:', err);
+        objectStream.on('error', (_) => {
             reject(new Error('Failed to download the image from MinIO'));
         });
 
         fileStream.on('finish', () => {
-            console.log(`Image downloaded successfully to ${localFilePath}`);
             resolve(localFilePath);
         });
 
-        fileStream.on('error', (err) => {
-            console.error('Error saving the image locally:', err);
+        fileStream.on('error', (_) => {
             reject(new Error('Failed to save the image locally'));
         });
     });
 };
 
-export const uploadLocalImage = async (filePath, isPreview, projectId) => {
-    if (!fs.existsSync(filePath)) {
-        throw new Error('File does not exist');
-    }
-
-    const fileStream = fs.createReadStream(filePath);
-    const extensionName = pathModule.extname(filePath);
-    const contentType = mime.lookup(extensionName);
+export const uploadLocalImage = async (userId, projectId, buffer, isPreview) => {
     const objectId = new mongoose.Types.ObjectId();
-
-    const fileName = `${objectId}${extensionName}`;
-    
+    const fileName = `${objectId}.zip`;
     const bucketName = process.env.S3_TEMP_BUCKET
 
-    const metaData = {
-        'Content-Type': contentType,
-    };
-
-    await minioClient.putObject(bucketName, fileName, fileStream, metaData);
-    await minioClient.setObjectTagging(bucketName);
+    await minioClient.putObject(bucketName, fileName, buffer);
     const imageUrl = await minioClient.presignedGetObject(bucketName, fileName, 24 * 60 * 60);
 
     // save the result in the project
     if(!isPreview){
-        const project = await getProject(projectId);
-        project.result = {
+        const result = {
             output: imageUrl,
             expireDate:  Date.now()
         };
-        await updateProject(projectId, project);
+        await updateProject(userId, projectId, {result});
     }
     
-    return imageUrl;
+    return rewriteS3Url(imageUrl);
 };

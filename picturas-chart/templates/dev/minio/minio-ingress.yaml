@@ -4,6 +4,7 @@ metadata:
   name: minio
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/upstream-vhost: minio:9000
 spec:
   rules:
     - http:

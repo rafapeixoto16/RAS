@@ -11,7 +11,6 @@ RUN npm run build
 FROM nginx:stable-alpine
 
 COPY --from=build-stage /app/dist /usr/share/nginx/html
-COPY elements/ /usr/share/nginx/html
 COPY ./scripts/default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

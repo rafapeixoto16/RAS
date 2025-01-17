@@ -11,7 +11,10 @@ const port = 3000;
 
 // Default configs
 app.use(morgan('dev'));
-app.use(cors()); // TODO we might need to properly configure this
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ['GET', 'PUT', 'POST', 'DELETE']
+}));
 app.use(rateLimiterMiddleware);
 
 // Routers

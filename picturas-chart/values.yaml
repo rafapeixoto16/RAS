@@ -12,7 +12,7 @@ production:
     targetMemoryUtilizationPercentage: 80
 
 # General settings
-frontend_url: "http://localhost"
+frontend_url: "http://192.168.49.2"
 
 filters:
   - auto-adjust-filter
@@ -30,14 +30,15 @@ filters:
 #  - rotate-filter
 #  - saturation-filter
 #  - smart-crop-filter
-#  - watermark-filter
+  - watermark-filter
 
 # Miscellaneous
 auth_jwt_secret: "auth-secret"
 refresh_jwt_secret: "refresh-secret"
 validate_jwt_secret: "validate-secret"
 
-filter_output_queue: "filters-output"
+filter_output_exchange: "filters-exchange"
+filter_output_routing_key: "results"
 notification_queue: "notification-output"
 
 # Dependencies Configuration
@@ -153,9 +154,6 @@ subscriptions-ms-db:
 stripe_private_key: "stripe-private-key"
 stripe_webhook_secret: "stripe-webhook-key"
 
-# TODO
-#s3_endpoint: "http://localhost/minio" # static from dev
-#s3_port: 80 # static from dev
 s3_endpoint: "minio" # static from dev
 s3_port: 9000 # static from dev
 s3_username: "s3-username" # access
