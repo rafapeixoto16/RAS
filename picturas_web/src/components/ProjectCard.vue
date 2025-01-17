@@ -30,7 +30,7 @@
           <span class="text-xs sm:text-sm text-gray-500">{{ timeAgo(project.updatedAt) }}</span>
           <div v-if="isLargeScreen" class="relative">
             <button
-              @click.stop.prevent
+              @click.stop="(event) => { event.preventDefault(); event.stopPropagation(); }"
               class="px-2 py-1 sm:px-3 sm:py-1 bg-blue-500 text-white text-xs sm:text-sm rounded-full hover:bg-blue-600 transition-colors duration-300"
             >
               <i class="bi bi-three-dots"></i>

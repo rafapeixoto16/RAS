@@ -1,5 +1,5 @@
 <template>
-  <div :class="['relative', placement]" ref="triggerElement">
+  <div :class="['relative', placement, 'custom-dropdown']" ref="triggerElement">
     <span @click="toggleDropdown" class="cursor-pointer">
       <i v-if="isIcon" :class="trigger"></i>
       <span v-else>{{ trigger }}</span>
@@ -16,6 +16,7 @@
               v-for="option in options"
               :key="option.label"
               class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              @click.stop="handleOptionClick(option)"
             >
               <div
                 class="flex items-center gap-2"
@@ -38,6 +39,7 @@
             v-for="option in options"
             :key="option.label"
             class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            @click.stop="handleOptionClick(option)"
           >
             <a
               v-if="option.route"
@@ -98,7 +100,8 @@ const triggerElement = ref<HTMLElement | null>(null);
 const dropdownElement = ref<HTMLElement | null>(null);
 const dropdownStyle = ref({});
 
-const toggleDropdown = () => {
+const toggleDropdown = (event: Event) => {
+  event.stopPropagation();
   isOpen.value = !isOpen.value;
   if (isOpen.value && appendToBody) {
     updateDropdownPosition();
@@ -144,6 +147,15 @@ const handleClickOutside = (event: MouseEvent | TouchEvent) => {
   ) {
     isOpen.value = false;
   }
+};
+
+const handleOptionClick = (option: Option) => {
+  if (option.action && project) {
+    handleClick(option.action, project);
+  } else if (option.route) {
+    openInNewTab(option);
+  }
+  isOpen.value = false;
 };
 
 onMounted(() => {
