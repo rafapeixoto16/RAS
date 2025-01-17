@@ -188,7 +188,13 @@ const saveTitle = async () => {
   }
 };
 
-const pages = ref<Page[]>([{ id: 1, imageUrl: null }]);
+const pages = computed<Page[]>(() => {
+  return project.value?.images.map((image, index) => ({
+    id: index + 1,
+    imageUrl: image.imageUrl,
+  })) || [{ id: 1, imageUrl: null }];
+});
+
 const currentPage = ref(0);
 const imageTransform = reactive({
   scale: 1,

@@ -56,8 +56,6 @@ export const useProjectStore = defineStore('projectStore', {
 
     async createProject(projectData: { name: string }) {
       this.loading = true;
-      const authStore = useAuthStore();
-      console.log(authStore.accessToken);
       try {
         const newProject = await createProject(projectData);
         this.projects = [newProject, ...this.projects];
@@ -115,20 +113,20 @@ export const useProjectStore = defineStore('projectStore', {
     async addProjectImage(projectId: string, imageFile: File) {
       this.loading = true;
       try {
-        const { index, imageUrl } = await addImage(projectId, imageFile);
+        const { id, imageUrl } = await addImage(projectId, imageFile);
         const project = this.projects.find(p => p._id === projectId);
         if (project) {
-          project.images.push({ id: index.toString(), format: imageFile.type.split('/')[1] });
+          project.images.push({ id: id.toString(), imageUrl });
         }
         if (this.currentProject && this.currentProject._id === projectId) {
-          this.currentProject.images.push({ id: index.toString(), format: imageFile.type.split('/')[1] });
+          this.currentProject.images.push({ id: id.toString(), imageUrl });
         }
-        return { index, imageUrl };
+        return { id: id.toString(), imageUrl };
       } catch (error) {
-        this.error = error instanceof Error ? error.message : 'An error occurred while adding the image';
-        throw error;
+      this.error = error instanceof Error ? error.message : 'An error occurred while adding the image';
+      throw error;
       } finally {
-        this.loading = false;
+      this.loading = false;
       }
     },
 

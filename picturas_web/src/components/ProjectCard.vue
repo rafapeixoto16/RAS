@@ -7,8 +7,8 @@
       <div class="relative pb-[75%] sm:pb-2/3">
         <div v-if="project.images.length > 1" class="absolute h-full w-full grid grid-cols-2 gap-1">
           <img
-            v-for="(image, index) in project.images.slice(0, 4)"
-            :key="image.id"
+            v-for="(_, index) in project.images.slice(0, 4)"
+            :key="index"
             :src="imageUrls[index]"
             :alt="`Image ${index + 1} of ${project.name}`"
             class="object-cover w-full h-full"
@@ -81,7 +81,6 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Dropdown from './CustomDropdown.vue';
 import MobileProjectOptions from './MobileProjectOptions.vue';
 import { type Project } from '@/types/project';
-import { useProjectStore } from '@/stores/projectsStore';
 
 const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit", "restore", "remove-permanently"]);
 
@@ -93,14 +92,17 @@ const props = defineProps<{
 }>();
 
 const mode = props.mode;
-const projectStore = useProjectStore();
 
 // Reactive State
-const imageUrls = ref<string[]>([]);
+const imageUrls = computed(() => {
+  if (props.project.images && props.project.images.length > 0) {
+    return props.project.images.map(image => image.imageUrl);
+  }
+  return [];
+});
 const isLargeScreen = ref(window.innerWidth >= 1024);
 const activeMobileProjectId = ref<string | null>(null);
 
-// Methods
 const openMobileOptions = (projectId: string) => {
   activeMobileProjectId.value = projectId;
 };
@@ -109,7 +111,6 @@ const closeMobileOptions = () => {
   activeMobileProjectId.value = null;
 };
 
-// Handle Dropdown Options Based on Mode
 const getDropdownOptions = computed(() => {
   if (mode === 'default') {
     return [
@@ -137,17 +138,7 @@ const getDropdownOptions = computed(() => {
   }
   return [];
 });
-
-// Fetch image URLs
-Promise.all(props.project.images.map((_, index) => getImageUrl(props.project._id, index)))
-  .then(urls => {
-    imageUrls.value = urls;
-  })
-  .catch(error => {
-    console.error('Error fetching image URLs:', error);
-  });
   
-// Handle Screen Size Changes
 const updateScreenSize = () => {
   isLargeScreen.value = window.innerWidth >= 1024;
 };
@@ -172,9 +163,5 @@ const timeAgo = (date: Date) => {
   if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
   if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
   return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
-};
-
-const getImageUrl = (projectId: string, imageIndex: number) => {
-  return projectStore.getProjectImage(projectId, imageIndex);
 };
 </script>

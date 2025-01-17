@@ -1,6 +1,6 @@
 export interface Image {
     id: string;
-    format: string;
+    imageUrl: string;
   }
   
   export interface Project {
