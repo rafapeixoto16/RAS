@@ -9,4 +9,4 @@ venv
 # Miscelaneous
 .DS_Store
 
-keys.yaml
+values-production.yaml

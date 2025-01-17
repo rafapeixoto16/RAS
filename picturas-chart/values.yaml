@@ -153,6 +153,10 @@ subscriptions-ms-db:
 
 stripe_private_key: "stripe-private-key"
 stripe_webhook_secret: "stripe-webhook-key"
+# webhook:
+# - invoice.payment_succeeded
+# - invoice.payment_failed
+# - customer.subscription.deleted
 
 s3_endpoint: "minio" # static from dev
 s3_port: 9000 # static from dev
