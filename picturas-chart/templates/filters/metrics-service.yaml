@@ -1,0 +1,15 @@
+{{- range .Values.filters }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ . }}-metrics
+spec:
+  type: ClusterIP
+  ports:
+    - name: http-metrics
+      port: 9121
+      targetPort: 9121
+  selector:
+    name: {{ . }}
+{{- end }}

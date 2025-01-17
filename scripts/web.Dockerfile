@@ -25,6 +25,6 @@ RUN rm -rf /app
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY ./scripts/default.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80 9113
+EXPOSE 80 9121
 
-CMD ["sh", "-c", "nginx && nginx-prometheus-exporter --nginx.scrape-uri=http://127.0.0.1/nginx_status"]
+CMD ["sh", "-c", "nginx && nginx-prometheus-exporter --nginx.scrape-uri=http://127.0.0.1/nginx_status --web.listen-address ':9121'"]

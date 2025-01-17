@@ -11,7 +11,7 @@ const app = express();
 const port = 3000;
 
 // Default configs
-app.use(promMiddleware);
+app.use(promMiddleware());
 app.use(morgan('dev'));
 app.use(cors({
     origin: process.env.FRONTEND_URL,

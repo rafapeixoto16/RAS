@@ -17,6 +17,9 @@ spec:
     metadata:
       labels:
         name: {{ . }}
+      annotations:
+        prometheus.io/port: "9121"
+        prometheus.io/scrape: "true"
     spec:
       containers:
         - name: {{ . }}
@@ -43,17 +46,17 @@ spec:
               value: {{ $.Values.filter_output_routing_key }}
           ports:
             - containerPort: 3000
-            - containerPort: 9091
+            - containerPort: 9121
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 9091
+              port: 9121
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /readiness
-              port: 9091
+              port: 9121
             initialDelaySeconds: 5
             periodSeconds: 10
           volumeMounts:

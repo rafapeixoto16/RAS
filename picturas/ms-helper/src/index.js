@@ -4,7 +4,7 @@ import ResponseTime from 'response-time';
 
 // Prometheus & Kubernetes Probes
 
-const port = 9091;
+const port = 9121;
 const app = express();
 let isReady = false;
 const requestDurationBuckets = [0.1, 0.5, 1, 1.5];
@@ -13,15 +13,15 @@ export function promMiddleware() {
     const labels = ['route', 'method', 'status'];
 
     const requestCount = new Prometheus.Counter({
-        name: 'http_requests_total',
+        name: 'picturas_http_requests_total',
         help: 'Counter for total requests received',
-        labels,
+        labelNames: labels,
     });
     const requestDuration = new Prometheus.Histogram({
-        name: 'http_request_duration_seconds',
+        name: 'picturas_http_request_duration_seconds',
         help: 'Duration of HTTP requests in seconds',
-        labels,
-        requestDurationBuckets,
+        labelNames: labels,
+        buckets: requestDurationBuckets
     });
 
     const middleware = ResponseTime((req, res, time) => {
@@ -49,24 +49,24 @@ export function recordRabbitMQMetrics() {
     const labels = [];
 
     const requestCount = new Prometheus.Counter({
-        name: 'filter_requests_total',
+        name: 'picturas_filter_requests_total',
         help: 'Counter for total requests received',
-        labels,
+        labelNames: labels,
     });
     const successCount = new Prometheus.Counter({
-        name: 'filter_success_total',
+        name: 'picturas_filter_success_total',
         help: 'Counter for successful Filter processing',
-        labels,
+        labelNames: labels,
     });
     const failCount = new Prometheus.Counter({
-        name: 'filter_fail_total',
+        name: 'picturas_filter_fail_total',
         help: 'Counter for failed Filter processing',
-        labels,
+        labelNames: labels,
     });
     const filterDuration = new Prometheus.Histogram({
-        name: 'filter_duration_seconds',
+        name: 'picturas_filter_duration_seconds',
         help: 'Duration of Filter processing in seconds',
-        labels,
+        labelNames: labels,
         buckets: requestDurationBuckets,
     });
 

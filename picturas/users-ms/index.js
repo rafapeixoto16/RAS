@@ -37,7 +37,7 @@ setupBucket().then(() => {
 });
 
 // Default configs
-app.use(promMiddleware);
+app.use(promMiddleware());
 app.use(morgan('dev'));
 app.use(express.json());
 

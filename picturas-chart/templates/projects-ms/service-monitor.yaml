@@ -1,0 +1,13 @@
+{{- if .Values.production.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: projects-ms
+spec:
+  endpoints:
+    - port: http-metrics
+      interval: 30s
+  selector:
+    matchLabels:
+      name: projects-ms-metrics
+{{- end }}

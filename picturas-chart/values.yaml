@@ -177,6 +177,8 @@ kube-prometheus:
 grafana:
   admin:
     password: admin
+  persistence:
+    enabled: false
   datasources:
     secretDefinition:
       apiVersion: 1
@@ -216,6 +218,15 @@ grafana-loki:
   fullnameOverride: grafana-loki
   promtail:
     enabled: true
+  ingester:
+    persistence:
+      enabled: false
+  querier:
+    persistence:
+      enabled: false
+  compactor:
+    persistence:
+      enabled: false
   metrics:
     enabled: true
     serviceMonitor:
