@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 import projectRouter from './routes/projects.js';
 import {setupBucket} from "./config/minioClient.js";
-import {requiresAuth, useGatewayAuth} from "@picturas/ms-helper";
+import {promMiddleware, requiresAuth, useGatewayAuth} from "@picturas/ms-helper";
 import {getLimitsMiddleware, isPremiumMiddleware} from "./utils/premium.js";
 import { connectToRabbitMQ } from './utils/filterCall.js'
 import {serverIsReady, startPLServer} from "@picturas/ms-helper";
@@ -44,6 +44,7 @@ connectToRabbitMQ().then(() => {
 });
 
 // Default configs
+app.use(promMiddleware);
 app.use(morgan('dev'));
 app.use(express.json());
 

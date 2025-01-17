@@ -4,7 +4,7 @@ import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import usersRouter from './routes/users.js';
-import {useGatewayAuth} from "@picturas/ms-helper";
+import {promMiddleware, useGatewayAuth} from "@picturas/ms-helper";
 import {setupBucket} from "./config/minioClient.js";
 import {serverIsReady, startPLServer} from "@picturas/ms-helper";
 
@@ -37,6 +37,7 @@ setupBucket().then(() => {
 });
 
 // Default configs
+app.use(promMiddleware);
 app.use(morgan('dev'));
 app.use(express.json());
 

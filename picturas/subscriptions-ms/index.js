@@ -4,7 +4,7 @@ import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import subscriptionsRouter from './routes/subscriptions.js';
-import {useGatewayAuth} from "@picturas/ms-helper";
+import {promMiddleware, useGatewayAuth} from "@picturas/ms-helper";
 import {initStripe} from "./config/stripe.js";
 import {serverIsReady, startPLServer} from "@picturas/ms-helper";
 
@@ -38,6 +38,7 @@ initStripe().then(() => {
 });
 
 // Default configs
+app.use(promMiddleware);
 app.use(morgan('dev'));
 app.use(express.json({
     verify: (req, res, buf, _) => {

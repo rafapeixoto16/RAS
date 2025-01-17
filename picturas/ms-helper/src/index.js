@@ -7,8 +7,9 @@ import ResponseTime from 'response-time';
 const port = 9091;
 const app = express();
 let isReady = false;
+const requestDurationBuckets = [0.1, 0.5, 1, 1.5];
 
-export function promMiddleware(requestDurationBuckets = [0.1, 0.5, 1, 1.5]) {
+export function promMiddleware() {
     const labels = ['route', 'method', 'status'];
 
     const requestCount = new Prometheus.Counter({
@@ -29,21 +30,61 @@ export function promMiddleware(requestDurationBuckets = [0.1, 0.5, 1, 1.5]) {
             method,
         } = req;
         const status = `${Math.floor(res.statusCode / 100)}XX`;
-        const labels = {
+        const labelsDef = {
             route: originalUrl,
             method,
             status,
         };
 
-        requestCount.inc(labels);
-        requestDuration.observe(labels, time / 1000);
+        requestCount.inc(labelsDef);
+        requestDuration.observe(labelsDef, time / 1000);
     });
 
-    Prometheus.collectDefaultMetrics({
-        prefix: options.prefix,
-    });
+    Prometheus.collectDefaultMetrics();
 
     return middleware;
+}
+
+export function recordRabbitMQMetrics() {
+    const labels = [];
+
+    const requestCount = new Prometheus.Counter({
+        name: 'filter_requests_total',
+        help: 'Counter for total requests received',
+        labels,
+    });
+    const successCount = new Prometheus.Counter({
+        name: 'filter_success_total',
+        help: 'Counter for successful Filter processing',
+        labels,
+    });
+    const failCount = new Prometheus.Counter({
+        name: 'filter_fail_total',
+        help: 'Counter for failed Filter processing',
+        labels,
+    });
+    const filterDuration = new Prometheus.Histogram({
+        name: 'filter_duration_seconds',
+        help: 'Duration of Filter processing in seconds',
+        labels,
+        buckets: requestDurationBuckets,
+    });
+
+    Prometheus.collectDefaultMetrics();
+
+    return function processMetrics({ success, duration }) {
+        requestCount.inc();
+
+        if (success) {
+            successCount.inc();
+        } else {
+            failCount.inc();
+        }
+
+        if (typeof duration === 'number') {
+            filterDuration.observe(duration);
+        }
+    };
 }
 
 export function serverIsReady() {
