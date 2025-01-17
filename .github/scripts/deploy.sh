@@ -16,7 +16,7 @@ ssh -o StrictHostKeyChecking=no -f -N -L 6443:127.0.0.1:6443 $SSH_USER@$SSH_HOST
 sleep 5
 
 # Configure docker
-docker context create server-remote --docker "host=ssh://$SSH_USER@$SSH_HOST:$SSH_PORT"
+docker context create server-remote --docker "host=ssh://$SSH_USER@$SSH_HOST:$SSH_PORT" --docker "ssh.key=private_key"
 docker context use server-remote
 
 # Config Kubernetes
