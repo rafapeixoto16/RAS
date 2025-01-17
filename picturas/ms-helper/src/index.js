@@ -101,11 +101,6 @@ app.get('/healthz', (req, res) => {
         .send('I am healthy');
 });
 
-app.get('/liveness', (req, res) => {
-    res.status(200)
-        .send('I am alive');
-});
-
 app.get('/readiness', (req, res) => {
     if (isReady) {
         res.status(200).send('I am ready.');

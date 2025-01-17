@@ -5,6 +5,11 @@ kind: Deployment
 metadata:
   name: {{ . }}
 spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       name: {{ . }}
@@ -38,6 +43,19 @@ spec:
               value: {{ $.Values.filter_output_routing_key }}
           ports:
             - containerPort: 3000
+            - containerPort: 9091
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9091
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 9091
+            initialDelaySeconds: 5
+            periodSeconds: 10
           volumeMounts:
             - mountPath: {{ $.Values.filter_shared_dir }}
               name: nfs-volume
