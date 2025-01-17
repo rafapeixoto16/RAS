@@ -10,8 +10,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Checkout Submodules
-        uses: textbook/git-checkout-submodule-action@master
+
+      - name: Update submodules
+        run: |
+          git submodule init
+          git submodule update
 
       - name: Write production values to values-production.yaml
         run: |
