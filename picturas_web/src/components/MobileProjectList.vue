@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full">
+  <div class="w-full bg-blue-50">
     <div
       v-for="project in visibleProjects"
       :key="project.id"
@@ -61,7 +61,7 @@ const props = defineProps<{
   projects: Project[];
 }>();
 
-const emit = defineEmits<{
+defineEmits<{
   (e: "close-menu"): void;
 }>();
 

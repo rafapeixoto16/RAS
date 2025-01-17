@@ -2,8 +2,9 @@
   <div class="flex h-screen">
     <div
       class="fixed left-0 flex flex-col w-1/6 h-full bg-azure-radiance-100 text-gray-700 border-r border-gray-200 shadow-lg">
-      <router-link class="flex items-center justify-center px-8 py-4 w-full" to="/">
-        <h1 class="text-3xl xl:text-5xl font-bold text-gray-900" style="font-family: 'Caveat', cursive;">
+      <router-link class="flex items-center justify-center px-8 py-4 w-full" to="/dashboard">
+        <h1
+          class="text-3xl xl:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-purple-600 font-caveat px-4 py-2">
           Picturas
         </h1>
       </router-link>
@@ -14,25 +15,25 @@
           <i class="bi bi-plus mr-2 fs-5 text-[20px]"></i>
           Create a Project
         </router-link>
-        <a href="#"
-          class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
+        <button
+          class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-500 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
           @click="openPremiumModal">
           <i class="bi bi-gem mr-2"></i>
-          Try Pro for 30 days
-        </a>
+          Try Premium for 30 days
+        </button>
       </div>
       <div class="flex flex-col items-start mt-8 px-4 space-y-2 flex-grow overflow-y-auto">
         <h2 class="text-sm font-semibold">Projects</h2>
         <div class="flex flex-col w-full relative">
           <div v-for="project in visibleProjects" :key="project.title" class="relative group w-full">
-            <router-link class="block p-4 rounded w-full hover:bg-azure-radiance-50" :to="'project' + project.id">
+            <router-link class="block p-4 rounded w-full" :to="'project' + project.id">
               {{ project.title }}
             </router-link>
             <div
               class="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <Dropdown placement="right" trigger="..." :isSidebar="true" :project="project"
                 :options="getDropdownOptions(project)" @open-new-tab="openInNewTab" @rename="renameProject"
-                @move-to-trash="moveToTrash" append-to-body />
+                @move-to-trash="moveToTrash" append-to-body class="bg-blue-50"/>
             </div>
           </div>
           <button v-if="showSeeAllButton" @click="toggleSeeAll" class="mt-2 text-[#3B82F6] hover:underline">
@@ -42,7 +43,7 @@
       </div>
       <div class="px-4 py-2 border-t border-gray-200">
         <router-link
-          class="flex items-center px-4 py-3 w-full bg-azure-radiance-100 text-sm xl:text-base text-gray-500 font-bold hover:bg-gray-500 hover:text-azure-radiance-100 rounded-xl"
+          class="flex items-center px-4 py-3 w-full bg-blue-50 text-sm xl:text-base text-gray-500 font-semibold hover:text-gray-600"
           to="/trash">
           <i class="bi bi-trash mr-2"></i>
           Trash
@@ -198,6 +199,8 @@ const openPremiumModal = () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+
 .flex-grow {
   flex-grow: 1;
 }
@@ -223,5 +226,9 @@ const openPremiumModal = () => {
 .overflow-y-auto {
   scrollbar-width: thin;
   scrollbar-color: #3B82F6 #F5F7FA;
+}
+
+.font-caveat {
+  font-family: 'Caveat', sans-serif;
 }
 </style>

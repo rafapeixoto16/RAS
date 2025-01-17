@@ -98,11 +98,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { login, loginSecondFactor } from '@/api';
+import { getUserInfo, login, loginSecondFactor } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
+import { useUserStore } from '@/stores/userStore';
 import { loginGuest } from '@/api/mutations/login';
 
 const authStore = useAuthStore()
+const userStore = useUserStore()
 const router = useRouter();
 const email = ref('');
 const password = ref('');
@@ -125,6 +127,8 @@ const handleLogin = async () => {
     } else {
       const finalResponse = await loginSecondFactor(response.validationToken);
       authStore.setTokens(finalResponse.accessToken, finalResponse.refreshToken);
+      const { username, email, profilePic } = await getUserInfo()
+      userStore.setUser({username: username, email: email, avatarUrl: profilePic})
       router.push('/dashboard');
     }
   } catch (error) {
