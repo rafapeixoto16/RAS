@@ -4,7 +4,7 @@ fullnameOverride: ""
 
 # Production Settings
 production:
-  enabled: false
+  enabled: true
   autoscaling:
     minReplicas: 2
     maxReplicas: 10

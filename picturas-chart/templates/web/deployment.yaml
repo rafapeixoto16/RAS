@@ -15,9 +15,6 @@ spec:
     metadata:
       labels:
         name: web
-      annotations:
-        prometheus.io/port: "9121"
-        prometheus.io/scrape: "true"
     spec:
       containers:
         - name: web
