@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col h-screen bg-gray-100">
-    <header class="bg-white shadow-sm z-10">
+    <header class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
           <div class="w-full sm:w-auto">

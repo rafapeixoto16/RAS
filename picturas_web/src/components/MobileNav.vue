@@ -2,7 +2,7 @@
   <div>
     <!-- Mobile Header -->
     <div
-      class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden z-20"
+      class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden z-50"
     >
       <router-link
         to="/dashboard" 
@@ -47,7 +47,7 @@
 
     <!-- Mobile Menu -->
     <div
-      class="fixed inset-0 bg-black bg-opacity-50 z-10 transition-opacity duration-300 md:hidden"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden"
       :class="{
         'opacity-0 pointer-events-none': !isOpen,
         'opacity-100': isOpen,

@@ -1,6 +1,6 @@
 <template>
     <Transition name="drawer">
-      <div v-if="modelValue" class="fixed inset-0 z-50" @click.self="close">
+      <div v-if="modelValue" class="fixed inset-0 z-20" @click.self="close">
         <div class="absolute inset-0 bg-black bg-opacity-25" />
         <div 
           class="absolute bottom-0 left-0 right-0 bg-white rounded-t-xl shadow-lg"

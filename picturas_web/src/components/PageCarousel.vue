@@ -19,7 +19,7 @@
     <button 
       v-if="modelValue > 0"
       @click="prev" 
-      class="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg text-gray-700 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 z-10"
+      class="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg text-gray-700 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
     >
       <i class="bi bi-chevron-left text-lg sm:text-xl"></i>
     </button>
@@ -27,7 +27,7 @@
     <button 
       v-if="modelValue < items.length - 1"
       @click="next" 
-      class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg text-gray-700 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 z-10"
+      class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg text-gray-700 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
     >
       <i class="bi bi-chevron-right text-lg sm:text-xl"></i>
     </button>
@@ -35,12 +35,12 @@
     <button 
       v-if="modelValue === items.length - 1 && canAddPage"
       @click="$emit('add-page')" 
-      class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg text-gray-700 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 z-10"
+      class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg text-gray-700 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
     >
       <i class="bi bi-plus text-lg sm:text-xl"></i>
     </button>
 
-    <div class="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+    <div class="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
       <button
         v-for="(_, index) in items"
         :key="index"
