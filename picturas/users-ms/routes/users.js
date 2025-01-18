@@ -12,6 +12,7 @@ import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
 import {schemaValidation, validateRequest} from '@picturas/schema-validation';
 import {requiresAuth, requiresNonGuest} from "@picturas/ms-helper";
+import {deleteSubcriptionByUserId, getSubcriptionById} from '@picturas/subscriptions/controller/subscriptions.js';
 
 const SALT_WORK_FACTOR = 10;
 
@@ -363,19 +364,6 @@ router.post('/token', validateRequest({
     });
 });
 
-router.put('/:id/recover', async (req, res) => {
-    const userId = req.params.id;
-    try {
-        const user = await User.recoverUser(userId);  
-        res.status(200).json({ 
-            message: 'User account recovered successfully.',
-            user: { _id: userId, deletedAt: user.deletedAt }
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // Requires Auth from now on
 router.use(requiresAuth);
 router.use(requiresNonGuest);
@@ -564,24 +552,31 @@ router.put(
 
 router.delete('/softDelete', async (req, res) => {
     const userId = req.user._id; 
-    const user = await User.softDeleteUser(userId); 
 
-    User.getUser(req.user._id).then(userInfo => {
-        if (!userInfo) return res.sendStatus(404);
+    // cancelar subscriacao
+    const stripsub = await getSubcriptionById(userId);
+    if (stripsub) {
+        await deleteSubcriptionByUserId(userId);
+    }
 
-        userInfo.refresh = null;
+    // logout
+    const userInfo = await User.getUser(userId);
+    if (!userInfo) {
+        return res.sendStatus(404);
+    }
 
-        User.updateUser(userInfo._id, userInfo)
-            .then((resp) => res.status(200).json(
-                {
-                    message: 'User marked for deletion. Recoverable within 30 days.', 
-                    user: { _id: userInfo._id, deletedAt: user.deletedAt } 
-                }))
-            .catch((err) => res.sendStatus(400));
-    })
-        .catch((err) => res.sendStatus(400));
+    userInfo.refresh = null;
+
+    await User.updateUser(userInfo._id, userInfo);
+
+    // delete do user
+    await User.deleteUser(userId);
+
+    res.status(200).json({
+        message: 'User deleted.',
+        userId: userInfo._id
+    });
 });
-
 
 
 export default router;
