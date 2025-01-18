@@ -98,10 +98,6 @@ const emit = defineEmits(['apply', 'cancel']);
 const toolValues = ref<Record<string, unknown>>({});
 
 onMounted(() => {
-  console.log('DynamicToolMenu mounted');
-  console.log('Tool Name:', props.toolName);
-  console.log('Tool Options:', props.toolOptions);
-  
   for (const [key, option] of Object.entries(props.toolOptions)) {
     toolValues.value[key] = option.default ?? getDefaultValue(option.type);
   }
@@ -122,7 +118,7 @@ const formatOptionName = (name: string) => {
 
 const apply = () => {
   console.log('Applying tool:', props.toolName, 'with values:', toolValues.value);
-  emit('apply', { name: props.toolName, args: toolValues.value });
+  emit('apply', { filterName: props.toolName, args: toolValues.value });
 };
 
 const cancel = () => {

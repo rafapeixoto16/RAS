@@ -17,6 +17,7 @@
     "@stripe/stripe-js": "^5.5.0",
     "axios": "^1.7.9",
     "bootstrap-icons": "^1.11.3",
+    "draggable": "^4.2.0",
     "flowbite": "^2.5.2",
     "flowbite-vue": "^0.1.6",
     "jszip": "^3.10.1",
@@ -28,7 +29,7 @@
     "qrcode.vue": "^3.6.0",
     "vue": "^3.5.13",
     "vue-router": "^4.4.5",
-    "vuedraggable": "^2.24.3"
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",

@@ -9,7 +9,7 @@ import { reorderImage } from '@/api/mutations/reorderImage';
 import { removeImage } from '@/api/mutations/removeImage';
 import type { Project, FilterParameters } from '@/types/project';
 import { useAuthStore } from './authStore';
-import { getFiltersParemeters } from '@/api';
+import { getFiltersParemeters, addTool, removeTool, reorderTool } from '@/api';
 
 interface ProjectState {
   projects: Project[];
@@ -170,6 +170,68 @@ export const useProjectStore = defineStore('projectStore', {
         this.filterParameters = await getFiltersParemeters(useAuthStore().accessToken ?? '');
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while fetching filter parameters';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async addProjectTool(projectId: string, toolData: { filterName: string; args: Record<string, unknown> }) {
+      this.loading = true;
+      try {
+        const { index } = await addTool(projectId, toolData, useAuthStore().accessToken ?? '');
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          project.tools.push({ ...toolData });
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          this.currentProject.tools.push({ ...toolData });
+        }
+        return index;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while adding the tool';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async removeProjectTool(projectId: string, toolIndex: number) {
+      this.loading = true;
+      try {
+        const { removedTool } = await removeTool(projectId, toolIndex, useAuthStore().accessToken ?? '');
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          project.tools = project.tools.filter((_, index) => index !== toolIndex);
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          this.currentProject.tools = this.currentProject.tools.filter((_, index) => index !== toolIndex);
+        }
+        return removedTool;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while removing the tool';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async reorderProjectTool(projectId: string, oldIndex: number, newIndex: number) {
+      this.loading = true;
+      try {
+        const { reorderedTool, toolIdx } = await reorderTool(projectId, oldIndex, newIndex, useAuthStore().accessToken ?? '');
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          const [removedTool] = project.tools.splice(oldIndex, 1);
+          project.tools.splice(newIndex, 0, removedTool);
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          const [removedTool] = this.currentProject.tools.splice(oldIndex, 1);
+          this.currentProject.tools.splice(newIndex, 0, removedTool);
+        }
+        return { reorderedTool, toolIdx };
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while reordering the tool';
+        throw error;
       } finally {
         this.loading = false;
       }

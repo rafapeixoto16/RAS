@@ -153,6 +153,17 @@
         </div>
       </main>
 
+      <aside class="w-full md:w-72 bg-white border-l border-gray-200 overflow-y-auto flex-shrink-0">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold mb-4">Applied Tools</h3>
+          <ReorderableList
+            v-model="appliedTools"
+            :projectId="projectId"
+            @remove="removeTool"
+          />
+        </div>
+      </aside>
+
       <button 
         @click="isToolDrawerOpen = true"
         class="md:hidden fixed right-4 bottom-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors duration-200 z-20"
@@ -231,6 +242,7 @@ import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
 import DynamicToolMenu from '@/components/DynamicToolMenu.vue';
 import BottomDrawer from '@/components/BottomDrawer.vue';
+import ReorderableList from '@/components/ReordableList.vue';
 import type { Tool } from '@/types/project';
 
 interface Page {
@@ -261,6 +273,8 @@ let isPanning = false;
 let startX = 0;
 let startY = 0;
 let lastPinchDistance: number | null = null;
+const isToolDrawerOpen = ref(false);
+const appliedTools = computed(() => project.value ? project.value.tools : []);
 
 onMounted(async () => {
   if (project.value) {
@@ -455,17 +469,22 @@ const downloadCurrentImage = () => {
 };
 
 const selectTool = (toolName: string) => {
-  console.log('Selecting tool:', toolName);
   if (activeTool.value === toolName) {
     activeTool.value = null;
   } else {
     activeTool.value = toolName;
-    isToolDrawerOpen.value = false; // Added to close drawer on mobile after tool selection
+    isToolDrawerOpen.value = false;
   }
 };
 
-const applyTool = (tool: Tool) => {
-  console.log(`Applying ${tool.filterName} with args:`, tool.args);
+const applyTool = async (tool: Tool) => {
+  if (project.value) {
+    try {
+      await projectStore.addProjectTool(project.value._id, tool);
+    } catch (error) {
+      console.error('Error applying tool:', error);
+    }
+  }
   activeTool.value = null;
 };
 
@@ -474,7 +493,7 @@ const cancelTool = () => {
 };
 
 const getToolMenuPosition = (toolName: string): 'top' | 'center' | 'bottom' => {
-  const allTools = [...basicTools.value, ...premiumTools.value];
+  const allTools = [...(basicTools.value || []), ...(premiumTools.value || [])];
   const index = allTools.findIndex(tool => tool === toolName);
   const totalTools = allTools.length;
 
@@ -562,11 +581,29 @@ watch(currentPage, (newPage) => {
   }
 });
 
-watch(activeTool, (newValue) => {
-  console.log('Active tool changed:', newValue);
-});
+const removeTool = async (index: number) => {
+  if (project.value) {
+    try {
+      await projectStore.removeProjectTool(project.value._id, index);
+    } catch (error) {
+      console.error('Error removing tool:', error);
+    }
+  }
+};
 
-const isToolDrawerOpen = ref(false);
+
+watch(project, (newProject) => {
+  if (newProject) {
+    projectTitle.value = newProject.name;
+    pages.value = newProject.images.map((image, index) => ({
+      id: index,
+      imageUrl: image.imageUrl,
+    }));
+    if (pages.value.length === 0) {
+      pages.value.push({ id: 0, imageUrl: null });
+    }
+  }
+}, { immediate: true });
 </script>
 
 <style scoped>
