@@ -7,17 +7,17 @@
       <div class="relative pb-[75%] sm:pb-2/3">
         <div v-if="project.images.length > 1" class="absolute h-full w-full grid grid-cols-2 gap-1">
           <img
-            v-for="(_, index) in project.images.slice(0, 4)"
-            :key="index"
-            :src="imageUrls[index]"
-            :alt="`Image ${index + 1} of ${project.name}`"
+            v-for="image in project.images.slice(0, 4)"
+            :key="image.id"
+            :src="image.imageUrl"
+            :alt="`Image ${image.id} of ${project.name}`"
             class="object-cover w-full h-full"
           />
         </div>
         <img
           v-else-if="project.images.length === 1"
-          :src="imageUrls[0]"
-          :alt="project.name"
+          :src="project.images[0].imageUrl"
+          :alt="`Image ${project.images[0].id} of ${project.name}`"
           class="absolute h-full w-full object-cover"
         />
         <div v-else class="absolute h-full w-full bg-gray-200 flex items-center justify-center">
@@ -93,13 +93,6 @@ const props = defineProps<{
 
 const mode = props.mode;
 
-// Reactive State
-const imageUrls = computed(() => {
-  if (props.project.images && props.project.images.length > 0) {
-    return props.project.images.map(image => image.imageUrl);
-  }
-  return [];
-});
 const isLargeScreen = ref(window.innerWidth >= 1024);
 const activeMobileProjectId = ref<string | null>(null);
 

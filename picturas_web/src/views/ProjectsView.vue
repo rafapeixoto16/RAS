@@ -8,7 +8,8 @@
               <input 
                 v-model="projectTitle" 
                 @keyup.enter="saveTitle" 
-                class="text-xl md:text-2xl font-bold text-gray-900 px-2 focus:outline-none"
+                @blur="saveTitle" 
+                class="text-xl md:text-2xl font-bold text-gray-900 bg-gray-100 px-2 border-b border-gray-300 focus:outline-none"
                 autofocus
               />
             </template>
@@ -141,13 +142,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
 import type { Tool } from '@/components/ToolButton.vue';
 import { useProjectStore } from '@/stores/projectsStore';
-import { useRoute } from 'vue-router';
-
 
 interface Page {
   id: number;
@@ -159,11 +159,35 @@ const projectStore = useProjectStore();
 
 const projectId = computed<string>(() => route.params.id as string);
 const project = computed(() => projectStore.getProjectById(projectId.value));
-const projectTitle = ref("");
+
 const isGridView = ref(false);
+const projectTitle = ref("");
+const isEditingTitle = ref(false);
+const pages = ref<Page[]>([]);
+const currentPage = ref(0);
+
+const imageTransform = reactive({
+  scale: 1,
+  translateX: 0,
+  translateY: 0,
+});
+
+let isPanning = false;
+let startX = 0;
+let startY = 0;
+let lastPinchDistance: number | null = null;
 
 onMounted(async () => {
-  projectTitle.value = project.value?.name || "";
+  if (project.value) {
+    projectTitle.value = project.value.name;
+    pages.value = project.value.images.map((image, index) => ({
+      id: index,
+      imageUrl: image.imageUrl,
+    }));
+    if (pages.value.length === 0) {
+      pages.value.push({ id: 0, imageUrl: null });
+    }
+  }
 });
 
 const toggleGridView = () => {
@@ -175,8 +199,6 @@ const goToImage = (index: number) => {
   isGridView.value = false;   
 };
 
-const isEditingTitle = ref(false);
-
 const editTitle = () => {
   isEditingTitle.value = true;
 };
@@ -187,24 +209,6 @@ const saveTitle = async () => {
     await projectStore.updateProject(project.value._id, { name: projectTitle.value });
   }
 };
-
-const pages = computed<Page[]>(() => {
-  return project.value?.images.map((image, index) => ({
-    id: index + 1,
-    imageUrl: image.imageUrl,
-  })) || [{ id: 1, imageUrl: null }];
-});
-
-const currentPage = ref(0);
-const imageTransform = reactive({
-  scale: 1,
-  translateX: 0,
-  translateY: 0,
-});
-let isPanning = false;
-let startX = 0;
-let startY = 0;
-let lastPinchDistance: number | null = null;
 
 const imageStyle = computed(() => {
   return {
@@ -252,18 +256,24 @@ const onDragLeave = (event: DragEvent | TouchEvent) => {
   }
 };
 
-const onDrop = (index: number, event: DragEvent | TouchEvent) => {
+const onDrop = async (index: number, event: DragEvent | TouchEvent) => {
   if (event instanceof TouchEvent) {
     event.preventDefault(); 
   }
   
-  if (draggedIndex === null || draggedIndex === index) return;
-  const draggedItem = pages.value[draggedIndex];
-  pages.value.splice(draggedIndex, 1);
-  pages.value.splice(index, 0, draggedItem);
+  if (draggedIndex === null || draggedIndex === index || !project.value) return;
+  
+  try {
+    await projectStore.reorderProjectImage(project.value._id, draggedIndex, index);
+    const draggedItem = pages.value[draggedIndex];
+    pages.value.splice(draggedIndex, 1);
+    pages.value.splice(index, 0, draggedItem);
+  } catch (error) {
+    console.error('Error reordering image:', error);
+  }
+  
   draggedIndex = null;
 };
-
 
 const tools: Tool[] = [
   { 
@@ -318,36 +328,36 @@ const handleFilesDropped = async (files: File[]) => {
   
   if (imageFiles.length === 0 || !project.value) return;
 
-  const newPages = await Promise.all(imageFiles.map(async (file) => ({
-    id: Date.now() + Math.random(),
-    imageUrl: URL.createObjectURL(file)
-  })));
-
   for (const file of imageFiles) {
-    await projectStore.addProjectImage(project.value._id, file);
-  }
-
-  if (pages.value[currentPage.value].imageUrl === null) {
-    pages.value.splice(currentPage.value, 1, newPages[0]);
-    if (newPages.length > 1) {
-      pages.value.push(...newPages.slice(1));
+    try {
+      const { id, imageUrl } = await projectStore.addProjectImage(project.value._id, file);
+      if (pages.value[currentPage.value].imageUrl === null) {
+        pages.value[currentPage.value] = { id, imageUrl };
+      } else {
+        pages.value.push({ id, imageUrl });
+      }
+    } catch (error) {
+      console.error('Error adding image:', error);
     }
-  } else {
-    pages.value.push(...newPages);
   }
 
-  currentPage.value = pages.value.indexOf(newPages[0]);
+  currentPage.value = pages.value.length - imageFiles.length;
 };
 
 const deleteCurrentPage = async () => {
-  if (project.value && project.value.images.length > 0) {
-    await projectStore.removeProjectImage(project.value._id, currentPage.value);
-    pages.value.splice(currentPage.value, 1);
-    if (currentPage.value >= pages.value.length) {
-      currentPage.value = pages.value.length - 1;
+  if (project.value && pages.value.length > 0) {
+    try {
+      await projectStore.removeProjectImage(project.value._id, currentPage.value);
+      pages.value.splice(currentPage.value, 1);
+      if (pages.value.length === 0) {
+        pages.value.push({ id: 0, imageUrl: null });
+      }
+      if (currentPage.value >= pages.value.length) {
+        currentPage.value = Math.max(0, pages.value.length - 1);
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
     }
-  } else {
-    pages.value[0].imageUrl = null;
   }
 };
 
@@ -455,10 +465,17 @@ const zoomImage = (event: WheelEvent | TouchEvent) => {
     lastPinchDistance = dist;
   }
 };
+
+watch(currentPage, (newPage) => {
+  if (newPage < 0) {
+    currentPage.value = 0;
+  } else if (newPage >= pages.value.length) {
+    currentPage.value = pages.value.length - 1;
+  }
+});
 </script>
 
 <style scoped>
-
 @media (max-width: 768px) {
   .md\:w-20 {
     width: 100%;

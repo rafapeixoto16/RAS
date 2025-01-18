@@ -33,6 +33,15 @@ export const useProjectStore = defineStore('projectStore', {
         const authStore = useAuthStore();
         if (authStore.accessToken) {
           this.projects = await getProjects(authStore.accessToken);
+          console.log(this.projects)
+            for (const project of this.projects) {
+            const imagesUrls = [];
+            for (let index = 0; index < project.images.length; index++) {
+              const imageUrl = await getImage(project._id, index);
+              imagesUrls.push({ id: index, imageUrl });
+            }
+            project.images = imagesUrls;
+            }
         } else {
           throw new Error('Access token is null');
         }
@@ -116,12 +125,12 @@ export const useProjectStore = defineStore('projectStore', {
         const { id, imageUrl } = await addImage(projectId, imageFile);
         const project = this.projects.find(p => p._id === projectId);
         if (project) {
-          project.images.push({ id: id.toString(), imageUrl });
+          project.images.push({ id: id, imageUrl });
         }
         if (this.currentProject && this.currentProject._id === projectId) {
-          this.currentProject.images.push({ id: id.toString(), imageUrl });
+          this.currentProject.images.push({ id: id, imageUrl });
         }
-        return { id: id.toString(), imageUrl };
+        return { id: id, imageUrl };
       } catch (error) {
       this.error = error instanceof Error ? error.message : 'An error occurred while adding the image';
       throw error;

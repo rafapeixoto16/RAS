@@ -96,12 +96,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick, computed } from 'vue'
+import { ref, watch, onMounted, nextTick, computed, onUnmounted } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { CreditCard, Loader2, CheckIcon, XIcon } from 'lucide-vue-next'
 import { subscribe } from '@/api/mutations/subscriptions'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
-import { loadStripe, type Stripe, type StripeElements } from '@stripe/stripe-js'
+import { loadStripe, type Stripe, type StripeCardElement, type StripeElements } from '@stripe/stripe-js'
 
 const props = defineProps<{
   isOpen: boolean
@@ -120,6 +120,7 @@ const message = ref('')
 const subscriptionStore = useSubscriptionStore()
 const stripe = ref<Stripe | null>(null)
 const elements = ref<StripeElements | null>(null)
+const cardElementInstance = ref<StripeCardElement | null>(null)
 const cardElement = ref<HTMLElement | null>(null)
 
 const initializeStripe = async () => {
@@ -132,10 +133,10 @@ const initializeStripe = async () => {
   }
 
   await nextTick()
-  
+
   if (cardElement.value && elements.value) {
-    const cardElementInstance = elements.value.create('card')
-    cardElementInstance.mount(cardElement.value)
+    cardElementInstance.value = elements.value.create('card')
+    cardElementInstance.value.mount(cardElement.value)
   } else {
     console.error('Card element or Stripe Elements not available')
   }
@@ -144,6 +145,18 @@ const initializeStripe = async () => {
 onMounted(() => {
   if (props.isOpen) {
     initializeStripe()
+  }
+})
+
+onUnmounted(() => {
+  if (elements.value) {
+    cardElementInstance.value?.unmount();
+    cardElementInstance.value?.destroy();
+    elements.value = null
+  }
+
+  if (stripe.value) {
+    stripe.value = null
   }
 })
 

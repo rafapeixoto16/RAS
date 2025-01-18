@@ -19,3 +19,4 @@ export * from './queries/getImage';
 export * from './mutations/addImage';
 export * from './mutations/reorderImage';
 export * from './mutations/removeImage';
+export * from './queries/getFiltersParemeters';
