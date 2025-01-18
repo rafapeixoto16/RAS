@@ -1,38 +1,32 @@
 import { Router } from 'express';
 import {
-    updateProject,
-    addProject,
-    getProjects,
-    deleteProject,
-    getProject,
-    addTool,
-    removeTool,
-    reorderTool,
     addImage,
-    getImage,
-    removeImage,
+    addProject,
+    addTool,
+    deleteProject,
     downloadImageLocally,
-    uploadLocalImage,
-    objectIdSchema,
     filterProject,
-    reorderImage
+    getProject,
+    getProjects,
+    objectIdSchema,
+    removeImage,
+    removeTool,
+    reorderImage,
+    reorderTool,
+    updateProject,
+    uploadLocalImage,
 } from '../controller/project.js';
 import { queryProjectSchema } from '../models/queryProject.js';
 import { schemaValidation, validateRequest } from '@picturas/schema-validation';
 import schemas from '../utils/filters.js';
 import multer from '../config/multerConfig.js';
-import { getLimitsMiddleware } from '../utils/premium.js'
+import { getLimitsMiddleware } from '../utils/premium.js';
 import {
     addProjectToPipeline,
+    isUserLimitReached,
     removeProjectFromPipeline,
-    isUserLimitReached
-} from '../controller/pipeline.js'
-import {
-    cancelPipeline,
-    runPipeline,
-    runPreview,
-    setHooks
-} from '../utils/filterCall.js'
+} from '../controller/pipeline.js';
+import { cancelPipeline, runPipeline, setHooks } from '../utils/filterCall.js';
 
 setHooks(downloadImageLocally, uploadLocalImage, removeProjectFromPipeline);
 
@@ -56,7 +50,8 @@ router.post('/', validateRequest({
         }
 
         const project = await addProject(data);
-        return res.status(200).json(filterProject(project));
+        return res.status(200)
+            .json(await filterProject(project));
     } catch (error) {
         return res.status(500).json({ error: 'Failed to add project' });
     }
@@ -70,21 +65,8 @@ router.get('/:id', async (req, res) => {
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
-        return res.status(200).json(filterProject(project));
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
-});
-
-router.get('/:id/output', async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const project = await getProject(req.user._id, id);
-        if (!project || !project.result.output) {
-            return res.status(404).json({ error: 'Project not found' });
-        }
-        return res.status(200).json({output: project.result.output});
+        return res.status(200)
+            .json(await filterProject(project));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
@@ -100,7 +82,8 @@ router.get('/', validateRequest({
         if (!projects) {
             return res.status(404).json({ error: 'Projects not found' });
         }
-        return res.status(200).json(projects.map(p => filterProject(p)));
+        return res.status(200)
+            .json(await Promise.all(projects.map(async (p) => await filterProject(p))));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
@@ -119,7 +102,8 @@ router.put('/:id', validateRequest({
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
-        return res.status(200).json(filterProject(project));
+        return res.status(200)
+            .json(await filterProject(project));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
@@ -133,7 +117,8 @@ router.delete('/:id', async (req, res) => {
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
-        return res.status(200).json(filterProject(project));
+        return res.status(200)
+            .json(await filterProject(project));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
@@ -156,7 +141,7 @@ router.post('/:id/tool', validateRequest({
     const { id } = req.params;
     const toolInformation = req.body;
 
-    // if the user is not premium and it tries to add a premium tool just send a 401 
+    // if the user is not premium and it tries to add a premium tool just send a 401
     // (Not sure if this is the best way to do it)
     const isToolPremium = schemas[toolInformation.filterName].isPremium;
 
@@ -169,7 +154,7 @@ router.post('/:id/tool', validateRequest({
         return res.status(200).json({index})
     } catch(error) {
         return res.status(500).json({ error: error.message });
-    } 
+    }
 })
 
 router.delete('/:id/tool/:idxTool', async (req, res) => {
@@ -193,7 +178,7 @@ router.put('/:id/tool/:idxTool', validateRequest({
 }), async (req, res) => {
     const { id, idxTool } = req.params;
     const { idxToolAfter } = req.body;
-    
+
     try {
         const { reorderedTool, toolIdx } = await reorderTool(req.user._id, id, idxTool, idxToolAfter);
         return res.status(200).json({
@@ -208,19 +193,6 @@ router.put('/:id/tool/:idxTool', validateRequest({
 //////////////////////////////////////////////////////////////////////////////////////////
 // Images
 //////////////////////////////////////////////////////////////////////////////////////////
-
-router.get('/:id/image/:idxImage', async (req, res) => {
-    const { id, idxImage } = req.params;
-
-    try {
-        const imageUrl = await getImage(req.user._id, id, idxImage);
-        return res.status(200).json({
-            imageUrl
-        });
-    } catch(error) {
-        return res.status(500).json({ error: error.message });
-    } 
-})
 
 router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
     const { id } = req.params;
@@ -241,7 +213,7 @@ router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
         })
     } catch(error) {
         return res.status(500).json({ error: error.message });
-    } 
+    }
 })
 
 router.put('/:id/image/:idxImage', validateRequest({
@@ -251,8 +223,8 @@ router.put('/:id/image/:idxImage', validateRequest({
   }), async (req, res) => {
       const { id, idxImage } = req.params;
       const { idxImageAfter } = req.body;
-      
-      try {
+
+    try {
           const { reorderedImage, imageIdx } = await reorderImage(req.user._id, id, idxImage, idxImageAfter);
           return res.status(200).json({
               reorderedImage,
@@ -282,17 +254,17 @@ router.post('/:id/process', async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id;
     const userLimits = req.user.limits;
-    
+
     try {
         const isLimitReached = await isUserLimitReached(userId, userLimits);
-        if (isLimitReached) 
+        if (isLimitReached)
             return res.status(429).json({
                 message: 'Daily limit reached'
             })
 
         const updatedPipeline = await addProjectToPipeline(userId, id, userLimits);
         const project = await getProject(userId, id);
-        
+
         const tools = project.tools.map(tool => ({filterName: tool._doc.filterName, args: tool._doc.args ?? {}}));
         await runPipeline(userId, id, project.images, tools, !req.user.limits.noWatermark)
 
@@ -314,7 +286,7 @@ router.post('/:id/preview', validateRequest({
     const {imageId} = req.body;
     const userId = req.user._id;
     const userLimits = req.user.limits;
-    
+
     try {
         const updatedPipeline = await addProjectToPipeline(userId, id, userLimits);
         const project = await getProject(id);
@@ -348,7 +320,7 @@ router.delete('/:id/process', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: `Error processing pipeline: ${error.message}` });
     }
-    
+
 });
 
 export default router;

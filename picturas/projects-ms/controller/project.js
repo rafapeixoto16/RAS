@@ -1,13 +1,12 @@
 import Project from '../models/projectModel.js';
-import { buildPagination, buildSort, buildQuery } from '../models/queryProject.js';
-import {schemaValidation} from '@picturas/schema-validation';
-import Image from '../models/imageModel.js'
-import minioClient from '../config/minioClient.js';
+import { buildPagination, buildQuery, buildSort } from '../models/queryProject.js';
+import { schemaValidation } from '@picturas/schema-validation';
+import Image from '../models/imageModel.js';
+import minioClient, { rewriteS3Url } from '../config/minioClient.js';
 import sharp from 'sharp';
 import path from 'node:path';
 import mongoose from 'mongoose';
 import fs from 'node:fs';
-import { rewriteS3Url } from '../config/minioClient.js'
 
 export const objectIdSchema = schemaValidation.string().refine((val) => mongoose.Types.ObjectId.isValid(val));
 
@@ -39,11 +38,34 @@ export const deleteProject = (userId, id) => {
     return Project.deleteOne({ userId, _id: id }).exec();
 };
 
-export const filterProject = (project) => ({
+export const getImage = async (projectId, imageRef) => {
+    let image = await Image.findById(imageRef.id);
+
+    if (!image) {
+        const extensionName = imageRef.format.startsWith('.') ? imageRef.format : `.${imageRef.format}`;
+        const bucketName = process.env.S3_PICTURE_BUCKET;
+        const imageName = `${projectId}/${imageRef.id}${extensionName}`;
+        const publicUrl = await minioClient.presignedGetObject(bucketName, imageName, 24 * 60 * 60);
+
+        image = new Image({
+            _id: imageRef.id,
+            url: publicUrl,
+        });
+
+        await image.save();
+
+        return rewriteS3Url(publicUrl);
+    }
+
+    return rewriteS3Url(image.url);
+};
+
+export const filterProject = async (project) => ({
     name: project.name,
     _id: project._id,
     tools: project.tools,
-    images: project.images,
+    images: await Promise.all(project.images.map(async (image) => await getImage(project._id, image))),
+    result: (project.result && project.result.expireDate > Date.now()) ? project.result.output : null,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt
 });
@@ -97,7 +119,7 @@ export const reorderTool = async (userId, projectId, toolIdx, toolIdxAfter) => {
     if (toolIdx < 0 || toolIdx >= toolsLength) {
         throw new Error('Invalid current tool index');
     }
-    
+
     if (toolIdxAfter < 0 || toolIdxAfter >= toolsLength) {
         throw new Error('Invalid target tool index');
     }
@@ -123,7 +145,7 @@ export const addImage = async (userId, projectId, file, userLimits) => {
     const objectId = new mongoose.Types.ObjectId();
     const imageName = `${projectId}/${objectId}${extensionName}`;
     const is4kAllowed = userLimits.has4kUpload;
-    
+
     const project = await getProject(userId, projectId);
     if (!project) {
         throw new Error('Project not found');
@@ -206,39 +228,6 @@ export const removeImage = async (userId, projectId, imageIdx) => {
     return removedImage;
 };
 
-export const getImage = async (userId, projectId, imageIdx) => {
-    const project = await getProject(userId, projectId);
-    if (!project) {
-        throw new Error('Project not found');
-    }
-
-    if (imageIdx < 0 || imageIdx >= project.images.length) {
-        throw new Error('Invalid image index');
-    }
-
-    const imageRef = project.images[imageIdx];
-
-    let image = await Image.findById(imageRef.id);
-
-    if (!image) {
-        const extensionName = imageRef.format.startsWith('.') ? imageRef.format : `.${imageRef.format}`;
-        const bucketName = process.env.S3_PICTURE_BUCKET;
-        const imageName = `${projectId}/${imageRef.id}${extensionName}`;
-        const publicUrl = await minioClient.presignedGetObject(bucketName, imageName, 24 * 60 * 60);
-
-        image = new Image({
-            _id: imageRef.id,
-            url: publicUrl,
-        });
-
-        await image.save();
-
-        return rewriteS3Url(publicUrl);
-    }
-
-    return rewriteS3Url(image.url);
-};
-
 export const reorderImage = async (userId, projectId, imageIdx, imageIdxAfter) => {
     const project = await getProject(userId, projectId);
 
@@ -250,7 +239,7 @@ export const reorderImage = async (userId, projectId, imageIdx, imageIdxAfter) =
     if (imageIdx < 0 || imageIdx >= imageLength) {
         throw new Error('Invalid current image index');
     }
-    
+
     if (imageIdxAfter < 0 || imageIdxAfter >= imageLength) {
         throw new Error('Invalid target image index');
     }
@@ -313,6 +302,6 @@ export const uploadLocalImage = async (userId, projectId, buffer, isPreview) => 
         };
         await updateProject(userId, projectId, {result});
     }
-    
+
     return rewriteS3Url(imageUrl);
 };
