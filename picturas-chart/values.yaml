@@ -53,10 +53,6 @@ rabbitmq:
       amqp: 5672
   persistence:
     enabled: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 rate-limiter-redis:
   fullnameOverride: rate-limiter-redis
@@ -67,10 +63,6 @@ rate-limiter-redis:
   master:
     persistence:
       enabled: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 ws-redis:
   fullnameOverride: ws-redis
@@ -81,10 +73,6 @@ ws-redis:
   master:
     persistence:
       enabled: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 filter-redis:
   fullnameOverride: filter-redis
@@ -95,10 +83,6 @@ filter-redis:
   master:
     persistence:
       enabled: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 users-ms-db:
   fullnameOverride: users-ms-db
@@ -111,10 +95,6 @@ users-ms-db:
     mongodb: 27017
   persistence:
     enabled: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 projects-ms-db:
   fullnameOverride: projects-ms-db
@@ -130,10 +110,6 @@ projects-ms-db:
     mongodb: 27017
   persistence:
     enabled: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 subscriptions-ms-db:
   fullnameOverride: subscriptions-ms-db
@@ -146,10 +122,6 @@ subscriptions-ms-db:
     mongodb: 27017
   persistence:
     enabled: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 stripe_private_key: "stripe-private-key"
 stripe_webhook_secret: "stripe-webhook-key"
@@ -213,10 +185,6 @@ grafana:
           url: http://grafana-loki-gateway
           version: 1
           editable: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 grafana-loki:
   fullnameOverride: grafana-loki
@@ -231,7 +199,3 @@ grafana-loki:
   compactor:
     persistence:
       enabled: false
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true

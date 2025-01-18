@@ -13,6 +13,7 @@ import minioClient from '../config/minioClient.js';
 import {schemaValidation, validateRequest} from '@picturas/schema-validation';
 import {requiresAuth, requiresNonGuest} from "@picturas/ms-helper";
 import {deleteSubcriptionByUserId, getSubcriptionById} from '@picturas/subscriptions/controller/subscriptions.js';
+import {deleteProject, getProjects} from '@picturas/projects-ms/controller/projects.js';
 
 const SALT_WORK_FACTOR = 10;
 
@@ -553,11 +554,20 @@ router.put(
 router.delete('/softDelete', async (req, res) => {
     const userId = req.user._id; 
 
+    // garantir que so este microservico consegue contactar com os outros 2
+
     // cancelar subscriacao
-    const stripsub = await getSubcriptionById(userId);
-    if (stripsub) {
+    const stripesub = await getSubcriptionById(userId);
+    if (stripesub) {
         await deleteSubcriptionByUserId(userId);
     }
+
+    // apagar projetos
+    const userProjects = await getProjects(userId, {});
+
+    for (const project of userProjects) {
+        await deleteProject(userId, project._id);
+    } 
 
     // logout
     const userInfo = await User.getUser(userId);
