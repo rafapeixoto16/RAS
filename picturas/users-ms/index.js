@@ -45,7 +45,7 @@ app.use(express.json());
 app.use(useGatewayAuth);
 
 // Routers
-app.use('/', usersRouter);
+app.use('/public', usersRouter);
 
 // 404
 app.use((req, res) => {

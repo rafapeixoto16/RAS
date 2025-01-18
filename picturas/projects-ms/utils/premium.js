@@ -5,7 +5,7 @@ export const isPremiumMiddleware = async (req, res, next) => {
         req.user.isPremium = false;
         next();
     } else {
-        axios.get(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}`, {
+        axios.get(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}/public`, {
             headers: {
                 Authorization: req.headers.authorization
             }
@@ -26,7 +26,9 @@ export const getLimitsMiddleware = (req, res, next) => {
         has4kUpload: false,
         noWatermark: false,
         concurrentPipelines: 1,
-        dailyPipelines: 1
+        dailyPipelines: 1,
+        projectsLimit: 1,
+        imagesLimit: 2
     }
 
     limits.ttlStartTime = new Date(req.user.iat * 1000);
@@ -40,8 +42,12 @@ export const getLimitsMiddleware = (req, res, next) => {
         limits.noWatermark = true;
         limits.concurrentPipelines = 5;
         limits.dailyPipelines = Infinity;
+        limits.projectsLimit = 50;
+        limits.imagesLimit = 10;
     } else {
         limits.dailyPipelines = 5;
+        limits.projectsLimit = 10;
+        limits.imagesLimit = 5;
     }
 
     req.user.limits = limits;

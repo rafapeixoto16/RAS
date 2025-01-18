@@ -55,7 +55,7 @@ const projectSchema = new mongoose.Schema({
 
 const Project = mongoose.model('Project', projectSchema);
 
-async function listObjectsPromise(bucketName, prefix, recursive) {
+export async function listObjectsPromise(bucketName, prefix, recursive) {
     return new Promise((resolve, reject) => {
         const files = [];
         const stream = minioClient.listObjects(bucketName, prefix, recursive);
