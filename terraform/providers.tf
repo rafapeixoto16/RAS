@@ -29,6 +29,10 @@ data "http" "ingress_nginx_yaml" {
   url = "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0/deploy/static/provider/cloud/deploy.yaml"
 }
 
+locals {
+  manifests = split("---", data.http.ingress_nginx_yaml.response_body)
+}
+
 provider "kubernetes" {
   host  = "https://${module.gke.endpoint}"
   token = data.google_client_config.default.access_token

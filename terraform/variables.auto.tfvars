@@ -1,5 +1,5 @@
-gcp_credentials = "gcloudkey.json"
-gcp_project_id  = "picturas"
+gcp_credentials = "gcloud.json"
+gcp_project_id  = "geometric-rock-440710-k5"
 gcp_region      = "europe-west2"
 
 gke_cluster_name = "picturas-cluster"

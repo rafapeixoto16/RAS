@@ -7,8 +7,8 @@ module "gke" {
   zones             = var.gke_zones
   network           = var.gke_network
   subnetwork        = var.gke_subnetwork
-  ip_range_pods     = "europe-west2-01-gke-01-pods"
-  ip_range_services = "europe-west2-01-gke-01-services"
+  ip_range_pods     = ""
+  ip_range_services = ""
 
   http_load_balancing        = false
   network_policy             = false
@@ -33,7 +33,7 @@ module "gke" {
       logging_variant    = "DEFAULT"
       auto_repair        = true
       auto_upgrade       = true
-      service_account    = "project-service-account@<PROJECT ID>.iam.gserviceaccount.com"
+      service_account = "terraform-sa@geometric-rock-440710-k5.iam.gserviceaccount.com"
       preemptible        = true
       initial_node_count = 2
       accelerator_count  = 0
@@ -85,12 +85,14 @@ module "gke" {
 }
 
 resource "kubernetes_manifest" "ingress_nginx" {
-  manifest = yamldecode(data.http.ingress_nginx_yaml.response_body)
+  depends_on = [module.gke]
+  for_each = toset(local.manifests)
+  manifest = yamldecode(each.value)
 }
 
-resource "google_artifact_registry_repository" "picturas_registry" {
+resource "google_artifact_registry_repository" "picturas" {
   location      = "us-central1"
-  repository_id = "picturas_registry"
+  repository_id = "picturas"
   description   = "registry for picturas images"
   format        = "DOCKER"
 }
