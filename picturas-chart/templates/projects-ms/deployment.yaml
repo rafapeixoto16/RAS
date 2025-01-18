@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: projects-ms
-          image: {{ .Values.imageRegistry }}projects-ms: {{ .Values.imageTag }}
+          image: "{{ .Values.imageRegistry }}projects-ms:{{ .Values.imageTag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000

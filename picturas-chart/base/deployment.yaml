@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: EXAMPLE
-          image: { { .Values.imageRegistry } }EXAMPLE:{{ .Values.imageTag }}
-          imagePullPolicy: { { .Values.imagePullPolicy } }
+          image: "{{ .Values.imageRegistry }}EXAMPLE:{{ .Values.imageTag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
             - containerPort: 9121
