@@ -14,10 +14,7 @@ export interface Project {
   name: string;
   tools: Tool[];
   images: Image[];
-  result: {
-    expireDate?: Date;
-    output?: string;
-  };
+  result: string | null
   ttl?: Date;
   createdAt: Date;
   updatedAt: Date;

@@ -4,7 +4,6 @@ import { getProject } from '@/api/queries/getProject';
 import { createProject } from '@/api/mutations/createProject';
 import { updateProject } from '@/api/mutations/updateProject';
 import { deleteProject } from '@/api/mutations/deleteProject';
-import { getImage } from '@/api/queries/getImage';
 import { addImage } from '@/api/mutations/addImage';
 import { reorderImage } from '@/api/mutations/reorderImage';
 import { removeImage } from '@/api/mutations/removeImage';
@@ -34,16 +33,11 @@ export const useProjectStore = defineStore('projectStore', {
       this.loading = true;
       try {
         if (useAuthStore().accessToken) {
-          this.projects = await getProjects(useAuthStore().accessToken ?? '');
-          console.log(this.projects)
-            for (const project of this.projects) {
-            const imagesUrls = [];
-            for (let index = 0; index < project.images.length; index++) {
-              const imageUrl = await getImage(project._id, index, useAuthStore().accessToken ?? '');
-              imagesUrls.push({ id: index, imageUrl });
-            }
-            project.images = imagesUrls;
-            }
+          const projects = await getProjects(useAuthStore().accessToken ?? '');
+          this.projects = [];
+          for (const project of projects) {
+            this.projects.push({...project, images: project.images.map((img: string, idx: number) => ({id: idx, imageUrl: img}))});
+          }
         } else {
           throw new Error('Access token is null');
         }
@@ -102,19 +96,6 @@ export const useProjectStore = defineStore('projectStore', {
         }
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while deleting the project';
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async getProjectImage(projectId: string, imageIndex: number) {
-      this.loading = true;
-      try {
-        const imageUrl = await getImage(projectId, imageIndex, useAuthStore().accessToken ?? '');
-        return imageUrl;
-      } catch (error) {
-        this.error = error instanceof Error ? error.message : 'An error occurred while fetching the image';
         throw error;
       } finally {
         this.loading = false;

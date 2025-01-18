@@ -100,6 +100,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getUserInfo, login, loginSecondFactor } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
+import TwoFactorModal from '@/components/TwoFactorModal.vue';
 import { useUserStore } from '@/stores/userStore';
 import { loginGuest } from '@/api/mutations/login';
 import { useProjectStore } from '@/stores/projectsStore';
@@ -162,6 +163,10 @@ const handleTwoFactorVerification = async (twoFactorCode: string) => {
     errorMessage.value = '';
     const response = await loginSecondFactor(loginJwt.value, twoFactorCode);
     authStore.setTokens(response.accessToken, response.refreshToken);
+    const { username, email, profilePic } = await getUserInfo(authStore.accessToken ?? '')
+    userStore.setUser({username: username, email: email, avatarUrl: profilePic})
+    projectsStore.clearEverything();
+    await projectsStore.fetchProjects();
     router.push('/dashboard');
   } catch (error) {
     console.error('Two-factor login error:', error);

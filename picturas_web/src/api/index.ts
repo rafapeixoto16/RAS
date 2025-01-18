@@ -20,3 +20,5 @@ export * from './mutations/addImage';
 export * from './mutations/reorderImage';
 export * from './mutations/removeImage';
 export * from './queries/getFiltersParemeters';
+export * from './mutations/activateOtp';
+export * from './mutations/deactivateOtp';

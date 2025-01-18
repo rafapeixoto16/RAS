@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { getSubscriptionStatus, getBillingInfo } from '@/api/queries/subscriptions';
 import { useAuthStore } from './authStore';
+import { cancelSubscription } from '@/api';
 
 interface SubscriptionStatus {
   isPremium: boolean;
@@ -51,6 +52,15 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     }
   };
 
+  const cancelPremiumSubscription = async () => {
+    try {
+      await cancelSubscription(useAuthStore().accessToken ?? '');
+      await fetchSubscriptionStatus();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return {
     status,
     billingInfo,
@@ -60,6 +70,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     currentPlan,
     hasTrialAvailable,
     fetchSubscriptionStatus,
-    fetchBillingInfo
+    cancelPremiumSubscription,
+    fetchBillingInfo,
   };
 });

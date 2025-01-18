@@ -81,8 +81,7 @@ const handelSignOut = async () => {
     if (!isLoggedIn.value) {
       return;
     }
-    const response = await signOut();
-    console.log(response);
+    await signOut();
     authStore.clearTokens();
     userStore.clearUser();
     router.push('/');
