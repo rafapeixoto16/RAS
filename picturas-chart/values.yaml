@@ -5,6 +5,7 @@ fullnameOverride: ""
 # Images
 imageRegistry: ""
 imagePullPolicy: Never
+imageTag: latest
 
 # Production Settings
 production:

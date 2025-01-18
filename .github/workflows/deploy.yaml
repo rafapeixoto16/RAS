@@ -37,7 +37,7 @@ jobs:
 
       - name: Build Images
         run: |
-          .github/scripts/deploy.sh true ${{ github.sha }} TODO
+          .github/scripts/deploy.sh true TODO ${{ github.sha }}
         env:
           STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
 

@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: {{ . }}
-          image: {{ $.Values.imageRegistry }}{{ . }}:latest
+          image: {{ $.Values.imageRegistry }}{{ . }}:{{ $.Values.imageTag }}
           imagePullPolicy: {{ $.Values.imagePullPolicy }}
           env:
             - name: RABBITMQ_HOST

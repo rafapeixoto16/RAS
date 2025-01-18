@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: {{ .Values.imageRegistry }}api-gateway:latest
+          image: {{ .Values.imageRegistry }}api-gateway: {{ .Values.imageTag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
