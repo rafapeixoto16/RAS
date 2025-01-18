@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Images
         run: |
-          .github/scripts/deploy.sh true us-central1-docker.pkg.dev/geometric-rock-440710-k5/picturas ${{ github.sha }}
+          scripts/build-docker.sh true us-central1-docker.pkg.dev/geometric-rock-440710-k5/picturas ${{ github.sha }}
         env:
           STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
 
