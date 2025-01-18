@@ -2,6 +2,11 @@
 nameOverride: ""
 fullnameOverride: ""
 
+# Images
+imageRegistry: ""
+imagePullPolicy: Never
+imageTag: latest
+
 # Production Settings
 production:
   enabled: false
@@ -54,9 +59,9 @@ rabbitmq:
   persistence:
     enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 rate-limiter-redis:
   fullnameOverride: rate-limiter-redis
@@ -68,9 +73,9 @@ rate-limiter-redis:
     persistence:
       enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 ws-redis:
   fullnameOverride: ws-redis
@@ -82,9 +87,9 @@ ws-redis:
     persistence:
       enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 filter-redis:
   fullnameOverride: filter-redis
@@ -96,9 +101,9 @@ filter-redis:
     persistence:
       enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 users-ms-db:
   fullnameOverride: users-ms-db
@@ -112,9 +117,9 @@ users-ms-db:
   persistence:
     enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 projects-ms-db:
   fullnameOverride: projects-ms-db
@@ -131,9 +136,9 @@ projects-ms-db:
   persistence:
     enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 subscriptions-ms-db:
   fullnameOverride: subscriptions-ms-db
@@ -147,9 +152,9 @@ subscriptions-ms-db:
   persistence:
     enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 stripe_private_key: "stripe-private-key"
 stripe_webhook_secret: "stripe-webhook-key"

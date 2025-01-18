@@ -11,10 +11,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Undeploy
-        run: .github/scripts/undeploy.sh
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Log in to Google Cloud
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Access Kubernetes Cluster
+        uses: 'google-github-actions/get-gke-credentials@v2'
+        with:
+          project_id: picturas
+          cluster_name: picturas-cluster
+
+      - name: Undeploy with helm
+        run: |
+          helm uninstall picturas

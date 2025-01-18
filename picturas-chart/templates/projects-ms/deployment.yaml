@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: projects-ms
-          image: projects-ms:latest
-          imagePullPolicy: Never
+          image: {{ .Values.imageRegistry }}projects-ms: {{ .Values.imageTag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
             - containerPort: 9121
