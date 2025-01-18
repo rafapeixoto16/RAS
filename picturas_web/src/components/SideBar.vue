@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-screen">
     <div
-      class="fixed left-0 flex flex-col w-1/6 h-full bg-azure-radiance-100 text-gray-700 border-r border-gray-200 shadow-lg">
+      class="fixed left-0 flex flex-col w-1/6 h-full bg-blue-50 text-gray-700 border-r border-gray-200 shadow-lg">
       <router-link class="flex items-center justify-center px-8 py-4 w-full" to="/dashboard">
         <h1
           class="text-3xl xl:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-purple-600 font-caveat px-4 py-2">

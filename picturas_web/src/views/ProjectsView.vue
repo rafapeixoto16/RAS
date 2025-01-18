@@ -1,28 +1,28 @@
 <template>
   <div class="flex flex-col h-screen bg-gray-100">
-    <header class="bg-white shadow-sm z-0">
+    <header class="bg-white shadow-sm z-10">
       <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-          <div>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+          <div class="w-full sm:w-auto">
             <template v-if="isEditingTitle">
               <input 
                 v-model="projectTitle" 
                 @keyup.enter="saveTitle" 
                 @blur="saveTitle" 
-                class="text-xl md:text-2xl font-bold text-gray-900 bg-gray-100 px-2 border-b border-gray-300 focus:outline-none"
+                class="text-xl md:text-2xl font-bold text-gray-900 px-2 border-b border-gray-300 focus:outline-none w-full sm:w-auto"
                 autofocus
               />
             </template>
             <template v-else>
               <h1 
-                class="text-xl md:text-2xl font-bold text-gray-900 mb-[10%] sm:mb-0 cursor-pointer"
+                class="text-xl md:text-2xl font-bold text-gray-900 cursor-pointer"
                 @click="editTitle"
               >
                 {{ projectTitle }}
               </h1>
             </template>
           </div>
-          <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+          <div class="flex items-center gap-4 w-full sm:w-auto justify-between mb-[10%] md:mb-0 sm:justify-end">
             <span class="text-sm text-gray-500">Page {{ currentPage + 1 }} of {{ pages.length }}</span>
             <div class="flex space-x-2">
               <button @click="deleteCurrentPage" class="p-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
@@ -44,40 +44,44 @@
     </header>
 
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
-      <aside class="w-full md:w-64 bg-white border-b md:border-r border-gray-200 shadow-md overflow-x-auto md:overflow-y-auto flex-shrink-0">
-  <div class="flex md:flex-col items-center py-4 md:py-6 px-4 md:px-2 space-x-4 md:space-x-0 md:space-y-6">
-    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4 hidden md:block">Tools</h3>
-    <div class="flex md:flex-col space-x-4 md:space-x-0 md:space-y-4">
-      <h4 class="text-sm font-semibold text-gray-600 mt-4">Basic Tools</h4>
-      <div class="flex flex-wrap md:flex-col gap-2">
-        <ToolButton 
-          v-for="tool in basicTools" 
-          :key="tool" 
-          :name="tool" 
-          :icon="getIconForTool(tool)" 
-          :options="projectStore.filterParameters?.[tool]?.schema?.definitions?.[tool]?.properties"
-          :showMenu="activeTool === tool"
-          :menuPosition="getToolMenuPosition(tool)"
-          @click="selectTool(tool)"
-        />
-      </div>
-      <h4 class="text-sm font-semibold text-gray-600 mt-4">Premium Tools</h4>
-      <div class="flex flex-wrap md:flex-col gap-2">
-        <ToolButton 
-          v-for="tool in premiumTools" 
-          :key="tool" 
-          :name="tool" 
-          :icon="getIconForTool(tool)" 
-          :options="projectStore.filterParameters?.[tool]?.schema?.definitions?.[tool]?.properties"
-          :showMenu="activeTool === tool"
-          :menuPosition="getToolMenuPosition(tool)"
-          :disabled="!isPremiumUser"
-          @click="selectTool(tool)"
-        />
-      </div>
-    </div>
-  </div>
-</aside>
+      <aside class="hidden md:block w-72 bg-white border-r border-gray-200 shadow-md overflow-y-auto flex-shrink-0">
+        <div class="p-6">
+          <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-6">Tools</h3>
+          
+          <div class="mb-8">
+            <h4 class="text-sm font-semibold text-gray-600 mb-4">Basic Tools</h4>
+            <div class="space-y-2">
+              <ToolButton 
+                v-for="tool in basicTools" 
+                :key="tool" 
+                :name="tool" 
+                :icon="getIconForTool(tool)" 
+                :options="projectStore.filterParameters ? projectStore.filterParameters[tool].schema.definitions[tool].properties : {}"
+                :showMenu="activeTool === tool"
+                :menuPosition="getToolMenuPosition(tool)"
+                @click="selectTool(tool)"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-semibold text-gray-600 mb-4">Premium Tools</h4>
+            <div class="space-y-2">
+              <ToolButton 
+                v-for="tool in premiumTools" 
+                :key="tool" 
+                :name="tool" 
+                :icon="getIconForTool(tool)" 
+                :options="projectStore.filterParameters ? projectStore.filterParameters[tool].schema.definitions[tool].properties : {}"
+                :showMenu="activeTool === tool"
+                :menuPosition="getToolMenuPosition(tool)"
+                :disabled="!isPremiumUser"
+                @click="selectTool(tool)"
+              />
+            </div>
+          </div>
+        </div>
+      </aside>
 
       <main class="flex-1 overflow-hidden relative">
         <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
@@ -95,7 +99,7 @@
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
               <button 
                 @click="goToImage(index)" 
-                class="w-full h-72">
+                class="w-full aspect-square">
                 <img
                   v-if="page.imageUrl"
                   :src="page.imageUrl"
@@ -148,8 +152,66 @@
           </Carousel>
         </div>
       </main>
+
+      <button 
+        @click="isToolDrawerOpen = true"
+        class="md:hidden fixed right-4 bottom-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors duration-200 z-20"
+      >
+        <i class="bi bi-tools text-xl"></i>
+      </button>
+
+      <BottomDrawer
+        v-model="isToolDrawerOpen"
+        class="md:hidden"
+      >
+        <div class="px-4 py-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold">Tools</h3>
+            <button 
+              @click="isToolDrawerOpen = false"
+              class="p-2 text-gray-400 hover:text-gray-500"
+            >
+              <i class="bi bi-x text-xl"></i>
+            </button>
+          </div>
+
+          <div class="mb-6">
+            <h4 class="text-sm font-semibold text-gray-600 mb-4">Basic Tools</h4>
+            <div class="grid grid-cols-4 gap-4">
+              <ToolButton 
+                v-for="tool in basicTools" 
+                :key="tool" 
+                :name="tool" 
+                :icon="getIconForTool(tool)" 
+                :options="projectStore.filterParameters ? projectStore.filterParameters[tool].schema.definitions[tool].properties : {}"
+                :showMenu="activeTool === tool"
+                :menuPosition="getToolMenuPosition(tool)"
+                @click="selectTool(tool)"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-semibold text-gray-600 mb-4">Premium Tools</h4>
+            <div class="grid grid-cols-4 gap-4">
+              <ToolButton 
+                v-for="tool in premiumTools" 
+                :key="tool" 
+                :name="tool" 
+                :icon="getIconForTool(tool)" 
+                :options="projectStore.filterParameters ? projectStore.filterParameters[tool].schema.definitions[tool].properties : {}"
+                :showMenu="activeTool === tool"
+                :menuPosition="getToolMenuPosition(tool)"
+                :disabled="!isPremiumUser"
+                @click="selectTool(tool)"
+              />
+            </div>
+          </div>
+        </div>
+      </BottomDrawer>
     </div>
   </div>
+
   <DynamicToolMenu
     v-if="activeTool && projectStore.filterParameters && projectStore.filterParameters[activeTool]"
     :toolName="activeTool"
@@ -168,6 +230,7 @@ import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
 import DynamicToolMenu from '@/components/DynamicToolMenu.vue';
+import BottomDrawer from '@/components/BottomDrawer.vue';
 import type { Tool } from '@/types/project';
 
 interface Page {
@@ -338,7 +401,6 @@ const getIconForTool = (toolName: string): string => {
   return iconMap[toolName] || 'bi-question-circle';
 };
 
-
 const addNewPage = () => {
   pages.value.push({ id: Date.now(), imageUrl: null });
   currentPage.value = pages.value.length - 1;
@@ -398,6 +460,7 @@ const selectTool = (toolName: string) => {
     activeTool.value = null;
   } else {
     activeTool.value = toolName;
+    isToolDrawerOpen.value = false; // Added to close drawer on mobile after tool selection
   }
 };
 
@@ -502,27 +565,14 @@ watch(currentPage, (newPage) => {
 watch(activeTool, (newValue) => {
   console.log('Active tool changed:', newValue);
 });
+
+const isToolDrawerOpen = ref(false);
 </script>
 
 <style scoped>
 @media (max-width: 768px) {
-  .md\:w-20 {
-    width: 100%;
-    height: auto;
-  }
-  
-  .md\:flex-col {
-    flex-direction: row;
-  }
-  
-  .md\:space-y-6 {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-  
-  .md\:space-x-0 {
-    margin-right: 1rem;
-    margin-left: 1rem;
+  .aspect-square {
+    aspect-ratio: 1 / 1;
   }
 }
 </style>

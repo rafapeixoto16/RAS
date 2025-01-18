@@ -2,12 +2,15 @@
   <div class="relative group">
     <button 
       @click="$emit('click')"
-      class="w-full p-2 md:p-3 flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+      class="w-full p-3 flex items-center gap-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors duration-200"
       :class="{ 'opacity-50 cursor-not-allowed': disabled }"
       :disabled="disabled"
     >
-      <i :class="['bi', icon, 'text-lg md:text-xl']"></i>
-      <span class="text-xs font-medium md:block hidden">{{ name }}</span>
+      <i :class="['bi', icon, 'text-xl']"></i>
+      <span class="text-sm font-medium hidden md:block">{{ name }}</span>
+      <div class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none md:hidden">
+        {{ name }}
+      </div>
     </button>
     
     <DynamicToolMenu
@@ -50,3 +53,11 @@ defineEmits<{
   (e: 'cancel'): void;
 }>();
 </script>
+
+<style scoped>
+@media (max-width: 768px) {
+  .group:hover .absolute {
+    display: block;
+  }
+}
+</style>
