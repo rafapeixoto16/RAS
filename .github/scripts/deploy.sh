@@ -24,7 +24,7 @@ docker context use server-remote
 # Config Kubernetes
 mkdir $HOME/.kube
 ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST -p $SSH_PORT 'cat $HOME/.kube/config' > $HOME/.kube/config
-sed -i 's/192.168.1.133/localhost/' ~/.kube/config
+sed -i 's/\([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\)/localhost/' ~/.kube/config
 export KUBECONFIG=$HOME/.kube/config
 
 # Build Images
