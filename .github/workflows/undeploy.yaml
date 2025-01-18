@@ -21,6 +21,7 @@ jobs:
         with:
           project_id: geometric-rock-440710-k5
           cluster_name: picturas-cluster
+          location: europe-west2
 
       - name: Undeploy with helm
         run: |
