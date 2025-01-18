@@ -19,7 +19,7 @@ jobs:
       - name: Access Kubernetes Cluster
         uses: 'google-github-actions/get-gke-credentials@v2'
         with:
-          project_id: picturas
+          project_id: geometric-rock-440710-k5
           cluster_name: picturas-cluster
 
       - name: Undeploy with helm
