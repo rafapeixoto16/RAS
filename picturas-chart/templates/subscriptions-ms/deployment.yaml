@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: subscriptions-ms
-          image: subscriptions-ms:latest
-          imagePullPolicy: Never
+          image: {{ .Values.imageRegistry }}subscriptions-ms:latest
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
             - containerPort: 9121

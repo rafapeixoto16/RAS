@@ -2,6 +2,10 @@
 nameOverride: ""
 fullnameOverride: ""
 
+# Images
+imageRegistry: ""
+imagePullPolicy: Never
+
 # Production Settings
 production:
   enabled: false

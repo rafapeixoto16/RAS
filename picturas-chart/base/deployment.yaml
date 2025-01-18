@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: EXAMPLE
-          image: EXAMPLE:latest
-          imagePullPolicy: Never
+          image: { { .Values.imageRegistry } }EXAMPLE:latest
+          imagePullPolicy: { { .Values.imagePullPolicy } }
           ports:
             - containerPort: 3000
             - containerPort: 9121

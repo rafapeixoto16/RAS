@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: web
-          image: web:latest
-          imagePullPolicy: Never
+          image: {{ .Values.imageRegistry }}web:latest
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 80
             - containerPort: 9121

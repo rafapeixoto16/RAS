@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: ws-gateway
-          image: ws-gateway:latest
-          imagePullPolicy: Never
+          image: {{ .Values.imageRegistry }}ws-gateway:latest
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
             - containerPort: 9113

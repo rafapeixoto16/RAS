@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: users-ms
-          image: users-ms:latest
-          imagePullPolicy: Never
+          image: {{ .Values.imageRegistry }}users-ms:latest
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
             - containerPort: 9121

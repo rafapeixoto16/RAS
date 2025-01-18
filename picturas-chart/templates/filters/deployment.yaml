@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
         - name: {{ . }}
-          image: {{ . }}:latest
-          imagePullPolicy: Never
+          image: {{ $.Values.imageRegistry }}{{ . }}:latest
+          imagePullPolicy: {{ $.Values.imagePullPolicy }}
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq
