@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: {{ .Values.imageRegistry }}web: {{ .Values.imageTag }}
+          image: "{{ .Values.imageRegistry }}web:{{ .Values.imageTag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 80
