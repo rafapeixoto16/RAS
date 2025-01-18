@@ -11,7 +11,7 @@ import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
 import {schemaValidation, validateRequest} from '@picturas/schema-validation';
-import {requiresAuth, requiresNonGuest} from "@picturas/ms-helper";
+import {requiresAuth, requiresNonGuest, authSubsProj} from "@picturas/ms-helper";
 import {deleteSubcriptionByUserId, getSubcriptionById} from '@picturas/subscriptions/controller/subscriptions.js';
 import {deleteProject, getProjects} from '@picturas/projects-ms/controller/projects.js';
 
@@ -551,10 +551,11 @@ router.put(
     }
 );
 
+// garantir que so este microservico consegue contactar com os outros 2 (subscriptions e projects)
+router.use(authSubsProj);
+
 router.delete('/softDelete', async (req, res) => {
     const userId = req.user._id; 
-
-    // garantir que so este microservico consegue contactar com os outros 2
 
     // cancelar subscriacao
     const stripesub = await getSubcriptionById(userId);
