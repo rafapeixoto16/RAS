@@ -1,10 +1,7 @@
 import axiosInstance from '../axiosConfig';
-import { useAuthStore } from '@/stores/authStore';
 
-export const addImage = async (projectId: string, imageFile: File) => {
-  const authStore = useAuthStore();
+export const addImage = async (projectId: string, imageFile: File, accessToken: string) => {
   try {
-    const accessToken = authStore.accessToken;
     const formData = new FormData();
     formData.append('projectImage', imageFile);
     const response = await axiosInstance.post(`/api/v1/project/${projectId}/image`, formData, {

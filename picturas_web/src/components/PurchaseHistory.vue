@@ -39,6 +39,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { getTransactionHistory } from '@/api/queries/subscriptions';
+import { useAuthStore } from '@/stores/authStore';
 
 interface Purchase {
   id: number;
@@ -65,7 +66,7 @@ const getStatusClass = (status: string) => {
 const fetchTransactionHistory = async () => {
   isLoading.value = true;
   try {
-    const history = await getTransactionHistory();
+    const history = await getTransactionHistory(useAuthStore().accessToken ?? '');
     purchases.value = history.map((item: Purchase, index: number) => ({
       id: index + 1,
       date: new Date(item.date).toLocaleDateString(),

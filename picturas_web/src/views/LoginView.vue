@@ -129,7 +129,7 @@ const handleLogin = async () => {
     } else {
       const finalResponse = await loginSecondFactor(response.validationToken);
       authStore.setTokens(finalResponse.accessToken, finalResponse.refreshToken);
-      const { username, email, profilePic } = await getUserInfo()
+      const { username, email, profilePic } = await getUserInfo(authStore.accessToken ?? '')
       userStore.setUser({username: username, email: email, avatarUrl: profilePic})
       projectsStore.clearEverything();
       await projectsStore.fetchProjects();

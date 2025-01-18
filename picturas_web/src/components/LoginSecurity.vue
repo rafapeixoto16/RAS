@@ -35,6 +35,7 @@ import { onMounted, ref } from 'vue';
 import { getUserInfo } from '@/api/queries/getUserInfo';
 import { changeUserPassword } from '@/api';
 import Modal from '@/components/CustomModal.vue';
+import { useAuthStore } from '@/stores/authStore';
 
 const user = ref({
   email: '',
@@ -43,7 +44,7 @@ const user = ref({
 
 onMounted(async () => {
   try {
-    const userInfo = await getUserInfo();
+    const userInfo = await getUserInfo(useAuthStore().accessToken || '');
     user.value.email = userInfo.email;
   } catch (error) {
     console.error('Failed to fetch user info:', error);
@@ -59,7 +60,7 @@ const changePassword = async () => {
   showPasswordModal.value = false;
 
   try{
-    await changeUserPassword(newPassword.value)
+    await changeUserPassword(newPassword.value, useAuthStore().accessToken ?? '')
   } catch(error){
     console.error('Failed to change password', error);
   }

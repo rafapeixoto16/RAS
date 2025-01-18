@@ -8,14 +8,16 @@ import { getImage } from '@/api/queries/getImage';
 import { addImage } from '@/api/mutations/addImage';
 import { reorderImage } from '@/api/mutations/reorderImage';
 import { removeImage } from '@/api/mutations/removeImage';
-import { type Project } from '@/types/project';
+import type { Project, FilterParameters } from '@/types/project';
 import { useAuthStore } from './authStore';
+import { getFiltersParemeters } from '@/api';
 
 interface ProjectState {
   projects: Project[];
   currentProject: Project | null;
   loading: boolean;
   error: string | null;
+  filterParameters: FilterParameters | null;
 }
 
 export const useProjectStore = defineStore('projectStore', {
@@ -24,20 +26,20 @@ export const useProjectStore = defineStore('projectStore', {
     currentProject: null,
     loading: false,
     error: null,
+    filterParameters: null,
   }),
 
   actions: {
     async fetchProjects() {
       this.loading = true;
       try {
-        const authStore = useAuthStore();
-        if (authStore.accessToken) {
-          this.projects = await getProjects(authStore.accessToken);
+        if (useAuthStore().accessToken) {
+          this.projects = await getProjects(useAuthStore().accessToken ?? '');
           console.log(this.projects)
             for (const project of this.projects) {
             const imagesUrls = [];
             for (let index = 0; index < project.images.length; index++) {
-              const imageUrl = await getImage(project._id, index);
+              const imageUrl = await getImage(project._id, index, useAuthStore().accessToken ?? '');
               imagesUrls.push({ id: index, imageUrl });
             }
             project.images = imagesUrls;
@@ -55,7 +57,7 @@ export const useProjectStore = defineStore('projectStore', {
     async fetchProject(projectId: string) {
       this.loading = true;
       try {
-        this.currentProject = await getProject(projectId);
+        this.currentProject = await getProject(projectId, useAuthStore().accessToken ?? '');
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while fetching the project';
       } finally {
@@ -66,7 +68,7 @@ export const useProjectStore = defineStore('projectStore', {
     async createProject(projectData: { name: string }) {
       this.loading = true;
       try {
-        const newProject = await createProject(projectData);
+        const newProject = await createProject(projectData, useAuthStore().accessToken ?? '');
         this.projects = [newProject, ...this.projects];
         return newProject;
       } catch (error) {
@@ -80,7 +82,7 @@ export const useProjectStore = defineStore('projectStore', {
     async updateProject(projectId: string, projectData: { name: string }) {
       this.loading = true;
       try {
-        await updateProject(projectId, projectData);
+        await updateProject(projectId, projectData, useAuthStore().accessToken ?? '');
         await this.fetchProjects()
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while updating the project';
@@ -93,7 +95,7 @@ export const useProjectStore = defineStore('projectStore', {
     async deleteProject(projectId: string) {
       this.loading = true;
       try {
-        await deleteProject(projectId);
+        await deleteProject(projectId, useAuthStore().accessToken ?? '');
         this.projects = this.projects.filter(p => p._id !== projectId);
         if (this.currentProject && this.currentProject._id === projectId) {
           this.currentProject = null;
@@ -109,7 +111,7 @@ export const useProjectStore = defineStore('projectStore', {
     async getProjectImage(projectId: string, imageIndex: number) {
       this.loading = true;
       try {
-        const imageUrl = await getImage(projectId, imageIndex);
+        const imageUrl = await getImage(projectId, imageIndex, useAuthStore().accessToken ?? '');
         return imageUrl;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while fetching the image';
@@ -122,7 +124,7 @@ export const useProjectStore = defineStore('projectStore', {
     async addProjectImage(projectId: string, imageFile: File) {
       this.loading = true;
       try {
-        const { id, imageUrl } = await addImage(projectId, imageFile);
+        const { id, imageUrl } = await addImage(projectId, imageFile, useAuthStore().accessToken ?? '');
         const project = this.projects.find(p => p._id === projectId);
         if (project) {
           project.images.push({ id: id, imageUrl });
@@ -176,6 +178,17 @@ export const useProjectStore = defineStore('projectStore', {
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while removing the image';
         throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchFilterParameters() {
+      this.loading = true;
+      try {
+        this.filterParameters = await getFiltersParemeters(useAuthStore().accessToken ?? '');
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while fetching filter parameters';
       } finally {
         this.loading = false;
       }

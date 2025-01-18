@@ -1,10 +1,7 @@
 import axiosInstance from '../axiosConfig';
-import { useAuthStore } from '@/stores/authStore';
 
-export const updateProject = async (id: string, project: { name: string }) => {
-  const authStore = useAuthStore();
+export const updateProject = async (id: string, project: { name: string }, accessToken: string) => {
   try {
-    const accessToken = authStore.accessToken;
     const response = await axiosInstance.put(`/api/v1/project/${id}`, project, {
       headers: {
         Authorization: `Bearer ${accessToken}`,

@@ -102,6 +102,7 @@ import { CreditCard, Loader2, CheckIcon, XIcon } from 'lucide-vue-next'
 import { subscribe } from '@/api/mutations/subscriptions'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { loadStripe, type Stripe, type StripeCardElement, type StripeElements } from '@stripe/stripe-js'
+import { useAuthStore } from '@/stores/authStore'
 
 const props = defineProps<{
   isOpen: boolean
@@ -189,7 +190,7 @@ const handleSubmit = async () => {
 
   try {
     const interval = props.billingCycle === 'monthly' ? 'month' : 'year'
-    const { type, clientSecret } = await subscribe(interval)
+    const { type, clientSecret } = await subscribe(interval, useAuthStore().accessToken ?? '')
 
     let result;
     if (type === 'payment') {

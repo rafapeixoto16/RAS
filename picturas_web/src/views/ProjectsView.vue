@@ -44,30 +44,43 @@
     </header>
 
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
-      <aside class="w-full md:w-20 bg-white border-b md:border-r border-gray-200 shadow-md overflow-x-auto md:overflow-y-auto flex-shrink-0">
-        <div class="flex md:flex-col items-center py-4 md:py-6 px-4 md:px-2 space-x-4 md:space-x-0 md:space-y-6">
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4 hidden md:block">Tools</h3>
-          <div class="flex md:flex-col space-x-4 md:space-x-0 md:space-y-4">
-            <ToolButton 
-              v-for="(tool, index) in tools" 
-              :key="tool.name" 
-              :name="tool.name" 
-              :icon="tool.icon" 
-              :options="tool.options"
-              :showMenu="activeTool === tool.name"
-              :menuPosition="getToolMenuPosition(index)"
-              @click="selectTool(tool.name)"
-              @apply="applyTool"
-              @cancel="cancelTool"
-            />
-          </div>
-        </div>
-      </aside>
+      <aside class="w-full md:w-64 bg-white border-b md:border-r border-gray-200 shadow-md overflow-x-auto md:overflow-y-auto flex-shrink-0">
+  <div class="flex md:flex-col items-center py-4 md:py-6 px-4 md:px-2 space-x-4 md:space-x-0 md:space-y-6">
+    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4 hidden md:block">Tools</h3>
+    <div class="flex md:flex-col space-x-4 md:space-x-0 md:space-y-4">
+      <h4 class="text-sm font-semibold text-gray-600 mt-4">Basic Tools</h4>
+      <div class="flex flex-wrap md:flex-col gap-2">
+        <ToolButton 
+          v-for="tool in basicTools" 
+          :key="tool" 
+          :name="tool" 
+          :icon="getIconForTool(tool)" 
+          :options="projectStore.filterParameters?.[tool]?.schema?.definitions?.[tool]?.properties"
+          :showMenu="activeTool === tool"
+          :menuPosition="getToolMenuPosition(tool)"
+          @click="selectTool(tool)"
+        />
+      </div>
+      <h4 class="text-sm font-semibold text-gray-600 mt-4">Premium Tools</h4>
+      <div class="flex flex-wrap md:flex-col gap-2">
+        <ToolButton 
+          v-for="tool in premiumTools" 
+          :key="tool" 
+          :name="tool" 
+          :icon="getIconForTool(tool)" 
+          :options="projectStore.filterParameters?.[tool]?.schema?.definitions?.[tool]?.properties"
+          :showMenu="activeTool === tool"
+          :menuPosition="getToolMenuPosition(tool)"
+          :disabled="!isPremiumUser"
+          @click="selectTool(tool)"
+        />
+      </div>
+    </div>
+  </div>
+</aside>
 
-      <!-- Show either carousel or grid view based on isGridView -->
       <main class="flex-1 overflow-hidden relative">
         <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-          <!-- Display the images in a grid with portrait orientation -->
           <div 
             v-for="(page, index) in pages" 
             :key="page.id" 
@@ -96,7 +109,6 @@
         </div>
 
         <div v-else class="absolute inset-0 overflow-hidden">
-          <!-- Original carousel view -->
           <Carousel 
             v-model="currentPage" 
             :items="pages" 
@@ -138,16 +150,25 @@
       </main>
     </div>
   </div>
+  <DynamicToolMenu
+    v-if="activeTool && projectStore.filterParameters && projectStore.filterParameters[activeTool]"
+    :toolName="activeTool"
+    :toolOptions="projectStore.filterParameters[activeTool].schema.definitions[activeTool].properties"
+    @apply="applyTool"
+    @cancel="cancelTool"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { useRoute } from 'vue-router';
+import { useProjectStore } from '@/stores/projectsStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
-import type { Tool } from '@/components/ToolButton.vue';
-import { useProjectStore } from '@/stores/projectsStore';
+import DynamicToolMenu from '@/components/DynamicToolMenu.vue';
+import type { Tool } from '@/types/project';
 
 interface Page {
   id: number;
@@ -156,6 +177,7 @@ interface Page {
 
 const route = useRoute();
 const projectStore = useProjectStore();
+const subscriptionStore = useSubscriptionStore();
 
 const projectId = computed<string>(() => route.params.id as string);
 const project = computed(() => projectStore.getProjectById(projectId.value));
@@ -188,6 +210,7 @@ onMounted(async () => {
       pages.value.push({ id: 0, imageUrl: null });
     }
   }
+  await projectStore.fetchFilterParameters();
 });
 
 const toggleGridView = () => {
@@ -275,48 +298,46 @@ const onDrop = async (index: number, event: DragEvent | TouchEvent) => {
   draggedIndex = null;
 };
 
-const tools: Tool[] = [
-  { 
-    name: 'Resize', 
-    icon: 'bi-arrows-angle-expand', 
-    options: {
-      width: { label: 'Width', value: 800, type: 'number', min: 1, max: 4000, step: 1 },
-      height: { label: 'Height', value: 600, type: 'number', min: 1, max: 4000, step: 1 }
-    }
-  },
-  { 
-    name: 'Crop', 
-    icon: 'bi-crop',
-    options: {
-      aspect: { label: 'Aspect Ratio', value: '16:9', type: 'select', choices: ['16:9', '4:3', '1:1', 'Free'] }
-    }
-  },
-  { 
-    name: 'Rotate', 
-    icon: 'bi-arrow-clockwise',
-    options: {
-      angle: { label: 'Angle', value: 90, type: 'number', min: -180, max: 180, step: 1 }
-    }
-  },
-  { 
-    name: 'Filters', 
-    icon: 'bi-filter',
-    options: {
-      brightness: { label: 'Brightness', value: 100, type: 'number', min: 0, max: 200, step: 1 },
-      contrast: { label: 'Contrast', value: 100, type: 'number', min: 0, max: 200, step: 1 }
-    }
-  },
-  { 
-    name: 'Adjust', 
-    icon: 'bi-sliders',
-    options: {
-      saturation: { label: 'Saturation', value: 100, type: 'number', min: 0, max: 200, step: 1 },
-      exposure: { label: 'Exposure', value: 0, type: 'number', min: -100, max: 100, step: 1 }
-    }
-  },
-];
+const isPremiumUser = computed(() => subscriptionStore.isPremium);
 
 const activeTool = ref<string | null>(null);
+
+const basicTools = computed(() => {
+  if (!projectStore.filterParameters) return [];
+  return Object.entries(projectStore.filterParameters)
+    .filter(([, tool]) => !tool.isPremium)
+    .map(([name,]) => name);
+});
+
+const premiumTools = computed(() => {
+  if (!projectStore.filterParameters) return [];
+  return Object.entries(projectStore.filterParameters)
+    .filter(([, tool]) => tool.isPremium)
+    .map(([name,]) => name);
+});
+
+const getIconForTool = (toolName: string): string => {
+  const iconMap: Record<string, string> = {
+    autoAdjust: 'bi-magic',
+    binarization: 'bi-palette',
+    addBorder: 'bi-border-all',
+    brightness: 'bi-brightness-high',
+    contrast: 'bi-circle-half',
+    cropping: 'bi-crop',
+    grayscale: 'bi-palette2',
+    'object-identification': 'bi-box',
+    ocr: 'bi-file-text',
+    'person-count': 'bi-people',
+    'remove-bg': 'bi-eraser',
+    resize: 'bi-arrows-angle-expand',
+    rotation: 'bi-arrow-clockwise',
+    saturation: 'bi-droplet-half',
+    'smart-crop': 'bi-crop',
+  };
+
+  return iconMap[toolName] || 'bi-question-circle';
+};
+
 
 const addNewPage = () => {
   pages.value.push({ id: Date.now(), imageUrl: null });
@@ -372,6 +393,7 @@ const downloadCurrentImage = () => {
 };
 
 const selectTool = (toolName: string) => {
+  console.log('Selecting tool:', toolName);
   if (activeTool.value === toolName) {
     activeTool.value = null;
   } else {
@@ -380,7 +402,7 @@ const selectTool = (toolName: string) => {
 };
 
 const applyTool = (tool: Tool) => {
-  console.log(`Applying ${tool.name} with options:`, tool.options);
+  console.log(`Applying ${tool.filterName} with args:`, tool.args);
   activeTool.value = null;
 };
 
@@ -388,8 +410,11 @@ const cancelTool = () => {
   activeTool.value = null;
 };
 
-const getToolMenuPosition = (index: number): 'top' | 'center' | 'bottom' => {
-  const totalTools = tools.length;
+const getToolMenuPosition = (toolName: string): 'top' | 'center' | 'bottom' => {
+  const allTools = [...basicTools.value, ...premiumTools.value];
+  const index = allTools.findIndex(tool => tool === toolName);
+  const totalTools = allTools.length;
+
   if (index < totalTools / 3) return 'top';
   if (index >= totalTools * 2 / 3) return 'bottom';
   return 'center';
@@ -472,6 +497,10 @@ watch(currentPage, (newPage) => {
   } else if (newPage >= pages.value.length) {
     currentPage.value = pages.value.length - 1;
   }
+});
+
+watch(activeTool, (newValue) => {
+  console.log('Active tool changed:', newValue);
 });
 </script>
 
