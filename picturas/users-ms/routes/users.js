@@ -25,6 +25,45 @@ const kinds = {
 
 const issuer = 'Picturas - Stolen from UMinho Students Work';
 
+router.get('/export', async (req, res) => {
+    try {
+    const user = await User.getUser(req.user._id);
+
+    if (!user) {
+        return res.sendStatus(404);
+    }
+    console.log({proj_ms: process.env.PROJECT_MS, proj_ms_port: process.env.PROJECT_MS_PORT})
+
+    // TODO: get the information on the other ms
+    /*
+    const projects = await axios.get(`http://${process.env.PROJECT_MS}:${process.env.PROJECT_MS_PORT}`, {
+            headers: {
+                Authorization: req.headers.authorization
+            }
+        })
+    */
+
+    const userObj = user.toObject();
+    delete userObj.password;
+    delete userObj.otpSecret;
+    delete userObj.refresh;
+
+    const result = {
+        user: userObj,
+        projects,
+    }
+
+    return res.status(200).json(result);
+
+    } catch(error) {
+        console.error('Error exporting data:', error);
+        res.status(500).json({
+            error: 'Failed to export data',
+            details: error.message,
+        });
+    }
+});
+
 router.post('/register', validateRequest({
     body: schemaValidation.object({
         name: schemaValidation.string(),
@@ -324,6 +363,19 @@ router.post('/token', validateRequest({
     });
 });
 
+router.put('/:id/recover', async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const user = await User.recoverUser(userId);  
+        res.status(200).json({ 
+            message: 'User account recovered successfully.',
+            user: { _id: userId, deletedAt: user.deletedAt }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Requires Auth from now on
 router.use(requiresAuth);
 router.use(requiresNonGuest);
@@ -512,27 +564,24 @@ router.put(
 
 router.delete('/softDelete', async (req, res) => {
     const userId = req.user._id; 
-    try {
-        const user = await User.softDeleteUser(userId); 
-        res.status(200).json({ 
-            message: 'User marked for deletion. Recoverable within 30 days.',
-            user: { _id: user._id, deletedAt: user.deletedAt }
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    const user = await User.softDeleteUser(userId); 
+
+    User.getUser(req.user._id).then(userInfo => {
+        if (!userInfo) return res.sendStatus(404);
+
+        userInfo.refresh = null;
+
+        User.updateUser(userInfo._id, userInfo)
+            .then((resp) => res.status(200).json(
+                {
+                    message: 'User marked for deletion. Recoverable within 30 days.', 
+                    user: { _id: userInfo._id, deletedAt: user.deletedAt } 
+                }))
+            .catch((err) => res.sendStatus(400));
+    })
+        .catch((err) => res.sendStatus(400));
 });
-router.put('/:id/recover', async (req, res) => {
-    const userId = req.user._id;
-    try {
-        const user = await User.recoverUser(userId);  
-        res.status(200).json({ 
-            message: 'User account recovered successfully.',
-            user: { _id: user._id, deletedAt: user.deletedAt }
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+
+
 
 export default router;

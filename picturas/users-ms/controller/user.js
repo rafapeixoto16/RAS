@@ -34,7 +34,8 @@ export const deleteAll = () => {
 
 // (sotf) delete an account
 export const softDeleteUser = (id) => {
-    return User.findOneAndUpdate({ _id: id, deletedAt: { $exists: false } }, { deletedAt: new Date() }).exec();
+    // return User.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true }).exec();
+    return User.findOneAndUpdate({ _id: id, deletedAt: null }, { deletedAt: new Date() }, { new: true }).exec();
 };
 // Recover a (soft) deleted account
 export const recoverUser = (id) => {
