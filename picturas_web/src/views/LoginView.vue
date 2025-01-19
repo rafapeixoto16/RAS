@@ -104,7 +104,7 @@ import TwoFactorModal from '@/components/TwoFactorModal.vue';
 import { useUserStore } from '@/stores/userStore';
 import { loginGuest } from '@/api/mutations/login';
 import { useProjectStore } from '@/stores/projectsStore';
-import { initializeSocket } from '@/utils/socket';
+import { deactivateSocket, initializeSocket } from '@/utils/socket';
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
@@ -135,6 +135,7 @@ const handleLogin = async () => {
       userStore.setUser({username: username, email: email, avatarUrl: profilePic})
       projectsStore.clearEverything();
       await projectsStore.fetchProjects();
+      deactivateSocket();
       initializeSocket(finalResponse.accessToken);
       router.push('/dashboard');
     }
@@ -150,6 +151,7 @@ const handleGuest = async () => {
     if (!authStore.accessToken) {
       const response = await loginGuest();
       authStore.setTokensGuest(response.accessToken);
+      deactivateSocket();
       initializeSocket(response.accessToken);
     }
     projectsStore.clearEverything();

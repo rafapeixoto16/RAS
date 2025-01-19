@@ -7,7 +7,7 @@ import { deleteProject } from '@/api/mutations/deleteProject';
 import { addImage } from '@/api/mutations/addImage';
 import { reorderImage } from '@/api/mutations/reorderImage';
 import { removeImage } from '@/api/mutations/removeImage';
-import type { Project, FilterParameters, messageType } from '@/types/project';
+import type { Notification, Project, FilterParameters } from '@/types/project';
 import { useAuthStore } from './authStore';
 import { getFiltersParemeters, addTool, removeTool, reorderTool, deleteProcess, processProject, processPreview } from '@/api';
 import { getSocket } from '@/utils/socket';
@@ -18,7 +18,7 @@ interface ProjectState {
   loading: boolean;
   error: string | null;
   filterParameters: FilterParameters | null;
-  notifications: { [projectId: string]: messageType  };
+  notifications: Notification[];
 }
 
 export const useProjectStore = defineStore('projectStore', {
@@ -28,7 +28,7 @@ export const useProjectStore = defineStore('projectStore', {
     loading: false,
     error: null,
     filterParameters: null,
-    notifications: {},
+    notifications: [],
   }),
 
   actions: {
@@ -37,7 +37,6 @@ export const useProjectStore = defineStore('projectStore', {
       try {
         if (useAuthStore().accessToken) {
           const projects = await getProjects(useAuthStore().accessToken ?? '');
-          console.log(projects)
           this.projects = [];
           for (const project of projects) {
             this.projects.push({...project, images: project.images.map((img: string, idx: number) => ({id: idx, imageUrl: img}))});
@@ -245,6 +244,16 @@ export const useProjectStore = defineStore('projectStore', {
       this.loading = true;
       try {
         const result = await processPreview(projectId, imageIdx, useAuthStore().accessToken ?? '');
+
+        const socket = getSocket();
+        if (socket) {
+          socket.on('notification', (notification) => {
+            if (notification.projectId === projectId) {
+              this.receiveNotification(notification);
+            }
+          });
+        }
+
         return result;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while processing the preview';
@@ -262,7 +271,7 @@ export const useProjectStore = defineStore('projectStore', {
         const socket = getSocket();
         if (socket) {
           socket.on('notification', (notification) => {
-            if (notification.project === projectId) {
+            if (notification.projectId === projectId) {
               this.receiveNotification(notification);
             }
           });
@@ -290,8 +299,25 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
-    receiveNotification(notification: { project: string; message: messageType }) {
-      this.notifications[notification.project] = notification.message;
+    async getResultProject(projectId: string) {
+      let project = this.projects.find(project => project._id === projectId);
+      while (project?.result === null) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      project = this.projects.find(project => project._id === projectId);
+      }
+      return project?.result ?? null;
+    },
+
+    async removePreviewNotification(projectId: string) {
+      this.notifications = this.notifications.filter(notification => !(notification.projectId === projectId && notification.message.isPreview));
+    },
+
+    async removeNonPreviewNotification(projectId: string) {
+      this.notifications = this.notifications.filter(notification => notification.projectId === projectId && notification.message.isPreview);
+    },
+
+    receiveNotification(notification: Notification) {
+      this.notifications.push(notification);
     },
 
     setProjects(projects: Project[]) {
@@ -315,7 +341,7 @@ export const useProjectStore = defineStore('projectStore', {
       return (id: string) => state.projects.find(project => project._id === id);
     },
     getProjectNotification: (state) => {
-      return (projectId: string) => state.notifications[projectId].url || null;
+      return (projectId: string) => state.notifications.find(notification => notification.projectId === projectId);
     },
   },
 });

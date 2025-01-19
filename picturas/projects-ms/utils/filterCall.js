@@ -237,7 +237,7 @@ async function filterTerminated(msg) {
 
             for (const file of upload) {
                 const fileData = fs.readFileSync(file);
-                zip.file(file, fileData);
+                zip.file(path.basename(file), fileData);
             }
 
             const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
@@ -289,6 +289,6 @@ export async function runPipeline(userId, projectId, imageInfoList, filterInfoLi
     await runPipelineInternal(userId, projectId, imageInfoList, filterInfoList, applyWatermark, false);
 }
 
-export async function runPreview(userId, projectId, imageInfo, filterInfo, applyWatermark) {
-    await runPipelineInternal(userId, projectId, [imageInfo], [filterInfo], applyWatermark, true);
+export async function runPreview(userId, projectId, imageInfo, filterInfoList, applyWatermark) {
+    await runPipelineInternal(userId, projectId, [imageInfo], filterInfoList, applyWatermark, true);
 }

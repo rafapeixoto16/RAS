@@ -95,17 +95,15 @@
   const handelSignOut = async () => {
     try {
       
-      console.log(isLoggedIn.value);
       if (!isLoggedIn.value) {
         return;
       }
-      const response = await signOut();
-      console.log(response);
+      await signOut();
       authStore.clearTokens();
       userStore.clearUser();
       router.push('/');
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
   

@@ -55,3 +55,8 @@ export interface messageType {
   url: string | null;
   isPreview: boolean | null;
 }
+
+export interface Notification {
+  projectId: string;
+  message: messageType;
+}

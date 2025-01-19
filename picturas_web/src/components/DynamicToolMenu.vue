@@ -121,7 +121,6 @@ const apply = () => {
 };
 
 const cancel = () => {
-  console.log('Cancelling tool:', props.toolName);
   emit('cancel');
 };
 </script>

@@ -27,7 +27,7 @@ import {
     isUserLimitReached,
     removeProjectFromPipeline,
 } from '../controller/pipeline.js';
-import { cancelPipeline, runPipeline, setHooks } from '../utils/filterCall.js';
+import { cancelPipeline, runPipeline, runPreview, setHooks } from '../utils/filterCall.js';
 
 setHooks(downloadImageLocally, uploadArtifact, removeProjectFromPipeline);
 
@@ -280,24 +280,25 @@ router.post('/:id/process', async (req, res) => {
 
 router.post('/:id/preview', validateRequest({
     body: schemaValidation.object({
-        imageId: objectIdSchema
+        imageIdx: schemaValidation.number().min(0)
     })
 }), async (req, res) => {
     const { id } = req.params;
-    const {imageId} = req.body;
+    const {imageIdx} = req.body;
     const userId = req.user._id;
     const userLimits = req.user.limits;
 
     try {
+        const project = await getProject(req.user._id, id);
         await addProjectToPipeline(userId, id, userLimits);
-        const project = await getProject(id);
 
-        const image = await project.images.findOne(id => id === imageId);
-        if (!image) {
-            res.status(404).json({ message: `The specified image does not exist` });
+        if (project.images.length <= imageIdx || 0 > imageIdx) {
+            return res.status(404).json({ message: `The specified image does not exist` });
         }
 
-        await runPipeline(userId, id, [image], project.tools, !req.user.limits.noWatermark)
+        const image = await project.images[imageIdx]
+
+        await runPreview(userId, id, image, project.tools, !req.user.limits.noWatermark)
 
         res.status(200).json({
             message: 'Pipeline processing started.',

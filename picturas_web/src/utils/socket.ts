@@ -28,6 +28,15 @@ socket = io('http://192.168.49.2', {
   });
 }
 
+export function deactivateSocket() {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+    isConnected.value = false;
+    console.log('Socket deactivated');
+  }
+}
+
 export function getSocket() {
   return socket;
 }

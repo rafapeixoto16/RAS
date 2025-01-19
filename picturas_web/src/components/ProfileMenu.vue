@@ -77,7 +77,6 @@ const authStore = useAuthStore();
 
 const handelSignOut = async () => {
   try {
-    console.log(isLoggedIn.value);
     if (!isLoggedIn.value) {
       return;
     }
@@ -86,7 +85,7 @@ const handelSignOut = async () => {
     userStore.clearUser();
     router.push('/');
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 </script>

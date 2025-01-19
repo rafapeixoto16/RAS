@@ -92,7 +92,6 @@ const toggleTwoFactor = async () => {
   try {
     if (user.value.otpEnabled) {
       const { totp } = await activateOtp(useAuthStore().accessToken ?? '');
-      console.log(totp);
       otpUrl.value = totp;
       showQRCodeModal.value = true;
     } else {

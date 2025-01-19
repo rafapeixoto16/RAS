@@ -71,7 +71,7 @@ io.on("connect", (socket) => {
                 const content = JSON.parse(msg.content.toString());
                 const { userId, projectId, message } = content;
 
-                io.to(userId).emit("notification", { project: projectId, message });
+                io.to(userId).emit("notification", { projectId, message });
                 channel.ack(msg);
             }
         });

@@ -11,7 +11,7 @@ export const isPremiumMiddleware = async (req, res, next) => {
             }
         })
             .then(response => {
-                req.user.isPremium = response.isPremium
+                req.user.isPremium = response.data.isPremium
                 next();
             })
             .catch(_ => {

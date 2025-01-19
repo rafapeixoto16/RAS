@@ -151,6 +151,12 @@
             </template>
           </Carousel>
         </div>
+        <button 
+          @click="processPreview"
+          class="fixed left-4 bottom-4 md:bottom-auto md:top-4 w-14 h-14 bg-green-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-600 transition-colors duration-200 z-20"
+        >
+          <i class="bi bi-eye text-xl"></i>
+        </button>
       </main>
 
       <aside class="w-full md:w-72 bg-white border-l border-gray-200 overflow-y-auto flex-shrink-0">
@@ -239,10 +245,16 @@
     @apply="applyTool"
     @cancel="cancelTool"
   />
+
+  <PreviewModal
+    v-if="showPreviewModal"
+    :previewData="previewData"
+    @close="handleClosePreviewModal"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, reactive } from 'vue';
+import { ref, computed, onMounted, watch, reactive, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useProjectStore } from '@/stores/projectsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -253,13 +265,18 @@ import ToolButton from '@/components/ToolButton.vue';
 import DynamicToolMenu from '@/components/DynamicToolMenu.vue';
 import BottomDrawer from '@/components/BottomDrawer.vue';
 import ReorderableList from '@/components/ReordableList.vue';
+import PreviewModal from '@/components/PreviewModal.vue';
 import type { Tool } from '@/types/project';
+import type { PreviewData } from '@/types/preview';
+import JSZip from 'jszip';
 
 interface Page {
   id: number;
   imageUrl: string | null;
 }
 
+const showPreviewModal = ref<boolean>(false);
+const previewData = ref<PreviewData>({});
 const route = useRoute();
 const projectStore = useProjectStore();
 const subscriptionStore = useSubscriptionStore();
@@ -626,9 +643,9 @@ const processProject = async () => {
     await projectStore.processProject(projectId.value);
     
     await new Promise<void>((resolve) => {
-      const unwatch = watch(() => projectStore.getProjectNotification(projectId.value), (newNotification) => {
-        if (newNotification) {
-          notification.value = newNotification;
+      const unwatch = watch(() => projectStore.getProjectNotification(projectId.value), async (newNotification) => {
+        if (newNotification && !newNotification.message.isPreview) {
+          notification.value = newNotification.message.url;
           processingStatus.value = 'completed';
           unwatch();
           resolve();
@@ -636,7 +653,6 @@ const processProject = async () => {
       });
     });
     if (notification.value) {
-      console.log(notification.value)
       const link = document.createElement('a');
       link.href = notification.value;
       link.download = `project-${project.value._id}.zip`;
@@ -646,6 +662,59 @@ const processProject = async () => {
     console.error('Error processing project:', error);
     processingStatus.value = 'error';
   }
+};
+
+const processPreview = async () => {
+  if(!project.value) return;
+
+  try{
+    await projectStore.processPreview(projectId.value, currentPage.value)
+
+    await new Promise<void>((resolve) => {
+      const unwatch = watch(() => projectStore.getProjectNotification(projectId.value), async (newNotification) => {
+        if (newNotification && newNotification.message.isPreview) {
+          unwatch();
+        
+          notification.value = newNotification.message.url
+          if (notification.value) {
+            const response = await fetch(notification.value);
+            const zipBlob = await response.blob();
+            const zip = new JSZip();
+            const contents = await zip.loadAsync(zipBlob);
+
+            const previewFiles: PreviewData = {};
+            for(const [filename, file] of Object.entries(contents.files)) {
+              if(!file.dir){
+                const content = await file.async('blob');
+                if(filename.endsWith('.json')) {
+                  const jsonContent = JSON.parse(await content.text()) as Record<string, unknown>;
+                  previewFiles[filename] = {type: 'json', content: jsonContent};
+                } else {
+                  previewFiles[filename] = {type: 'image', url: URL.createObjectURL(content) };
+                }
+              }
+            }
+
+            previewData.value = previewFiles;
+            showPreviewModal.value = true;
+            resolve();
+          }
+        }
+      });
+    });
+  } catch  (error) {
+    console.error("Error processing preview:", error);
+  }
+}
+
+onUnmounted(() => {
+  projectStore.removeNonPreviewNotification(projectId.value);
+});
+
+const handleClosePreviewModal = () => {
+  showPreviewModal.value = false;
+  previewData.value = {};
+  projectStore.removePreviewNotification(projectId.value);
 };
 
 const applyButtonText = computed(() => {
