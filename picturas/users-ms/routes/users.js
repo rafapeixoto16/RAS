@@ -89,7 +89,7 @@ router.post('/register/2', validateRequest({
                     };
 
                     await User.updateUser(user._id, filteredUser);
-                    if (user.migrateAccount) 
+                    if (user.migrateAccount)
                         await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/migrateAccount`, {
                             data: {
                                 userId
@@ -525,29 +525,30 @@ router.put(
 );
 
 router.delete('/deleteAccount', async (req, res) => {
-    const userId = req.user._id; 
+    try {
+        const userId = req.user._id;
 
-    // TODO: tirar de comentario
-    /* 
-    await axios.delete(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}/private/deleteAccout`, {
-        data: {
-            userId
-        }
-    });
-    */
+        await axios.delete(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}/private/deleteAccout`, {
+            data: {
+                userId
+            }
+        });
 
-    await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/deleteAccout`, {
-        data: {
-            userId
-        }
-    });
+        await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/deleteAccout`, {
+            data: {
+                userId
+            }
+        });
 
-    await User.deleteUser(userId);
+        await User.deleteUser(userId);
 
-    res.status(200).json({
-        message: 'User deleted.',
-        userId: userInfo._id
-    });
+        res.status(200).json({
+            message: 'User deleted.',
+            userId: userInfo._id
+        });
+    } catch (_) {
+        res.sendStatus(500);
+    }
 });
 
 export default router;
