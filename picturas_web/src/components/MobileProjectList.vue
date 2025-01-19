@@ -94,9 +94,9 @@ const closeOptionsMenu = () => {
 };
 
 const openInNewTab = (projectId: string) => {
-  const fullUrl = window.location.origin + "/project" + projectId;
+  const baseUrl = window.location.origin;
+  const fullUrl = `${baseUrl}/project/${projectId}`;
   window.open(fullUrl, "_blank");
-  closeOptionsMenu();
 };
 
 const moveToTrash = async (projectId: string) => {

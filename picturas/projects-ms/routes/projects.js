@@ -119,8 +119,7 @@ router.delete('/:id', async (req, res) => {
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
-        return res.status(200)
-            .json(await filterProject(project));
+        return res.sendStatus(200)
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }

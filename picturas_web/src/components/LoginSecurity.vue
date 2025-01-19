@@ -17,15 +17,24 @@
           <button @click="showPasswordModal = true" class="text-blue-600 hover:text-blue-800">Change</button>
         </div>
       </div>
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Two-Factor Authentication</h3>
+          <div class="flex items-center justify-between">
+            <p class="text-gray-600">{{ user.otpEnabled? 'Enabled' : 'Disabled' }}</p>
+            <button @click="toggleTwoFactor" class="text-blue-600 hover:text-blue-800">
+              {{ user.otpEnabled? 'Disable' : 'Enable' }}
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Two-Factor Authentication</h3>
-        <div class="flex items-center justify-between">
-          <p class="text-gray-600">{{ user.otpEnabled? 'Enabled' : 'Disabled' }}</p>
-          <button @click="toggleTwoFactor" class="text-blue-600 hover:text-blue-800">
-            {{ user.otpEnabled? 'Disable' : 'Enable' }}
-          </button>
-        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Account Deletion</h3>
+        <p class="text-gray-600 mb-4">Permanently delete your account and all associated data.</p>
+        <button @click="showDeleteAccountModal = true" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+          Delete My Account
+        </button>
       </div>
     </div>
 
@@ -37,6 +46,19 @@
       <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">Change Password</button>
       </form>
     </Modal>
+
+    <Modal v-if="showDeleteAccountModal" @close="showDeleteAccountModal = false">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Confirm Account Deletion</h3>
+        <p class="text-gray-600 mb-4">Are you sure you want to delete your account? This action cannot be undone.</p>
+        <div class="flex justify-end space-x-4">
+          <button @click="showDeleteAccountModal = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Cancel
+          </button>
+          <button @click="deleteAccount" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+            Delete Account
+          </button>
+        </div>
+      </Modal>
   </div>
 
   <QRCodeModal v-if="showQRCodeModal" :url="otpUrl" @close="showQRCodeModal = false" />
@@ -70,6 +92,7 @@ onMounted(async () => {
 
 const showQRCodeModal = ref(false);
 const showPasswordModal = ref(false);
+const showDeleteAccountModal = ref(false);
 const newPassword = ref('');
 const confirmPassword = ref('');
 const otpUrl = ref('');
@@ -100,5 +123,9 @@ const toggleTwoFactor = async () => {
   } catch (error) {
     console.error('Failed to toggle two-factor authentication:', error);
   }
+};
+
+const deleteAccount = () => {
+    showDeleteAccountModal.value = false;
 };
 </script>

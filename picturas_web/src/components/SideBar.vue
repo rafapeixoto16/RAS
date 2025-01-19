@@ -32,7 +32,7 @@
             <div
               class="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <Dropdown placement="right" trigger="..." :isSidebar="true" :project="project"
-                :options="getDropdownOptions(project)" @open-new-tab="openInNewTab" @rename="renameProject"
+                :options="getDropdownOptions(project)" @open-new-tab="openInNewTab"
                 @move-to-trash="moveToTrash" append-to-body class="bg-blue-50"/>
             </div>
           </div>
@@ -104,11 +104,6 @@ const getDropdownOptions = (project: Project) => {
       action: () => emit("open-new-tab", project._id),
     },
     {
-      label: "Rename",
-      icon: "bi-pencil",
-      action: () => emit("rename", project._id),
-    },
-    {
       label: "Move to Trash",
       icon: "bi-trash",
       action: () => emit("move-to-trash", project._id),
@@ -116,15 +111,10 @@ const getDropdownOptions = (project: Project) => {
   ];
 };
 
-const openInNewTab = (id: number) => {
-  const fullUrl = window.location.origin + "/project/" + id;
+const openInNewTab = (id: string) => {
+  const baseUrl = window.location.origin;
+  const fullUrl = `${baseUrl}/project/${id}`;
   window.open(fullUrl, "_blank");
-};
-
-const renameProject = (id: number) => {
-  // openRenameModal();
-  //showRenameForm.value = true;
-  console.log(`renaming project with id: ${id} `);
 };
 
 const handleCreateProject = () => {
@@ -143,8 +133,8 @@ const createProject = async (name: string) => {
   }
 };
 
-const moveToTrash = async (id: string) => {
-  await projectStore.deleteProject(id);
+const moveToTrash = async (projectId: string) => {
+  await projectStore.deleteProject(projectId);
 };
 
 const visibleProjects = computed<Project[]>(() => {

@@ -114,7 +114,7 @@ const updateDropdownPosition = () => {
     dropdownStyle.value = {
       top: `${rect.bottom + window.scrollY}px`,
       left: `${rect.left + window.scrollX}px`,
-      backgroundColor: menuColor, // Apply the background color from the prop
+      backgroundColor: menuColor,
     };
   }
 };
@@ -132,8 +132,6 @@ const handleClick = (action: () => void, project: Project) => {
     action();
   } else if (String(action).includes("open-new-tab")) {
     emit("open-new-tab", project._id);
-  } else if (String(action).includes("rename")) {
-    emit("rename", project._id);
   } else if (String(action).includes("move-to-trash")) {
     emit("move-to-trash", project._id);
   }
