@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import * as OTPAuth from 'otpauth';
@@ -10,8 +10,8 @@ import mongoose from 'mongoose';
 import * as User from '../controller/user.js';
 import multer from '../config/multerConfig.js';
 import minioClient from '../config/minioClient.js';
-import {schemaValidation, validateRequest} from '@picturas/schema-validation';
-import {requiresAuth, requiresNonGuest} from "@picturas/ms-helper";
+import { schemaValidation, validateRequest } from '@picturas/schema-validation';
+import { requiresAuth, requiresNonGuest } from '@picturas/ms-helper';
 
 const SALT_WORK_FACTOR = 10;
 
@@ -36,6 +36,8 @@ router.post('/register', validateRequest({
         userId: objectIdSchema.optional()
     }),
 }), async (req, res) => {
+    if (req.body.name === 'Rick Astley') console.log('Never Gonna Give You Up');
+
     req.body.password = await bcrypt.hash(req.body.password, SALT_WORK_FACTOR);
 
     const { userId, ...createUser } = req.body;
