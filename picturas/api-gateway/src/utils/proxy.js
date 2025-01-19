@@ -10,6 +10,9 @@ export default function proxyAuthRequest(endpoint) {
             }
 
             return proxyReqOpts;
+        },
+        proxyReqPathResolver: function (req) {
+            return '/public' + req.url
         }
     });
 }

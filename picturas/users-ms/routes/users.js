@@ -25,21 +25,29 @@ const kinds = {
 
 const issuer = 'Picturas - Stolen from UMinho Students Work';
 
+export const objectIdSchema = schemaValidation.string().refine((val) => mongoose.Types.ObjectId.isValid(val));
+
 router.post('/register', validateRequest({
     body: schemaValidation.object({
         name: schemaValidation.string(),
         email: schemaValidation.string().email(),
         password: schemaValidation.string(),
-        username: schemaValidation.string()
+        username: schemaValidation.string(),
+        userId: objectIdSchema.optional()
     }),
 }), async (req, res) => {
     req.body.password = await bcrypt.hash(req.body.password, SALT_WORK_FACTOR);
 
-    User.addUser(req.body)
+    const { userId, ...createUser } = req.body;
+
+    if (userId) createUser._id = req.body.userId;
+
+    User.addUser(createUser)
         .then((user) => {
             const filteredUser = {
                 _id: user._id,
                 kind: kinds.validateAccount,
+                migrateAccount: !!req.body.userId
             };
 
             const validationToken = jwt.sign(
@@ -73,14 +81,20 @@ router.post('/register/2', validateRequest({
             }
 
             User.getUser(user._id)
-                .then((resp) => {
+                .then(async (resp) => {
                     const filteredUser = {
                         ...resp._doc,
                         active: true,
                         expireAt: null
                     };
 
-                    User.updateUser(user._id, filteredUser);
+                    await User.updateUser(user._id, filteredUser);
+                    if (user.migrateAccount)
+                        await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/migrateAccount`, {
+                            data: {
+                                userId
+                            }
+                        });
 
                     res.status(200).send()
                 }).catch((_) => {
@@ -509,5 +523,32 @@ router.put(
         }
     }
 );
+
+router.delete('/deleteAccount', async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        await axios.delete(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}/private/deleteAccout`, {
+            data: {
+                userId
+            }
+        });
+
+        await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/deleteAccout`, {
+            data: {
+                userId
+            }
+        });
+
+        await User.deleteUser(userId);
+
+        res.status(200).json({
+            message: 'User deleted.',
+            userId: userInfo._id
+        });
+    } catch (_) {
+        res.sendStatus(500);
+    }
+});
 
 export default router;
