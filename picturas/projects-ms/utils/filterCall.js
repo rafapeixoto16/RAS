@@ -29,7 +29,6 @@ function startProcessingOutputQueue() {
         FILTER_OUTPUT_EXCHANGE + '-queue',
         (msg) => {
             if (msg !== null) {
-                console.log('message received')
                 filterTerminated(msg.content.toString());
                 channel.ack(msg);
             }
@@ -54,8 +53,6 @@ async function sendMessage(queueName, message) {
     if (!channel) {
         throw new Error('Channel is not initialized. Connect to RabbitMQ first.');
     }
-
-    console.log(queueName, typeof message, message)
 
     channel.sendToQueue(queueName, Buffer.from(message), {
         persistent: true,
@@ -108,7 +105,7 @@ function getTempName(imageInfo, stage) {
 
 function getTempNameStage(imagePath, stage) {
     const { dir, name, ext } = path.parse(imagePath);
-    
+
     const regex = /^(\d+)-/;
     const newName = name.replace(regex, `${stage}-`);
 
@@ -162,7 +159,6 @@ async function applyFilter(projectId, imageId, inPath, outPath, filterInfo, stag
 }
 
 async function filterTerminated(msg) {
-    console.log(msg)
     const data = JSON.parse(msg);
     const {projectId, imageId, stage} = fromMessageId(data.correlationId);
 
@@ -197,7 +193,6 @@ async function filterTerminated(msg) {
 
     // Check if there is a next
     const filterInfoList = JSON.parse(await redisClient.get(getRedisKey(projectId, 'filters')));
-    console.error(filterInfoList, filterInfoList.length, stage)
     const runNext = filterInfoList.length !== stage;
 
     // Update base image (deal with non image outputs)
@@ -215,8 +210,8 @@ async function filterTerminated(msg) {
         dt.extraUpload.push(data.output.imageURI);
         await redisClient.set(k, JSON.stringify(dt));
     }
-    
-    // Next stage        
+
+    // Next stage
     if (runNext) {
         await applyFilter(projectId, imageId, inPath, outPath, filterInfoList[stage], stage + 1);
     } else {
@@ -225,8 +220,6 @@ async function filterTerminated(msg) {
         const allImages = JSON.parse(await redisClient.get(getRedisKey(projectId, 'images')));
         const nImages = allImages.length;
         const termCount = Number(await redisClient.get(termKey)) + 1;
-
-        console.log('hello1', allImages)
 
         if (nImages === termCount) {
             const k = getRedisKey(projectId, 'meta');
@@ -242,11 +235,9 @@ async function filterTerminated(msg) {
             // Create zip & upload
             const zip = new JSZip();
 
-            console.error(upload)
-
             for (const file of upload) {
                 const fileData = fs.readFileSync(file);
-                zip.file(file, fileData);
+                zip.file(path.basename(file), fileData);
             }
 
             const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
@@ -277,7 +268,7 @@ async function runPipelineInternal(userId, projectId, imageInfoList, filterInfoL
 
         const tempName = getTempName(imageInfo, 0);
         await hooks.downloadResource(projectId, imageInfo, tempName);
-        
+
         images.push({imageId: imageInfo.id, path: tempName});
     }
 

@@ -1,0 +1,15 @@
+{{- if .Values.production.enabled }}
+{{- range .Values.filters }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ . }}
+spec:
+  endpoints:
+    - port: http-metrics
+      interval: 30s
+  selector:
+    matchLabels:
+      app: {{ . }}
+{{- end }}
+{{- end }}

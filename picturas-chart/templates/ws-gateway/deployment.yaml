@@ -3,6 +3,11 @@ kind: Deployment
 metadata:
   name: ws-gateway
 spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       name: ws-gateway
@@ -13,10 +18,23 @@ spec:
     spec:
       containers:
         - name: ws-gateway
-          image: ws-gateway:latest
-          imagePullPolicy: Never
+          image: "{{ .Values.imageRegistry }}ws-gateway:{{ .Values.imageTag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
+            - containerPort: 9113
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9121
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 9121
+            initialDelaySeconds: 5
+            periodSeconds: 10
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq

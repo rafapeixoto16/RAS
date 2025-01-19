@@ -13,8 +13,14 @@ import {
     removeTool,
     reorderImage,
     reorderTool,
-    updateProject,
-    uploadLocalImage,
+    addImage,
+    getImage,
+    removeImage,
+    downloadImageLocally,
+    uploadArtifact,
+    objectIdSchema,
+    filterProject,
+    reorderImage
 } from '../controller/project.js';
 import { queryProjectSchema } from '../models/queryProject.js';
 import { schemaValidation, validateRequest } from '@picturas/schema-validation';
@@ -28,7 +34,7 @@ import {
 } from '../controller/pipeline.js';
 import { cancelPipeline, runPipeline, setHooks } from '../utils/filterCall.js';
 
-setHooks(downloadImageLocally, uploadLocalImage, removeProjectFromPipeline);
+setHooks(downloadImageLocally, uploadArtifact, removeProjectFromPipeline);
 
 const router = Router();
 router.use(getLimitsMiddleware);
@@ -98,7 +104,8 @@ router.put('/:id', validateRequest({
     const { body } = req;
 
     try {
-        const project = await updateProject(req.user._id, id, body);
+        await updateProject(req.user._id, id, body);
+        const project = await getProject(req.user._id, id);
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }

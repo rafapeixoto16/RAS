@@ -11,14 +11,37 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Update submodules
+        run: |
+          git submodule init
+          git submodule update
+
+      - name: Log in to Google Cloud
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Configure Docker to use GCR
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Access Kubernetes Cluster
+        uses: 'google-github-actions/get-gke-credentials@v2'
+        with:
+          project_id: geometric-rock-440710-k5
+          cluster_name: picturas-cluster
+          location: europe-west2-a
+
       - name: Write production values to values-production.yaml
         run: |
-          echo "${{ secrets.HELM_CONFIG_VALUES }}" > values-production.yaml
+          echo "${{ secrets.PROD_CONFIG_VALUES }}" > values-production.yaml
 
-      - name: Deploy
-        run: .github/scripts/deploy.sh
+      - name: Build Images
+        run: |
+          scripts/build-docker.sh true us-central1-docker.pkg.dev/geometric-rock-440710-k5/picturas ${{ github.sha }}
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
+
+      - name: Deploy with helm
+        run: |
+          helm upgrade --install picturas ./picturas-chart -f values-production.yaml --set imageTag=${{ github.sha }}

@@ -6,6 +6,7 @@
         "start": "node src/index.js"
     },
     "dependencies": {
+        "@picturas/ms-helper": "file:../ms-helper",
         "@socket.io/redis-streams-adapter": "^0.2.2",
         "amqplib": "^0.10.5",
         "ioredis": "^5.4.2",

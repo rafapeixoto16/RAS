@@ -70,8 +70,6 @@ async function listObjectsPromise(bucketName, prefix, recursive) {
 Project.watch([
     { $match: {operationType: 'delete'} }
 ]).on('change', async (change) => {
-    console.log(change.documentKey._id)
-
     const lock = await redisLock(change.documentKey._id, 0);
 
     const files = await listObjectsPromise(process.env.S3_PICTURE_BUCKET, change.documentKey._id.toString(), true);

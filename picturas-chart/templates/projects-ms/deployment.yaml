@@ -3,6 +3,11 @@ kind: Deployment
 metadata:
   name: projects-ms
 spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       name: projects-ms
@@ -13,10 +18,23 @@ spec:
     spec:
       containers:
         - name: projects-ms
-          image: projects-ms:latest
-          imagePullPolicy: Never
+          image: "{{ .Values.imageRegistry }}projects-ms:{{ .Values.imageTag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
+            - containerPort: 9121
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9121
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 9121
+            initialDelaySeconds: 5
+            periodSeconds: 10
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq

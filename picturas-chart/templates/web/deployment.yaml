@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: EXAMPLE
+  name: web
 spec:
   strategy:
     type: RollingUpdate
@@ -10,28 +10,28 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      name: EXAMPLE
+      name: web
   template:
     metadata:
       labels:
-        name: EXAMPLE
+        name: web
     spec:
       containers:
-        - name: EXAMPLE
-          image: "{{ .Values.imageRegistry }}EXAMPLE:{{ .Values.imageTag }}"
+        - name: web
+          image: "{{ .Values.imageRegistry }}web:{{ .Values.imageTag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
-            - containerPort: 3000
+            - containerPort: 80
             - containerPort: 9121
           livenessProbe:
             httpGet:
-              path: /healthz
-              port: 9121
+              path: /
+              port: 80
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /readiness
-              port: 9121
+              path: /
+              port: 80
             initialDelaySeconds: 5
             periodSeconds: 10

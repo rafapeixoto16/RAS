@@ -2,6 +2,11 @@
 nameOverride: ""
 fullnameOverride: ""
 
+# Images
+imageRegistry: ""
+imagePullPolicy: Never
+imageTag: latest
+
 # Production Settings
 production:
   enabled: false
@@ -54,9 +59,9 @@ rabbitmq:
   persistence:
     enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 rate-limiter-redis:
   fullnameOverride: rate-limiter-redis
@@ -68,9 +73,9 @@ rate-limiter-redis:
     persistence:
       enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 ws-redis:
   fullnameOverride: ws-redis
@@ -82,9 +87,9 @@ ws-redis:
     persistence:
       enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 filter-redis:
   fullnameOverride: filter-redis
@@ -96,9 +101,9 @@ filter-redis:
     persistence:
       enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 users-ms-db:
   fullnameOverride: users-ms-db
@@ -112,9 +117,9 @@ users-ms-db:
   persistence:
     enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 projects-ms-db:
   fullnameOverride: projects-ms-db
@@ -131,9 +136,9 @@ projects-ms-db:
   persistence:
     enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 subscriptions-ms-db:
   fullnameOverride: subscriptions-ms-db
@@ -147,12 +152,16 @@ subscriptions-ms-db:
   persistence:
     enabled: false
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 stripe_private_key: "stripe-private-key"
 stripe_webhook_secret: "stripe-webhook-key"
+# webhook:
+# - invoice.payment_succeeded
+# - invoice.payment_failed
+# - customer.subscription.deleted
 
 s3_endpoint: "minio" # static from dev
 s3_port: 9000 # static from dev
@@ -177,6 +186,8 @@ kube-prometheus:
 grafana:
   admin:
     password: admin
+  persistence:
+    enabled: false
   datasources:
     secretDefinition:
       apiVersion: 1
@@ -216,6 +227,15 @@ grafana-loki:
   fullnameOverride: grafana-loki
   promtail:
     enabled: true
+  ingester:
+    persistence:
+      enabled: false
+  querier:
+    persistence:
+      enabled: false
+  compactor:
+    persistence:
+      enabled: false
   metrics:
     enabled: true
     serviceMonitor:
