@@ -25,3 +25,6 @@ export * from './mutations/deactivateOtp';
 export * from './mutations/removeTool';
 export * from './mutations/addTool';
 export * from './mutations/reorderTool';
+export * from './mutations/processProject';
+export * from './mutations/deleteProcess';
+export * from './mutations/processPreview';

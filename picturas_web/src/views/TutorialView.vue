@@ -146,20 +146,28 @@ const toggleFaq = (index: number) => {
 
 const quickStartSteps = [
   {
-    title: 'Create Account',
-    description: 'Sign up for free and unlock basic features, or choose a premium plan for full access.',
+    title: 'Create an Account',
+    description: 'Sign up for free to explore basic editing features, or upgrade to a Premium plan for full access to advanced tools.',
+  },
+  {
+    title: 'Start a New Project',
+    description: 'Easily create a new project where you can manage and edit your images. Add a project name, and you’re ready to go!',
   },
   {
     title: 'Upload Images',
-    description: 'Drag and drop your images or select them from your device.',
+    description: 'Drag and drop your images or select them from your device. You can upload individual files or compressed .zip folders containing multiple images.',
   },
   {
-    title: 'Edit & Enhance',
-    description: 'Apply filters, adjust settings, and use AI-powered tools to perfect your images.',
+    title: 'Add and Customize Tools',
+    description: 'Choose from a variety of editing tools, adjust their parameters, and preview how they’ll transform your images.',
   },
   {
-    title: 'Save & Share',
-    description: 'Download your edited images or share them directly to social media.',
+    title: 'Apply Edits to All Images',
+    description: 'Once satisfied with your tool configuration, apply edits to all the images in your project in one seamless operation.',
+  },
+  {
+    title: 'Download and Share',
+    description: 'Download your processed images to your device or share them directly to your favorite social media platforms.',
   },
 ];
 
@@ -168,49 +176,71 @@ const detailedSections = [
     title: 'Premium Features',
     icon: 'bi-star-fill',
     content: [
-      'Upgrade to Premium to unlock advanced editing tools and AI-powered features.',
-      'Get unlimited access to all current and future premium filters.',
+      'Upgrade to unlock a comprehensive suite of advanced tools designed for professionals and enthusiasts.',
+      'Enjoy unlimited access to all current and future premium tools and filters.',
     ],
     features: [
       'AI Background Removal',
-      'AI Person Count',
-      'Smart Crop',
-      'Priority Support',
+      'Object Recognition',
+      'Smart Image Cropping',
+      'Person Counting',
+      'Priority Customer Support',
     ],
-    image: '/placeholder.svg?height=300&width=400',
+    image: '/assets/images/premium-features.svg',
   },
   {
     title: 'Project Management',
     icon: 'bi-folder2-open',
     content: [
-      'Organize your images into projects for better workflow management.',
-      'Access your projects from any device with cloud synchronization.',
+      'Organize and manage your images in projects, making it easier to focus on workflows and specific tasks.',
+      'Cloud synchronization ensures your projects are always accessible, whether you’re on desktop or mobile.',
     ],
     features: [
-      'Create Multiple Projects',
-      'Share Projects',
-      'Auto-Save',
+      'Create and Edit Multiple Projects',
+      'Auto-Save to Avoid Losing Progress',
     ],
-    image: '/placeholder.svg?height=300&width=400',
+    image: '/assets/images/project-management.svg',
+  },
+  {
+    title: 'Real-Time Processing',
+    icon: 'bi-speedometer2',
+    content: [
+      'Experience real-time feedback while applying tools to your images, with live previews of edits before finalizing them.',
+      'Our elastic microservices architecture ensures processing is fast, even with large workloads.',
+    ],
+    features: [
+      'Live Previews',
+      'Batch Processing for Multiple Images',
+      'Scalable and Responsive Processing Pipeline',
+    ],
+    image: '/assets/images/real-time.svg',
   },
 ];
 
 const faqs = [
   {
     question: 'What image formats are supported?',
-    answer: 'Picturas supports all major image formats including JPG, PNG, WebP.',
+    answer: 'PictuRAS supports all popular image formats, including JPG, PNG, and WebP. Additional formats may be supported in future updates.',
   },
   {
-    question: 'Can I edit images on mobile?',
-    answer: 'Yes, Picturas is available on mobile devices. Download the app from the App Store or Google Play.',
+    question: 'Can I use PictuRAS on mobile devices?',
+    answer: 'Yes! PictuRAS is fully optimized for mobile. You can freely use the mobile web version for a seamless experience.',
   },
   {
-    question: 'Is there a limit to the number of projects?',
-    answer: 'Guest users can create up to 5 projects. Logged in and Premium users have unlimited project creation.',
+    question: 'How many projects can I create?',
+    answer: 'Free users can create up to 5 projects, while registered and Premium users can enjoy unlimited project creation.',
   },
   {
-    question: 'How do I cancel my Premium subscription?',
-    answer: 'You can cancel your subscription at any time from your account settings.',
+    question: 'What editing tools are available?',
+    answer: 'PictuRAS offers a wide range of tools, including cropping, rotation, brightness/contrast adjustments, background removal, object recognition, and more. Premium users have access to advanced AI tools.',
+  },
+  {
+    question: 'How do I share my projects?',
+    answer: 'You can share projects directly via social media, it can be done from the project page.',
+  },
+  {
+    question: 'What happens if I cancel my Premium subscription?',
+    answer: 'If you cancel your Premium subscription, you’ll retain access to your projects and tools created during your Premium period, but future access to Premium features will be restricted.',
   },
 ];
 </script>

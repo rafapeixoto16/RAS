@@ -405,7 +405,8 @@ router.get('/', (req, res) => {
                 bio: resp.bio,
                 name: resp.name,
                 profilePic: resp.profilePic,
-                emailPreferences: resp.emailPreferences
+                emailPreferences: resp.emailPreferences,
+                otpEnabled: resp.otpEnabled
             };
 
             res.status(200).json(filteredUser);

@@ -105,7 +105,7 @@ function getTempName(imageInfo, stage) {
 
 function getTempNameStage(imagePath, stage) {
     const { dir, name, ext } = path.parse(imagePath);
-
+    
     const regex = /^(\d+)-/;
     const newName = name.replace(regex, `${stage}-`);
 
@@ -210,8 +210,8 @@ async function filterTerminated(msg) {
         dt.extraUpload.push(data.output.imageURI);
         await redisClient.set(k, JSON.stringify(dt));
     }
-
-    // Next stage
+    
+    // Next stage        
     if (runNext) {
         await applyFilter(projectId, imageId, inPath, outPath, filterInfoList[stage], stage + 1);
     } else {
@@ -237,7 +237,7 @@ async function filterTerminated(msg) {
 
             for (const file of upload) {
                 const fileData = fs.readFileSync(file);
-                zip.file(path.basename(file), fileData);
+                zip.file(file, fileData);
             }
 
             const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
@@ -248,7 +248,7 @@ async function filterTerminated(msg) {
 
             await freeRedis(projectId);
 
-            await sendMessage(process.env.NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'finished', url: uploadUrl}}));
+            await sendMessage(process.env.NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'finished', url: uploadUrl, isPreview: dt.isPreview}}));
             await hooks.terminated(projectId, uploadUrl);
         } else {
             await redisClient.set(termKey, termCount);
@@ -268,7 +268,7 @@ async function runPipelineInternal(userId, projectId, imageInfoList, filterInfoL
 
         const tempName = getTempName(imageInfo, 0);
         await hooks.downloadResource(projectId, imageInfo, tempName);
-
+        
         images.push({imageId: imageInfo.id, path: tempName});
     }
 

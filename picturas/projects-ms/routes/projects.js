@@ -1,17 +1,12 @@
 import { Router } from 'express';
 import {
-    addImage,
+    updateProject,
     addProject,
-    addTool,
-    deleteProject,
-    downloadImageLocally,
-    filterProject,
-    getProject,
     getProjects,
-    objectIdSchema,
-    removeImage,
+    deleteProject,
+    getProject,
+    addTool,
     removeTool,
-    reorderImage,
     reorderTool,
     addImage,
     getImage,
@@ -213,9 +208,9 @@ router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
     }
 
     try {
-        const { index, imageUrl } = await addImage(req.user._id, id, image, userLimits);
+        const { imageIdx, imageUrl } = await addImage(req.user._id, id, image, userLimits);
         return res.status(200).json({
-            index,
+            id: imageIdx,
             imageUrl
         })
     } catch(error) {
@@ -269,7 +264,7 @@ router.post('/:id/process', async (req, res) => {
                 message: 'Daily limit reached'
             })
 
-        const updatedPipeline = await addProjectToPipeline(userId, id, userLimits);
+        await addProjectToPipeline(userId, id, userLimits);
         const project = await getProject(userId, id);
 
         const tools = project.tools.map(tool => ({filterName: tool._doc.filterName, args: tool._doc.args ?? {}}));
@@ -277,7 +272,6 @@ router.post('/:id/process', async (req, res) => {
 
         res.status(200).json({
             message: 'Pipeline processing started.',
-            pipeline: updatedPipeline
         });
     } catch (error) {
         return res.status(500).json({ message: `Error processing pipeline: ${error.message}` });
@@ -295,7 +289,7 @@ router.post('/:id/preview', validateRequest({
     const userLimits = req.user.limits;
 
     try {
-        const updatedPipeline = await addProjectToPipeline(userId, id, userLimits);
+        await addProjectToPipeline(userId, id, userLimits);
         const project = await getProject(id);
 
         const image = await project.images.findOne(id => id === imageId);
@@ -307,7 +301,6 @@ router.post('/:id/preview', validateRequest({
 
         res.status(200).json({
             message: 'Pipeline processing started.',
-            pipeline: updatedPipeline
         });
     } catch (error) {
         res.status(500).json({ message: `Error processing pipeline: ${error.message}` });
@@ -322,7 +315,6 @@ router.delete('/:id/process', async (req, res) => {
 
         res.status(200).json({
             message: 'Pipeline processing canceled.',
-            pipeline: updatedPipeline
         });
     } catch (error) {
         res.status(500).json({ message: `Error processing pipeline: ${error.message}` });

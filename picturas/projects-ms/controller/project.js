@@ -298,7 +298,7 @@ export const uploadArtifact = async (userId, projectId, buffer, isPreview) => {
     if(!isPreview){
         const result = {
             output: imageUrl,
-            expireDate:  Date.now()
+            expireDate:  Date.now() + 2 * 24 * 60 * 60 * 1000
         };
         await updateProject(userId, projectId, {result});
     }

@@ -7,9 +7,10 @@ import { deleteProject } from '@/api/mutations/deleteProject';
 import { addImage } from '@/api/mutations/addImage';
 import { reorderImage } from '@/api/mutations/reorderImage';
 import { removeImage } from '@/api/mutations/removeImage';
-import type { Project, FilterParameters } from '@/types/project';
+import type { Project, FilterParameters, messageType } from '@/types/project';
 import { useAuthStore } from './authStore';
-import { getFiltersParemeters, addTool, removeTool, reorderTool } from '@/api';
+import { getFiltersParemeters, addTool, removeTool, reorderTool, deleteProcess, processProject, processPreview } from '@/api';
+import { getSocket } from '@/utils/socket';
 
 interface ProjectState {
   projects: Project[];
@@ -17,6 +18,7 @@ interface ProjectState {
   loading: boolean;
   error: string | null;
   filterParameters: FilterParameters | null;
+  notifications: { [projectId: string]: messageType  };
 }
 
 export const useProjectStore = defineStore('projectStore', {
@@ -26,6 +28,7 @@ export const useProjectStore = defineStore('projectStore', {
     loading: false,
     error: null,
     filterParameters: null,
+    notifications: {},
   }),
 
   actions: {
@@ -34,6 +37,7 @@ export const useProjectStore = defineStore('projectStore', {
       try {
         if (useAuthStore().accessToken) {
           const projects = await getProjects(useAuthStore().accessToken ?? '');
+          console.log(projects)
           this.projects = [];
           for (const project of projects) {
             this.projects.push({...project, images: project.images.map((img: string, idx: number) => ({id: idx, imageUrl: img}))});
@@ -237,6 +241,59 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
+    async processPreview(projectId: string, imageIdx: number) {
+      this.loading = true;
+      try {
+        const result = await processPreview(projectId, imageIdx, useAuthStore().accessToken ?? '');
+        return result;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while processing the preview';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async processProject(projectId: string) {
+      this.loading = true;
+      try {
+        const result = await processProject(projectId, useAuthStore().accessToken ?? '');
+        
+        const socket = getSocket();
+        if (socket) {
+          socket.on('notification', (notification) => {
+            if (notification.project === projectId) {
+              this.receiveNotification(notification);
+            }
+          });
+        }
+        
+        return result;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while processing the project';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async deleteProcess(projectId: string) {
+      this.loading = true;
+      try {
+        const result = await deleteProcess(projectId, useAuthStore().accessToken ?? '');
+        return result;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while deleting the process';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    receiveNotification(notification: { project: string; message: messageType }) {
+      this.notifications[notification.project] = notification.message;
+    },
+
     setProjects(projects: Project[]) {
       this.projects = projects;
     },
@@ -256,6 +313,9 @@ export const useProjectStore = defineStore('projectStore', {
   getters: {
     getProjectById: (state) => {
       return (id: string) => state.projects.find(project => project._id === id);
+    },
+    getProjectNotification: (state) => {
+      return (projectId: string) => state.notifications[projectId].url || null;
     },
   },
 });

@@ -6,6 +6,7 @@ import amqp from 'amqplib';
 import Redis from 'ioredis';
 import { createAdapter } from "@socket.io/redis-streams-adapter";
 import {serverIsReady, startPLServer} from "@picturas/ms-helper";
+import jwt from 'jsonwebtoken';
 
 const port = 3000;
 
@@ -32,7 +33,6 @@ const redisClient = new Redis({
 
 redisClient.on('connect', () => {
     incConnections();
-    console.log('Connected to Redis');
 });
 
 io.adapter(createAdapter(redisClient));
@@ -52,7 +52,7 @@ io.use((socket, next) => {
     }
 });
 
-io.on("connection", (socket) => {
+io.on("connect", (socket) => {
     socket.join(socket.user._id);
 });
 

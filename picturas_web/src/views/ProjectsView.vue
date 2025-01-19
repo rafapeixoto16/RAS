@@ -161,6 +161,15 @@
             :projectId="projectId"
             @remove="removeTool"
           />
+          <div v-if="appliedTools.length > 0" class="mt-4">
+            <button 
+              @click="processProject" 
+              :disabled="processingStatus === 'processing'"
+              class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            >
+              {{ applyButtonText }}
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -237,6 +246,7 @@ import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useProjectStore } from '@/stores/projectsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useSocketStatus } from '@/utils/socket';
 import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
@@ -253,6 +263,7 @@ interface Page {
 const route = useRoute();
 const projectStore = useProjectStore();
 const subscriptionStore = useSubscriptionStore();
+useSocketStatus();
 
 const projectId = computed<string>(() => route.params.id as string);
 const project = computed(() => projectStore.getProjectById(projectId.value));
@@ -275,6 +286,8 @@ let startY = 0;
 let lastPinchDistance: number | null = null;
 const isToolDrawerOpen = ref(false);
 const appliedTools = computed(() => project.value ? project.value.tools : []);
+const processingStatus = ref<'idle' | 'processing' | 'completed' | 'error'>('idle');
+const notification = ref<string | null>(null);
 
 onMounted(async () => {
   if (project.value) {
@@ -604,6 +617,49 @@ watch(project, (newProject) => {
     }
   }
 }, { immediate: true });
+
+const processProject = async () => {
+  if (!project.value) return;
+  
+  processingStatus.value = 'processing';
+  try {
+    await projectStore.processProject(projectId.value);
+    
+    await new Promise<void>((resolve) => {
+      const unwatch = watch(() => projectStore.getProjectNotification(projectId.value), (newNotification) => {
+        if (newNotification) {
+          notification.value = newNotification;
+          processingStatus.value = 'completed';
+          unwatch();
+          resolve();
+        }
+      });
+    });
+    if (notification.value) {
+      console.log(notification.value)
+      const link = document.createElement('a');
+      link.href = notification.value;
+      link.download = `project-${project.value._id}.zip`;
+      link.click();
+    }
+  } catch (error) {
+    console.error('Error processing project:', error);
+    processingStatus.value = 'error';
+  }
+};
+
+const applyButtonText = computed(() => {
+  switch (processingStatus.value) {
+    case 'processing':
+      return 'Processing...';
+    case 'completed':
+      return 'Download Results';
+    case 'error':
+      return 'Error - Try Again';
+    default:
+      return 'Apply Pipeline';
+  }
+});
 </script>
 
 <style scoped>

@@ -117,7 +117,6 @@ const formatOptionName = (name: string) => {
 };
 
 const apply = () => {
-  console.log('Applying tool:', props.toolName, 'with values:', toolValues.value);
   emit('apply', { filterName: props.toolName, args: toolValues.value });
 };
 

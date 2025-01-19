@@ -104,6 +104,7 @@ import TwoFactorModal from '@/components/TwoFactorModal.vue';
 import { useUserStore } from '@/stores/userStore';
 import { loginGuest } from '@/api/mutations/login';
 import { useProjectStore } from '@/stores/projectsStore';
+import { initializeSocket } from '@/utils/socket';
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
@@ -134,6 +135,7 @@ const handleLogin = async () => {
       userStore.setUser({username: username, email: email, avatarUrl: profilePic})
       projectsStore.clearEverything();
       await projectsStore.fetchProjects();
+      initializeSocket(finalResponse.accessToken);
       router.push('/dashboard');
     }
   } catch (error) {
@@ -148,6 +150,7 @@ const handleGuest = async () => {
     if (!authStore.accessToken) {
       const response = await loginGuest();
       authStore.setTokensGuest(response.accessToken);
+      initializeSocket(response.accessToken);
     }
     projectsStore.clearEverything();
     await projectsStore.fetchProjects();
@@ -167,6 +170,7 @@ const handleTwoFactorVerification = async (twoFactorCode: string) => {
     userStore.setUser({username: username, email: email, avatarUrl: profilePic})
     projectsStore.clearEverything();
     await projectsStore.fetchProjects();
+    initializeSocket(response.accessToken);
     router.push('/dashboard');
   } catch (error) {
     console.error('Two-factor login error:', error);

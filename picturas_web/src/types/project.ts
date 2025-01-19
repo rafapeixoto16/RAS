@@ -48,3 +48,10 @@ export interface FilterParameter {
 export interface FilterParameters {
   [key: string]: FilterParameter;
 }
+
+export interface messageType {
+  kind: string;
+  error: unknown | null;
+  url: string | null;
+  isPreview: boolean | null;
+}
