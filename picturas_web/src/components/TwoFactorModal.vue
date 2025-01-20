@@ -21,6 +21,9 @@
               pattern="[0-9]*"
             />
           </template>
+          <div class="flex items-center justify-center text-blue-600 text-lg sm:text-xl font-semibold">
+            {{ remainingTime }}s
+          </div>
         </div>
         <button
           @click="verify"
@@ -35,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted, onUnmounted } from 'vue';
 
 const code = reactive(Array(6).fill(''));
 const inputRefs = ref<HTMLInputElement[]>([]);
@@ -71,4 +74,28 @@ const verify = () => {
     emit('verify', fullCode);
   }
 };
+
+const timeRemainingForTOTP = () => {
+  const currentTime = Math.floor(Date.now() / 1000);
+  const timeStep = 30;
+  const timeSinceLastStep = currentTime % timeStep;
+
+  return timeStep - timeSinceLastStep;
+};
+
+const remainingTime = ref(timeRemainingForTOTP());
+
+const updateRemainingTime = () => {
+  remainingTime.value = timeRemainingForTOTP();
+};
+
+let intervalId: ReturnType<typeof setInterval>;
+
+onMounted(() => {
+  intervalId = setInterval(updateRemainingTime, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
 </script>
