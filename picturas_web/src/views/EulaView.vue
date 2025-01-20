@@ -12,8 +12,6 @@
           <div class="absolute bottom-1/4 left-1/2 w-20 h-20 bg-blue-200 rounded-lg rotate-12 opacity-20"></div>
         </div>
       </div>
-
-      <div class="w-full relative z-10">
         <div class="text-center mb-10">
           <h1 class="text-4xl font-bold text-blue-600 mb-2">End-User License Agreement (EULA)</h1>
         </div>
@@ -27,7 +25,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script lang="ts">

@@ -36,14 +36,20 @@
                 </p>
               </div>
 
-              <form @submit.prevent="handleSubmit" class="mt-6 space-y-4">
-                <div class="space-y-2">
-                  <label for="card-element" class="block text-sm font-medium text-gray-700">
-                    Card information
-                  </label>
-                  <div id="card-element" ref="cardElement" class="rounded-md border border-gray-300 p-3"></div>
-                  <div id="card-errors" role="alert" class="text-sm text-red-600"></div>
-                </div>
+              <form v-if="stripeLoaded" @submit.prevent="handleSubmit" class="mt-6 space-y-4">
+                <StripeElements
+                  class="py-3"
+                  :stripe-key="publishableKey"
+                  :instance-options="stripeOptions"
+                  :elements-options="elementsOptions"
+                  ref="elementsComponent"
+                >
+                  <StripeElement
+                    type="card"
+                    :options="cardOptions"
+                    ref="cardComponent"
+                  />
+                </StripeElements>
 
                 <TransitionGroup
                   enter-active-class="transition duration-200 ease-out"
@@ -96,13 +102,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick, computed, onUnmounted } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { CreditCard, Loader2, CheckIcon, XIcon } from 'lucide-vue-next'
 import { subscribe } from '@/api/mutations/subscriptions'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
-import { loadStripe, type Stripe, type StripeCardElement, type StripeElements } from '@stripe/stripe-js'
 import { useAuthStore } from '@/stores/authStore'
+import { loadStripe } from "@stripe/stripe-js"
+import type {
+  Stripe,
+  StripeCardElement,
+  StripeCardElementOptions,
+  StripeConstructorOptions,
+  StripeElementsOptions,
+} from "@stripe/stripe-js"
+import { computed, onBeforeMount, ref, useTemplateRef } from "vue"
+import { StripeElement, StripeElements } from 'vue-stripe-js'
 
 const props = defineProps<{
   isOpen: boolean
@@ -119,69 +133,30 @@ const isLoading = ref(false)
 const status = ref<'idle' | 'loading' | 'success' | 'error'>('idle')
 const message = ref('')
 const subscriptionStore = useSubscriptionStore()
+const publishableKey = import.meta.env.STRIPE_PUBLIC_KEY;
+const stripeLoaded = ref(false)
+
+const stripeOptions = ref<StripeConstructorOptions>({})
+const elementsOptions = ref<StripeElementsOptions>({})
+const cardOptions = ref<StripeCardElementOptions>({
+  style: {
+    base: {},
+    invalid: {},
+  },
+})
+
 const stripe = ref<Stripe | null>(null)
-const elements = ref<StripeElements | null>(null)
-const cardElementInstance = ref<StripeCardElement | null>(null)
-const cardElement = ref<HTMLElement | null>(null)
 
-const initializeStripe = async () => {
-  const stripe_public_key = import.meta.env.STRIPE_PUBLIC_KEY
+const elementsComponent = useTemplateRef("elementsComponent")
+const cardComponent = useTemplateRef("cardComponent")
 
-  if (!stripe.value) {
-    stripe.value = await loadStripe(stripe_public_key);
-  }
-  
-  if (stripe.value && !elements.value) {
-    elements.value = stripe.value.elements()
-  }
-
-  await nextTick()
-
-  if (cardElement.value && elements.value) {
-    cardElementInstance.value = elements.value.create('card')
-    cardElementInstance.value.mount(cardElement.value)
-  } else {
-    console.error('Card element or Stripe Elements not available')
-  }
-}
-
-onMounted(() => {
-  if (props.isOpen) {
-    initializeStripe()
-  }
-})
-
-onUnmounted(() => {
-  if (elements.value) {
-    cardElementInstance.value?.unmount();
-    cardElementInstance.value?.destroy();
-    elements.value = null
-  }
-
-  if (stripe.value) {
-    stripe.value = null
-  }
-})
-
-watch(() => props.isOpen, (isOpen) => {
-  if (isOpen) {
-    nextTick(() => {
-      initializeStripe()
-    })
-  } else {
-    status.value = 'idle'
-    message.value = ''
-    if (elements.value) {
-      const cardElement = elements.value.getElement('card')
-      if (cardElement) {
-        cardElement.clear()
-      }
-    }
-  }
+onBeforeMount(async () => {
+  stripe.value = await loadStripe(publishableKey)
+  stripeLoaded.value = true
 })
 
 const handleSubmit = async () => {
-  if (!stripe.value || !elements.value) {
+  if (!stripe.value) {
     console.error('Stripe has not been initialized')
     return
   }
@@ -194,17 +169,23 @@ const handleSubmit = async () => {
     const interval = props.billingCycle === 'monthly' ? 'month' : 'year'
     const { type, clientSecret } = await subscribe(interval, useAuthStore().accessToken ?? '')
 
-    let result;
+    const card = cardComponent.value?.stripeElement as StripeCardElement
+    const stripeInstance = elementsComponent.value?.instance
+
+    let result
+    if (!stripeInstance) {
+      throw new Error('Stripe instance is not available')
+    }
     if (type === 'payment') {
-      result = await stripe.value.confirmCardPayment(clientSecret, {
+      result = await stripeInstance.confirmCardPayment(clientSecret, {
         payment_method: {
-          card: elements.value.getElement('card')!,
+          card,
         }
       })
     } else if (type === 'setup') {
-      result = await stripe.value.confirmCardSetup(clientSecret, {
+      result = await stripeInstance.confirmCardSetup(clientSecret, {
         payment_method: {
-          card: elements.value.getElement('card')!,
+          card
         }
       })
     } else {
