@@ -17,8 +17,24 @@
             {{ formatOptionName(key) }}
           </label>
           
+          <div v-if="toolName === 'addBorder' && key === 'color'" class="space-y-4">
+            <ColorPicker 
+              v-model:pureColor="toolValues[key]"
+              :default-value="option.default || '#000000'"
+              theme="light"
+              format="hex"
+            />
+            <input
+              :id="key"
+              v-model="toolValues[key]"
+              type="text"
+              :pattern="option.pattern"
+              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
           <input
-            v-if="option.type === 'number'"
+            v-else-if="option.type === 'number'"
             :id="key"
             v-model.number="toolValues[key]"
             type="number"
@@ -86,6 +102,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import type { ToolOption } from '@/types/project';
+import { ColorPicker } from 'vue3-colorpicker';
+import 'vue3-colorpicker/style.css';
 
 interface Props {
   toolName: string;
@@ -136,3 +154,13 @@ const cancel = () => {
   emit('cancel');
 };
 </script>
+
+<style>
+.vue3-colorpicker {
+  --colorpicker-bg-color: white;
+  --colorpicker-border-color: #e5e7eb;
+  --colorpicker-border-radius: 0.375rem;
+  --colorpicker-box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  width: 100%;
+}
+</style>

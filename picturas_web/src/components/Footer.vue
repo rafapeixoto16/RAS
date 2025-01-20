@@ -133,6 +133,14 @@
           </a>
         </div>
       </div>
+      <div class="py-6 flex flex-col md:flex-row items-center justify-between" style="padding-right: 5rem;">
+        <p class="text-sm text-gray-500">
+          For technical support, contact us at <a href="mailto:support@picturas.com" class="text-blue-500 hover:underline">support@picturas.com</a>
+        </p>
+        <p class="text-sm text-gray-500">
+          For data export inquiries, contact us at <a href="mailto:dataexport@picturas.com" class="text-blue-500 hover:underline">dataexport@picturas.com</a>
+        </p>
+      </div>
     </div>
   </footer>
 </template>
