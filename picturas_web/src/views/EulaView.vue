@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full max-w-lg relative z-10 bg-white">
+  <div class="flex w-full relative z-10 bg-white">
     <div class="w-full flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-white relative overflow-hidden">
       <div class="absolute inset-0 overflow-hidden">
         <div class="absolute top-0 left-0 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -13,7 +13,7 @@
         </div>
       </div>
 
-      <div class="w-full max-w-md relative z-10">
+      <div class="w-full relative z-10">
         <div class="text-center mb-10">
           <h1 class="text-4xl font-bold text-blue-600 mb-2">End-User License Agreement (EULA)</h1>
         </div>
