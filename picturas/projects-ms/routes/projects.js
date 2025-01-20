@@ -1,37 +1,30 @@
 import { Router } from 'express';
 import {
-    updateProject,
-    addProject,
-    getProjects,
-    deleteProject,
-    getProject,
-    addTool,
-    removeTool,
-    reorderTool,
     addImage,
-    getImage,
-    removeImage,
-    downloadImageLocally,
-    uploadArtifact,
-    objectIdSchema,
-    filterProject,
-    reorderImage,
+    addProject,
+    addTool,
+    countImagesInProject,
     countProjects,
-    countImagesInProject
+    deleteProject,
+    downloadImageLocally,
+    filterProject,
+    getProject,
+    getProjects,
+    removeImage,
+    removeTool,
+    reorderImage,
+    reorderTool,
+    updateProject,
 } from '../controller/project.js';
 import { queryProjectSchema } from '../models/queryProject.js';
 import { schemaValidation, validateRequest } from '@picturas/schema-validation';
 import schemas from '../utils/filters.js';
 import multer from '../config/multerConfig.js';
 import { getLimitsMiddleware } from '../utils/premium.js';
-import {
-    addProjectToPipeline,
-    isUserLimitReached,
-    removeProjectFromPipeline,
-} from '../controller/pipeline.js';
+import { addProjectToPipeline, isUserLimitReached } from '../controller/pipeline.js';
 import { cancelPipeline, runPipeline, runPreview, setHooks } from '../utils/filterCall.js';
 
-setHooks(downloadImageLocally, uploadArtifact, removeProjectFromPipeline);
+setHooks(downloadImageLocally);
 
 const router = Router();
 router.use(getLimitsMiddleware);
@@ -202,11 +195,11 @@ router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
     const { id } = req.params;
     const image = req.file;
     const userLimits = req.user.limits;
-    
+
     if (!image) {
         return res.status(400).json({error: 'No image uploaded'});
     }
-    
+
     try {
         const numImages = await countImagesInProject(req.user._id, id);
         if (numImages >= req.user.limits.imagesLimit){
