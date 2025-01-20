@@ -290,6 +290,16 @@ export const useProjectStore = defineStore('projectStore', {
       this.loading = true;
       try {
         const result = await deleteProcess(projectId, useAuthStore().accessToken ?? '');
+
+        const socket = getSocket();
+        if (socket) {
+          socket.on('notification', (notification) => {
+            if (notification.projectId === projectId) {
+              this.receiveNotification(notification);
+            }
+          });
+        }
+
         return result;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An error occurred while deleting the process';
@@ -314,6 +324,10 @@ export const useProjectStore = defineStore('projectStore', {
 
     async removeNonPreviewNotification(projectId: string) {
       this.notifications = this.notifications.filter(notification => notification.projectId === projectId && notification.message.isPreview);
+    },
+
+    async removeCanceledNotification(projectId: string) {
+      this.notifications = this.notifications.filter(notification => !(notification.projectId === projectId && notification.message.kind == "canceled"));
     },
 
     receiveNotification(notification: Notification) {

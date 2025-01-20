@@ -5,6 +5,7 @@ import * as OTPAuth from 'otpauth';
 import sendEmail from '../email/sendEmail.js';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import axios from 'axios';
 import mongoose from 'mongoose';
 
 import * as User from '../controller/user.js';
@@ -44,7 +45,7 @@ router.post('/register', validateRequest({
 
     if (migrate) {
         try {
-            const decoded = jwt.verify(token, process.env.AUTH_JWT_SECRET);
+            const decoded = jwt.verify(migrate, process.env.AUTH_JWT_SECRET);
             createUser._id = decoded._id;
         } catch (_) {
             return res.sendStatus(400);
@@ -68,7 +69,7 @@ router.post('/register', validateRequest({
             sendEmail(user.email, validationToken, kinds.validateAccount);
             res.sendStatus(200);
         })
-        .catch((err) => {
+        .catch((_) => {
             res.status(444).json({error: 'Failed to add user'});
         });
 });
@@ -538,13 +539,13 @@ router.delete('/deleteAccount', async (req, res) => {
     try {
         const userId = req.user._id;
 
-        await axios.delete(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}/private/deleteAccout`, {
+        await axios.delete(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}/private/deleteAccount`, {
             data: {
                 userId
             }
         });
 
-        await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/deleteAccout`, {
+        await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/deleteAccount`, {
             data: {
                 userId
             }
@@ -554,7 +555,6 @@ router.delete('/deleteAccount', async (req, res) => {
 
         res.status(200).json({
             message: 'User deleted.',
-            userId: userInfo._id
         });
     } catch (_) {
         res.sendStatus(500);

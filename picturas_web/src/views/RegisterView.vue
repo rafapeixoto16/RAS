@@ -92,9 +92,17 @@
               </button>
             </div>
           </div>
-          <div class="mt-4 text-center text-sm text-blue-500">
-            <p>By creating an account, you automatically accept our Terms and Conditions.</p>
-          </div>
+            <div class="mt-4 text-center text-sm text-blue-500">
+            <p>
+              By creating an account, you automatically accept our 
+              <router-link 
+              to="/eula" 
+              class="text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline"
+              >
+              Terms and Conditions
+              </router-link>.
+            </p>
+            </div>
           <button 
             type="submit" 
             class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg"
@@ -148,6 +156,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { register } from '@/api';
+import { useAuthStore } from '@/stores/authStore';
 
 const router = useRouter();
 const name = ref('');
@@ -195,7 +204,8 @@ const handleRegister = async () => {
       name: name.value,
       username: username.value,
       email: email.value,
-      password: password.value
+      password: password.value,
+      migrate: useAuthStore().accessToken ?? undefined
     });
     router.push({ path: `/registration-success/${email.value}` });
   } catch (error) {

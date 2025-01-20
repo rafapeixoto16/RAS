@@ -28,3 +28,4 @@ export * from './mutations/reorderTool';
 export * from './mutations/processProject';
 export * from './mutations/deleteProcess';
 export * from './mutations/processPreview';
+export * from './mutations/deleteAccount';

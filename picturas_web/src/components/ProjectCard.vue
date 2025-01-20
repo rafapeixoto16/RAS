@@ -41,9 +41,9 @@
               <Dropdown
                 placement="right"
                 trigger="click"
-                @open-new-tab="$emit('open-new-tab', $event)"
-                @rename="$emit('rename', $event)"
-                @move-to-trash="$emit('move-to-trash', $event)"
+                :project="project"
+                @open-new-tab="openInNewTab"
+                @move-to-trash="deleteProject"
                 :options="getDropdownOptions"
                 :menu-color="'#FFFFFF'"
                 append-to-body
@@ -67,9 +67,8 @@
       :projectId="activeMobileProjectId"
       :mode="mode"
       @close="closeMobileOptions"
-      @open-new-tab="$emit('open-new-tab', $event)"
-      @rename="$emit('rename', $event)"
-      @move-to-trash="$emit('move-to-trash', $event)"
+      @open-new-tab="openInNewTab"
+      @move-to-trash="deleteProject"
       @restore="$emit('restore', $event)"
       @remove-permanently="$emit('remove-permanently', $event)"
     />
@@ -81,8 +80,10 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Dropdown from './CustomDropdown.vue';
 import MobileProjectOptions from './MobileProjectOptions.vue';
 import { type Project } from '@/types/project';
+import { useProjectStore } from '@/stores/projectsStore';
 
-const emit = defineEmits(["open-new-tab", "rename", "move-to-trash", "edit", "restore", "remove-permanently"]);
+const emit = defineEmits(["open-new-tab", "move-to-trash", "edit", "restore", "remove-permanently"]);
+const projectStore = useProjectStore()
 
 // Props
 const props = defineProps<{
@@ -104,6 +105,20 @@ const closeMobileOptions = () => {
   activeMobileProjectId.value = null;
 };
 
+const openInNewTab = (id: string) => {
+  const baseUrl = window.location.origin;
+  const fullUrl = `${baseUrl}/project/${id}`;
+  window.open(fullUrl, "_blank");
+};
+
+const deleteProject = async (projectId: string) => {
+  try {
+    await projectStore.deleteProject(projectId);
+  } catch (error) {
+    console.error("Error deleting project:", error);
+  }
+};
+
 const getDropdownOptions = computed(() => {
   if (mode === 'default') {
     return [
@@ -112,7 +127,6 @@ const getDropdownOptions = computed(() => {
         icon: 'bi-box-arrow-up-right',
         action: () => emit('open-new-tab', props.project._id),
       },
-      { label: 'Rename', icon: 'bi-pencil', action: () => emit('rename', props.project._id) },
       { label: 'Move to Trash', icon: 'bi-trash', action: () => emit('move-to-trash', props.project._id) },
     ];
   } else if (mode === 'trash') {

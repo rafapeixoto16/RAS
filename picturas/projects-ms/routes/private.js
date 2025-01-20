@@ -10,21 +10,19 @@ const router = Router();
 
 router.delete('/deleteAccount', async (req, res) => {
     try {
-        const userId = req.user._id;
-
-        const projects = getProjects(userId);
+        const userId = req.body.userId;
 
         await deleteProjects(userId);
-
+        
         res.sendStatus(200);
-    } catch(error) {
+    } catch(_) {
         res.sendStatus(500);
     }
 });
 
 router.post('/migrateAccount', async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.body.userId;
         const projects = await Project.find({ userId });
 
         await Promise.all(project.map(async project => {

@@ -66,8 +66,14 @@
               <i class="bi bi-plus mr-2 fs-5 text-[20px]"></i>
               Create a Project
             </button>
-
-            <button
+            <router-link v-if="!authStore.isLoggedIn()"
+              to="/plans"
+              class="flex items-center justify-center px-2 py-3 w-full bg-white hover:bg-azure-radiance-500 text-sm xl:text-base text-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
+            >
+              <i class="bi bi-gem mr-2"></i>
+              Check our Plans
+            </router-link>
+            <button v-else-if="!subscriptionsStore.isPremium && authStore.isLoggedIn()"
               class="flex items-center justify-center px-2 py-3 w-full bg-white hover:bg-azure-radiance-500 text-sm xl:text-base text-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
               @click="openPremiumModal"
             >
@@ -137,10 +143,12 @@ import { ref, computed } from "vue";
 import { useProjectStore } from "@/stores/projectsStore";
 import router from "@/router";
 import ProjectNameModal from './ProjectNameModal.vue';
+import { useSubscriptionStore } from "@/stores/subscriptionStore";
 
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn());
+const subscriptionsStore = useSubscriptionStore();
 
 const props = defineProps<{
   isOpen: boolean;

@@ -99,6 +99,12 @@ const router = createRouter({
       name: 'NotFound',
       component: () => import('../views/Error404View.vue'),
       meta: { fullWidth: true },
+    },
+    {
+      path: '/eula',
+      name: 'Eula',
+      component: () => import('../views/EulaView.vue'),
+      meta: { fullWidth: true },
     }
   ],
 })

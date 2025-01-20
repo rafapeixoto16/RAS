@@ -47,14 +47,14 @@
       </form>
     </Modal>
 
-    <Modal v-if="showDeleteAccountModal" @close="showDeleteAccountModal = false">
+    <Modal v-if="showDeleteAccountModal" @close="showDeleteAccountModal = false" :hasClose="false">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Confirm Account Deletion</h3>
         <p class="text-gray-600 mb-4">Are you sure you want to delete your account? This action cannot be undone.</p>
         <div class="flex justify-end space-x-4">
           <button @click="showDeleteAccountModal = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
             Cancel
           </button>
-          <button @click="deleteAccount" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+          <button @click="deleteAccountUser" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
             Delete Account
           </button>
         </div>
@@ -72,6 +72,8 @@ import Modal from '@/components/CustomModal.vue';
 import { useAuthStore } from '@/stores/authStore';
 import QRCodeModal from '@/components/QrCodeModal.vue';
 import { activateOtp, deactivateOtp } from '@/api';
+import { deleteAccount } from '@/api';
+import router from '@/router';
 
 
 const user = ref({
@@ -125,7 +127,9 @@ const toggleTwoFactor = async () => {
   }
 };
 
-const deleteAccount = () => {
+const deleteAccountUser = async () => {
+    await deleteAccount(useAuthStore().accessToken ?? '');
     showDeleteAccountModal.value = false;
+    router.push('/login');
 };
 </script>

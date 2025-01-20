@@ -42,7 +42,7 @@
                 <i class="bi bi-eye text-xl"></i>
                 <span>Preview</span>
                 <span v-if="isProcessingPreview" class="text-sm">
-                  <i class="bi bi-arrow-repeat animate-spin"></i>
+                  <Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4" />
                 </span>
                 </button>
             </div>
@@ -180,6 +180,13 @@
             >
               {{ applyButtonText }}
             </button>
+            <button 
+              v-if="processingStatus === 'processing'"
+              @click="cancelProcessing"
+              class="mt-2 w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
+            >
+              Cancel Processing
+            </button>
           </div>
         </div>
       </aside>
@@ -274,6 +281,7 @@ import PreviewModal from '@/components/PreviewModal.vue';
 import type { Tool } from '@/types/project';
 import type { PreviewData } from '@/types/preview';
 import JSZip from 'jszip';
+import { Loader2 } from 'lucide-vue-next'
 
 interface Page {
   id: number;
@@ -653,7 +661,7 @@ const processProject = async () => {
     
     await new Promise<void>((resolve) => {
       const unwatch = watch(() => projectStore.getProjectNotification(projectId.value), async (newNotification) => {
-        if (newNotification && !newNotification.message.isPreview) {
+        if (newNotification && !newNotification.message.isPreview && newNotification.message.kind != "canceled" ) {
           notification.value = newNotification.message.url;
           processingStatus.value = 'completed';
           unwatch();
@@ -677,6 +685,19 @@ const processProject = async () => {
   }
 };
 
+const cancelProcessing = async () => {
+  if (!project.value) return;
+  
+  try {
+    await projectStore.deleteProcess(project.value._id);
+    processingStatus.value = 'idle';
+    notification.value = null;
+    projectStore.removeCanceledNotification(projectId.value);
+  } catch (error) {
+    console.error('Error canceling process:', error);
+  }
+};
+
 const processPreview = async () => {
   if(!project.value) return;
 
@@ -686,7 +707,7 @@ const processPreview = async () => {
 
     await new Promise<void>((resolve) => {
       const unwatch = watch(() => projectStore.getProjectNotification(projectId.value), async (newNotification) => {
-        if (newNotification && newNotification.message.isPreview) {
+        if (newNotification && newNotification.message.isPreview && newNotification.message.kind != "canceled") {
           unwatch();
         
           notification.value = newNotification.message.url

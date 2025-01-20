@@ -5,6 +5,7 @@ interface RegisterData {
   username: string;
   email: string;
   password: string;
+  migrate?: string;
 }
 
 export const register = async (data: RegisterData) => {

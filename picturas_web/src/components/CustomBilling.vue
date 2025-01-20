@@ -72,6 +72,7 @@ const goToPlans = () => {
 const cancelSubscription = async () => {
   try {
     await subscriptionsStore.cancelPremiumSubscription();
+    router.go(0);
   } catch (error) {
     console.error('Failed to cancel subscription:', error);
   }

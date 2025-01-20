@@ -15,7 +15,13 @@
           <i class="bi bi-plus mr-2 fs-5 text-[20px]"></i>
           Create a Project
         </button>
-        <button
+        <router-link v-if="!authStore.isLoggedIn()"
+          class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-500 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
+          to="/plans">
+          <i class="bi bi-gem mr-2"></i>
+          Check our Plans
+        </router-link>
+        <button v-else-if="!subscriptionsStore.isPremium && authStore.isLoggedIn()"
           class="flex items-center justify-center px-2 py-3 w-full bg-white text-sm xl:text-base text-azure-radiance-950 hover:bg-azure-radiance-500 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
           @click="openPremiumModal">
           <i class="bi bi-gem mr-2"></i>
@@ -32,7 +38,7 @@
             draggable="true"
             @dragstart="onDragStart($event, project._id)"
           >
-            <router-link class="block p-4 rounded w-full" :to="'project/' + project._id">
+            <router-link class="block p-4 rounded w-full" :to="'/project/' + project._id">
               {{ project.name }}
             </router-link>
             <div
@@ -103,6 +109,7 @@ import PremiumUpgrade from './PremiumUpgrade.vue';
 import ProjectNameModal from './ProjectNameModal.vue';
 import type { Project } from '@/types/project';
 import { useProjectStore } from '@/stores/projectsStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import router from '@/router';
 
 const authStore = useAuthStore();
@@ -112,6 +119,7 @@ const emit = defineEmits(["open-new-tab", "move-to-trash"]);
 const seeAll = ref(false);
 const isOpenPremium = ref(false);
 const isProjectModalOpen = ref(false);
+const subscriptionsStore = useSubscriptionStore();
 
 const getDropdownOptions = (project: Project) => {
   return [
