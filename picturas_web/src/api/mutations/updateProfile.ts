@@ -1,5 +1,4 @@
 import axiosInstance from '../axiosConfig';
-import { useAuthStore } from '@/stores/authStore';
 
 interface UpdateProfileData {
   name?: string;
@@ -9,11 +8,9 @@ interface UpdateProfileData {
   username?: string;
 }
 
-const authStore = useAuthStore()
 
-export const updateProfile = async (data: UpdateProfileData) => {
+export const updateProfile = async (data: UpdateProfileData, accessToken: string) => {
   try {
-    const accessToken = authStore.accessToken;
     const response = await axiosInstance.put('/api/v1/user/', data, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -25,9 +22,8 @@ export const updateProfile = async (data: UpdateProfileData) => {
   }
 };
 
-export const updateProfilePic = async (file: File) => {
+export const updateProfilePic = async (file: File, accessToken: string) => {
   try {
-    const accessToken = authStore.accessToken;
     const formData = new FormData();
     formData.append('profilePic', file);
     const response = await axiosInstance.put('/profilePic', formData, {

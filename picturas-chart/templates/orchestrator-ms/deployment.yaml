@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orchestrator-ms
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      name: orchestrator-ms
+  template:
+    metadata:
+      labels:
+        name: orchestrator-ms
+    spec:
+      containers:
+        - name: orchestrator-ms
+          image: "{{ .Values.imageRegistry }}orchestrator-ms:{{ .Values.imageTag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: 9121
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9121
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 9121
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-auth-secret
+                  key: password
+            - name: FILTER_OUTPUT_EXCHANGE
+              value: {{ .Values.filter_output_exchange }}
+            - name: FILTER_OUTPUT_ROUTING_KEY
+              value: {{ .Values.filter_output_routing_key }}
+            - name: NOTIFICATION_QUEUE
+              value: {{ .Values.notification_queue }}
+            - name: FILTER_REDIS_HOST
+              value: "filter-redis-master"
+            - name: FILTER_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: filter-redis-auth-secret
+                  key: password
+            - name: PROJECTS_MS
+              value: projects-ms
+            - name: PROJECTS_MS_PORT
+              value: '3000'
+          volumeMounts:
+            - mountPath: {{ .Values.filter_shared_dir }}
+              name: nfs-volume
+      volumes:
+        - name: nfs-volume # Simulated with hostPath (single node)
+          hostPath:
+            path: /tmp/picturas

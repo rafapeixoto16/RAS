@@ -5,6 +5,7 @@ import * as OTPAuth from 'otpauth';
 import sendEmail from '../email/sendEmail.js';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import axios from 'axios';
 import mongoose from 'mongoose';
 
 import * as User from '../controller/user.js';
@@ -33,16 +34,23 @@ router.post('/register', validateRequest({
         email: schemaValidation.string().email(),
         password: schemaValidation.string(),
         username: schemaValidation.string(),
-        userId: objectIdSchema.optional()
+        migrate: schemaValidation.string().optional()
     }),
 }), async (req, res) => {
     if (req.body.name === 'Rick Astley') console.log('Never Gonna Give You Up');
 
     req.body.password = await bcrypt.hash(req.body.password, SALT_WORK_FACTOR);
 
-    const { userId, ...createUser } = req.body;
+    const { migrate, ...createUser } = req.body;
 
-    if (userId) createUser._id = req.body.userId;
+    if (migrate) {
+        try {
+            const decoded = jwt.verify(migrate, process.env.AUTH_JWT_SECRET);
+            createUser._id = decoded._id;
+        } catch (_) {
+            return res.sendStatus(400);
+        }
+    }
 
     User.addUser(createUser)
         .then((user) => {
@@ -61,7 +69,7 @@ router.post('/register', validateRequest({
             sendEmail(user.email, validationToken, kinds.validateAccount);
             res.sendStatus(200);
         })
-        .catch((err) => {
+        .catch((_) => {
             res.status(444).json({error: 'Failed to add user'});
         });
 });
@@ -421,7 +429,8 @@ router.get('/', (req, res) => {
                 bio: resp.bio,
                 name: resp.name,
                 profilePic: resp.profilePic,
-                emailPreferences: resp.emailPreferences
+                emailPreferences: resp.emailPreferences,
+                otpEnabled: resp.otpEnabled
             };
 
             res.status(200).json(filteredUser);
@@ -530,13 +539,13 @@ router.delete('/deleteAccount', async (req, res) => {
     try {
         const userId = req.user._id;
 
-        await axios.delete(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}/private/deleteAccout`, {
+        await axios.delete(`http://${process.env.SUBSCRIPTIONS_MS}:${process.env.SUBSCRIPTIONS_MS_PORT}/private/deleteAccount`, {
             data: {
                 userId
             }
         });
 
-        await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/deleteAccout`, {
+        await axios.delete(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/deleteAccount`, {
             data: {
                 userId
             }
@@ -546,7 +555,6 @@ router.delete('/deleteAccount', async (req, res) => {
 
         res.status(200).json({
             message: 'User deleted.',
-            userId: userInfo._id
         });
     } catch (_) {
         res.sendStatus(500);

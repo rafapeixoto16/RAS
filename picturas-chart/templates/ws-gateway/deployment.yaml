@@ -63,3 +63,8 @@ spec:
                   key: password
             - name: FRONTEND_URL
               value: {{ .Values.frontend_url }}
+            - name: AUTH_JWT_SECRET
+              valueFrom:
+               secretKeyRef:
+                 name: auth-jwt-secret
+                 key: token-secret

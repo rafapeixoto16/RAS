@@ -41,14 +41,14 @@
           class="space-y-6 backdrop-blur-sm bg-azure-radiance-50 bg-opacity-50 p-8 rounded-xl shadow-lg border border-azure-radiance-50 border-opacity-20">
           <div class="space-y-2">
             <label for="email" class="block text-sm font-medium text-blue-700">Email</label>
-            <input id="email" v-model="email" type="text" placeholder="Enter your email"
+            <input id="email" v-model="email" type="email" placeholder="Enter your email" required
               class="w-full px-3 py-2 bg-azure-radiance-50 bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300" />
           </div>
           <div class="space-y-2">
             <label for="password" class="block text-sm font-medium text-blue-700">Password</label>
             <div class="relative">
               <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'"
-                placeholder="Enter your password"
+                placeholder="Enter your password" required
                 class="w-full px-3 py-2 bg-azure-radiance-50 bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300" />
               <button type="button" @click="toggleShowPassword"
                 class="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:text-blue-700 transition-colors duration-200">
@@ -56,8 +56,8 @@
               </button>
             </div>
           </div>
-          <button type="submit"
-            class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-azure-radiance-50 font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg">
+          <button type="submit" :disabled="!isFormValid"
+            class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-azure-radiance-50 font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
             Sign In
           </button>
           <div class="text-center mb-10">
@@ -69,7 +69,6 @@
               Continue as a Guest
             </button>
           </div>
-
 
           <div v-if="errorMessage" class="mt-4 text-red-600 text-center">
             {{ errorMessage }}
@@ -96,15 +95,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getUserInfo, login, loginSecondFactor } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
+import TwoFactorModal from '@/components/TwoFactorModal.vue';
 import { useUserStore } from '@/stores/userStore';
 import { loginGuest } from '@/api/mutations/login';
+import { useProjectStore } from '@/stores/projectsStore';
+import { deactivateSocket, initializeSocket } from '@/utils/socket';
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const projectsStore = useProjectStore()
 const router = useRouter();
 const email = ref('');
 const password = ref('');
@@ -117,9 +120,17 @@ const toggleShowPassword = () => {
   showPassword.value = !showPassword.value;
 };
 
+const isFormValid = computed(() => {
+  return email.value.trim() !== '' && password.value.trim() !== '';
+});
+
 const handleLogin = async () => {
   try {
     errorMessage.value = '';
+    if (!isFormValid.value) {
+      errorMessage.value = 'Please enter both email and password.';
+      return;
+    }
     const response = await login({ email: email.value, password: password.value });
     if (response.requiresOtp) {
       loginJwt.value = response.validationToken;
@@ -127,8 +138,12 @@ const handleLogin = async () => {
     } else {
       const finalResponse = await loginSecondFactor(response.validationToken);
       authStore.setTokens(finalResponse.accessToken, finalResponse.refreshToken);
-      const { username, email, profilePic } = await getUserInfo()
+      const { username, email, profilePic } = await getUserInfo(authStore.accessToken ?? '')
       userStore.setUser({username: username, email: email, avatarUrl: profilePic})
+      projectsStore.clearEverything();
+      await projectsStore.fetchProjects();
+      deactivateSocket();
+      initializeSocket(finalResponse.accessToken);
       router.push('/dashboard');
     }
   } catch (error) {
@@ -143,11 +158,15 @@ const handleGuest = async () => {
     if (!authStore.accessToken) {
       const response = await loginGuest();
       authStore.setTokensGuest(response.accessToken);
+      deactivateSocket();
+      initializeSocket(response.accessToken);
     }
+    projectsStore.clearEverything();
+    await projectsStore.fetchProjects();
     router.push('/dashboard');
   } catch (error) {
     console.error('Login error:', error);
-    errorMessage.value = 'Invalid username or password. Please try again.';
+    errorMessage.value = 'Unable to continue as guest. Please try again.';
   }
 };
 
@@ -156,9 +175,14 @@ const handleTwoFactorVerification = async (twoFactorCode: string) => {
     errorMessage.value = '';
     const response = await loginSecondFactor(loginJwt.value, twoFactorCode);
     authStore.setTokens(response.accessToken, response.refreshToken);
+    const { username, email, profilePic } = await getUserInfo(authStore.accessToken ?? '')
+    userStore.setUser({username: username, email: email, avatarUrl: profilePic})
+    projectsStore.clearEverything();
+    await projectsStore.fetchProjects();
+    initializeSocket(response.accessToken);
     router.push('/dashboard');
   } catch (error) {
-    console.error('Two-factor login error:', error);
+    console.error('Login error:', error);
     errorMessage.value = 'Invalid two-factor code. Please try again.';
   }
 };

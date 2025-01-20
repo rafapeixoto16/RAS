@@ -33,15 +33,11 @@ import { useRouter } from 'vue-router';
 import LoginSecurity from '@/components/LoginSecurity.vue';
 import PurchaseHistory from '@/components/PurchaseHistory.vue';
 import Billing from '@/components/CustomBilling.vue';
-import Notifications from '@/components/CustomNotifications.vue';
-import Privacy from '@/components/CustomPrivacy.vue';
 
 const sections = [
   { id: 'login-security', title: 'Login & Security', component: LoginSecurity },
   { id: 'purchase-history', title: 'Purchase History', component: PurchaseHistory },
   { id: 'billing', title: 'Billing', component: Billing },
-  { id: 'notifications', title: 'Notifications', component: Notifications },
-  { id: 'privacy', title: 'Privacy', component: Privacy },
 ];
 
 const activeSection = ref(sections[0].id);

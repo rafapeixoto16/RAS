@@ -22,13 +22,6 @@
             <i class="bi bi-box-arrow-up-right mr-2"></i>
             Open in new tab
           </button>
-          <button
-            @click="$emit('rename', props.projectId)" 
-            class="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg"
-          >
-            <i class="bi bi-pencil mr-2"></i>
-            Rename
-          </button>
           <button 
             @click="$emit('move-to-trash', props.projectId)"
             class="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg text-red-500"
@@ -63,17 +56,16 @@
 import { ref, onMounted } from 'vue';
 
 const props = defineProps<{
-  projectId: number;
+  projectId: string;
   mode: 'default' | 'trash';
 }>();
 
 defineEmits<{
   (e: 'close'): void;
-  (e: 'open-new-tab', id: number): void;
-  (e: 'rename', id: number): void;
-  (e: 'move-to-trash', id: number): void;
-  (e: 'restore', id: number): void;
-  (e: 'remove-permanently', id: number): void;
+  (e: 'open-new-tab', id: string): void;
+  (e: 'move-to-trash', id: string): void;
+  (e: 'restore', id: string): void;
+  (e: 'remove-permanently', id: string): void;
 }>();
 
 const show = ref(false);

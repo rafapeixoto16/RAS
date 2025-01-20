@@ -1,30 +1,27 @@
 import { Router } from 'express';
-import {
-    getProjects,
-    deleteProjects
-} from '../controller/project.js';
+import { deleteProjects, getProjects, uploadArtifact } from '../controller/project.js';
 import minioClient from '../config/minioClient.js';
-import { listObjectsPromise } from '../models/projectModel.js'
+import { listObjectsPromise } from '../models/projectModel.js';
+import { removeProjectPipeline } from '../controller/pipeline.js';
+import multer from 'multer';
 
 const router = Router();
 
 router.delete('/deleteAccount', async (req, res) => {
     try {
-        const userId = req.user._id;
-
-        const projects = getProjects(userId);
+        const userId = req.body.userId;
 
         await deleteProjects(userId);
-
+        
         res.sendStatus(200);
-    } catch(error) {
+    } catch(_) {
         res.sendStatus(500);
     }
 });
 
 router.post('/migrateAccount', async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.body.userId;
         const projects = await Project.find({ userId });
 
         await Promise.all(project.map(async project => {
@@ -45,10 +42,28 @@ router.post('/migrateAccount', async (req, res) => {
 
         res.status(200).json({ message: 'Account migration completed successfully.' });
     } catch (error) {
-        console.error('Migration error:', error);
         res.status(500).json({ message: 'Failed to migrate account.', error: error.message });
     }
+});
 
+const storage = multer.memoryStorage();
+const upload = multer({storage});
+
+router.post('/terminated/:userId/:id', upload.single('process'), async (req, res) => {
+    try {
+        const { isPreview } = req.query;
+        const { id, userId } = req.params;
+        if (!req.file) return res.sendStatus(400);
+        const process = req.file.buffer;
+
+        const uploadUrl = await uploadArtifact(userId, id, process, isPreview === "true");
+        await removeProjectPipeline(userId, id);
+
+        res.status(200).json({ uploadUrl });
+    } catch (error) {
+        console.error('Migration error:', error);
+        res.status(500).json({ message: 'Failed to terminate project.', error: error.message });
+    }
 });
 
 export default router;

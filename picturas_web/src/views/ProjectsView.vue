@@ -1,21 +1,21 @@
 <template>
   <div class="flex flex-col h-screen bg-gray-100">
-    <header class="bg-white shadow-sm z-0">
+    <header class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-          <div>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+          <div class="w-full sm:w-auto">
             <template v-if="isEditingTitle">
               <input 
                 v-model="projectTitle" 
                 @keyup.enter="saveTitle" 
                 @blur="saveTitle" 
-                class="text-xl md:text-2xl font-bold text-gray-900 bg-gray-100 px-2 border-b border-gray-300 focus:outline-none"
+                class="text-xl md:text-2xl font-bold text-gray-900 px-2 border-b border-gray-300 focus:outline-none w-full sm:w-auto"
                 autofocus
               />
             </template>
             <template v-else>
               <h1 
-                class="text-xl md:text-2xl font-bold text-gray-900 mb-[10%] sm:mb-0 cursor-pointer"
+                class="text-xl md:text-2xl font-bold text-gray-900 cursor-pointer"
                 @click="editTitle"
               >
                 {{ projectTitle }}
@@ -28,15 +28,23 @@
               <button @click="deleteCurrentPage" class="p-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
                 <i class="bi bi-trash text-xl"></i>
               </button>
-              <button @click="downloadCurrentImage" class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200">
-                <i class="bi bi-download text-xl"></i>
-              </button>
               <button 
                 @click="toggleGridView" 
                 class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
               >
                 <i class="bi bi-grid text-xl"></i>
               </button>
+                <button 
+                @click="processPreview"
+                :disabled="isProcessingPreview"
+                class="p-2 bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2 rounded-md"
+                >
+                <i class="bi bi-eye text-xl"></i>
+                <span>Preview</span>
+                <span v-if="isProcessingPreview" class="text-sm">
+                  <Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4" />
+                </span>
+                </button>
             </div>
           </div>
         </div>
@@ -44,45 +52,65 @@
     </header>
 
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
-      <aside class="w-full md:w-20 bg-white border-b md:border-r border-gray-200 shadow-md overflow-x-auto md:overflow-y-auto flex-shrink-0">
-        <div class="flex md:flex-col items-center py-4 md:py-6 px-4 md:px-2 space-x-4 md:space-x-0 md:space-y-6">
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4 hidden md:block">Tools</h3>
-          <div class="flex md:flex-col space-x-4 md:space-x-0 md:space-y-4">
-            <ToolButton 
-              v-for="(tool, index) in tools" 
-              :key="tool.name" 
-              :name="tool.name" 
-              :icon="tool.icon" 
-              :options="tool.options"
-              :showMenu="activeTool === tool.name"
-              :menuPosition="getToolMenuPosition(index)"
-              @click="selectTool(tool.name)"
-              @apply="applyTool"
-              @cancel="cancelTool"
-            />
+      <aside class="hidden md:block w-72 bg-white border-r border-gray-200 shadow-md overflow-y-auto flex-shrink-0">
+        <div class="p-6">
+          <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-6">Tools</h3>
+          
+          <div class="mb-8">
+            <h4 class="text-sm font-semibold text-gray-600 mb-4">Basic Tools</h4>
+            <div class="space-y-2">
+              <ToolButton 
+                v-for="tool in basicTools" 
+                :key="tool" 
+                :name="tool" 
+                :icon="getIconForTool(tool)" 
+                :options="projectStore.filterParameters ? projectStore.filterParameters[tool].schema.definitions[tool].properties : {}"
+                :showMenu="activeTool === tool"
+                :menuPosition="getToolMenuPosition(tool)"
+                @click="selectTool(tool)"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-semibold text-gray-600 mb-4">Premium Tools</h4>
+            <div class="space-y-2">
+              <ToolButton 
+                v-for="tool in premiumTools" 
+                :key="tool" 
+                :name="tool" 
+                :icon="getIconForTool(tool)" 
+                :options="projectStore.filterParameters ? projectStore.filterParameters[tool].schema.definitions[tool].properties : {}"
+                :showMenu="activeTool === tool"
+                :menuPosition="getToolMenuPosition(tool)"
+                :disabled="!isPremiumUser"
+                @click="selectTool(tool)"
+              />
+            </div>
           </div>
         </div>
       </aside>
 
-      <!-- Show either carousel or grid view based on isGridView -->
       <main class="flex-1 overflow-hidden relative">
-        <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-          <!-- Display the images in a grid with portrait orientation -->
+        <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 max-h-[calc(100vh-4rem)] overflow-y-auto sm:max-h-none sm:overflow-visible">
           <div 
             v-for="(page, index) in pages" 
             :key="page.id" 
             class="relative group"
             draggable="true"
             @dragstart="onDragStart(index, $event)"
-            @dragover="onDragOver($event)"
-            @dragenter="onDragEnter($event)"
-            @dragleave="onDragLeave($event)"
+            @dragover.prevent
+            @dragenter.prevent
+            @dragleave.prevent
             @drop="onDrop(index, $event)"
+            @touchstart="onTouchStart(index, $event)"
+            @touchmove="onTouchMove($event)"
+            @touchend="onTouchEnd(index, $event)"
           >
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
               <button 
                 @click="goToImage(index)" 
-                class="w-full h-72">
+                class="w-full aspect-square">
                 <img
                   v-if="page.imageUrl"
                   :src="page.imageUrl"
@@ -96,7 +124,6 @@
         </div>
 
         <div v-else class="absolute inset-0 overflow-hidden">
-          <!-- Original carousel view -->
           <Carousel 
             v-model="currentPage" 
             :items="pages" 
@@ -136,26 +163,176 @@
           </Carousel>
         </div>
       </main>
+
+      <aside class="w-full md:w-72 bg-white border-l border-gray-200 overflow-y-auto flex-shrink-0">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold mb-4">Applied Tools</h3>
+          <ReorderableList
+            v-model="appliedTools"
+            :projectId="projectId"
+            @remove="removeTool"
+          />
+          <div v-if="appliedTools.length > 0" class="mt-4">
+            <button 
+              @click="processProject" 
+              :disabled="processingStatus === 'processing'"
+              :class="[applyButtonClass, 'w-full px-4 py-2 text-white rounded disabled:opacity-50 transition-colors duration-200']"
+            >
+              {{ applyButtonText }}
+            </button>
+            <button 
+              v-if="processingStatus === 'processing'"
+              @click="cancelProcessing"
+              class="mt-2 w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
+            >
+              Cancel Processing
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <button 
+        @click="isToolDrawerOpen = true"
+        class="md:hidden fixed right-4 bottom-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors duration-200 z-20"
+      >
+        <i class="bi bi-tools text-xl"></i>
+      </button>
+
+      <BottomDrawer
+        v-model="isToolDrawerOpen"
+        class="md:hidden"
+      >
+        <div class="px-4 py-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold">Tools</h3>
+            <button 
+              @click="isToolDrawerOpen = false"
+              class="p-2 text-gray-400 hover:text-gray-500"
+            >
+              <i class="bi bi-x text-xl"></i>
+            </button>
+          </div>
+
+          <div class="mb-6">
+            <h4 class="text-sm font-semibold text-gray-600 mb-4">Basic Tools</h4>
+            <div class="grid grid-cols-4 gap-4">
+              <ToolButton 
+                v-for="tool in basicTools" 
+                :key="tool" 
+                :name="tool" 
+                :icon="getIconForTool(tool)" 
+                :options="projectStore.filterParameters ? projectStore.filterParameters[tool].schema.definitions[tool].properties : {}"
+                :showMenu="activeTool === tool"
+                :menuPosition="getToolMenuPosition(tool)"
+                @click="selectTool(tool)"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-semibold text-gray-600 mb-4">Premium Tools</h4>
+            <div class="grid grid-cols-4 gap-4">
+              <ToolButton 
+                v-for="tool in premiumTools" 
+                :key="tool" 
+                :name="tool" 
+                :icon="getIconForTool(tool)" 
+                :options="projectStore.filterParameters ? projectStore.filterParameters[tool].schema.definitions[tool].properties : {}"
+                :showMenu="activeTool === tool"
+                :menuPosition="getToolMenuPosition(tool)"
+                :disabled="!isPremiumUser"
+                @click="selectTool(tool)"
+              />
+            </div>
+          </div>
+        </div>
+      </BottomDrawer>
     </div>
   </div>
+
+  <DynamicToolMenu
+    v-if="activeTool && projectStore.filterParameters && projectStore.filterParameters[activeTool]"
+    :toolName="activeTool"
+    :toolOptions="projectStore.filterParameters[activeTool].schema.definitions[activeTool].properties"
+    @apply="applyTool"
+    @cancel="cancelTool"
+  />
+
+  <PreviewModal
+    v-if="showPreviewModal"
+    :previewData="previewData"
+    @close="handleClosePreviewModal"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue';
+import { ref, computed, onMounted, watch, reactive, onUnmounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useProjectStore } from '@/stores/projectsStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useSocketStatus } from '@/utils/socket';
 import Carousel from '@/components/PageCarousel.vue';
 import DropZone from '@/components/DropZone.vue';
 import ToolButton from '@/components/ToolButton.vue';
-import type { Tool } from '@/components/ToolButton.vue';
+import DynamicToolMenu from '@/components/DynamicToolMenu.vue';
+import BottomDrawer from '@/components/BottomDrawer.vue';
+import ReorderableList from '@/components/ReordableList.vue';
+import PreviewModal from '@/components/PreviewModal.vue';
+import type { Tool } from '@/types/project';
+import type { PreviewData } from '@/types/preview';
 import JSZip from 'jszip';
-
+import { Loader2 } from 'lucide-vue-next'
 
 interface Page {
   id: number;
   imageUrl: string | null;
 }
 
+const showPreviewModal = ref<boolean>(false);
+const previewData = ref<PreviewData>({});
+const route = useRoute();
+const projectStore = useProjectStore();
+const subscriptionStore = useSubscriptionStore();
+useSocketStatus();
+
+const projectId = computed<string>(() => route.params.id as string);
+const project = computed(() => projectStore.getProjectById(projectId.value));
 
 const isGridView = ref(false);
+const projectTitle = ref("");
+const isEditingTitle = ref(false);
+const pages = ref<Page[]>([]);
+const currentPage = ref(0);
+
+const imageTransform = reactive({
+  scale: 1,
+  translateX: 0,
+  translateY: 0,
+});
+
+let isPanning = false;
+let startX = 0;
+let startY = 0;
+let lastPinchDistance: number | null = null;
+const isToolDrawerOpen = ref(false);
+const appliedTools = computed(() => project.value ? project.value.tools : []);
+const processingStatus = ref<'idle' | 'processing' | 'completed' | 'error'>('idle');
+const notification = ref<string | null>(null);
+const isProcessingPreview = ref(false);
+
+onMounted(async () => {
+  if (project.value) {
+    projectTitle.value = project.value.name;
+    pages.value = project.value.images.map((image, index) => ({
+      id: index,
+      imageUrl: image.imageUrl,
+    }));
+    if (pages.value.length === 0) {
+      pages.value.push({ id: 0, imageUrl: null });
+    }
+  }
+  await projectStore.fetchFilterParameters();
+});
 
 const toggleGridView = () => {
   isGridView.value = !isGridView.value;
@@ -166,29 +343,16 @@ const goToImage = (index: number) => {
   isGridView.value = false;   
 };
 
-
-const projectTitle = ref("Projects");
-const isEditingTitle = ref(false);
-
 const editTitle = () => {
   isEditingTitle.value = true;
 };
 
-const saveTitle = () => {
+const saveTitle = async () => {
   isEditingTitle.value = false;
+  if (project.value) {
+    await projectStore.updateProject(project.value._id, { name: projectTitle.value });
+  }
 };
-
-const pages = ref<Page[]>([{ id: 1, imageUrl: null }]);
-const currentPage = ref(0);
-const imageTransform = reactive({
-  scale: 1,
-  translateX: 0,
-  translateY: 0,
-});
-let isPanning = false;
-let startX = 0;
-let startY = 0;
-let lastPinchDistance: number | null = null;
 
 const imageStyle = computed(() => {
   return {
@@ -204,93 +368,109 @@ watch(() => pages.value.length, (newLength) => {
 });
 
 let draggedIndex: number | null = null;
+let touchStartY: number | null = null;
 
-const onDragStart = (index: number, event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault(); // Prevent default touch behavior
-  }
+const onDragStart = (index: number, event: DragEvent) => {
   draggedIndex = index;
+  event.dataTransfer?.setData('text/plain', index.toString());
 };
 
-const onDragOver = (event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault(); 
-  } else {
-    event.preventDefault();
+const onDrop = async (index: number, event: DragEvent) => {
+  event.preventDefault();
+  const droppedIndex = parseInt(event.dataTransfer?.getData('text/plain') || '-1', 10);
+  
+  if (droppedIndex === -1 || droppedIndex === index || !project.value) return;
+  
+  try {
+    await projectStore.reorderProjectImage(project.value._id, droppedIndex, index);
+    const [movedItem] = pages.value.splice(droppedIndex, 1);
+    pages.value.splice(index, 0, movedItem);
+  } catch (error) {
+    console.error('Error reordering image:', error);
   }
 };
 
-const onDragEnter = (event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault();
-  } else {
-    event.preventDefault();
-  }
+const onTouchStart = (index: number, event: TouchEvent) => {
+  draggedIndex = index;
+  touchStartY = event.touches[0].clientY;
 };
 
-const onDragLeave = (event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault();
-  } else {
-    event.preventDefault();
-  }
+const onTouchMove = (event: TouchEvent) => {
+  if (draggedIndex === null || touchStartY === null) return;
+  
+  const touch = event.touches[0];
+  const deltaY = touch.clientY - touchStartY;
+  
+  (event.currentTarget as HTMLElement).style.transform = `translateY(${deltaY}px)`;
 };
 
-const onDrop = (index: number, event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault(); 
+const onTouchEnd = async (index: number, event: TouchEvent) => {
+  if (draggedIndex === null || touchStartY === null || !project.value) return;
+  
+  const touch = event.changedTouches[0];
+  const deltaY = touch.clientY - touchStartY;
+  const threshold = 50;
+  
+  if (Math.abs(deltaY) > threshold) {
+    const newIndex = index + (deltaY > 0 ? 1 : -1);
+    if (newIndex >= 0 && newIndex < pages.value.length) {
+      try {
+        await projectStore.reorderProjectImage(project.value._id, draggedIndex, newIndex);
+        const [movedItem] = pages.value.splice(draggedIndex, 1);
+        pages.value.splice(newIndex, 0, movedItem);
+      } catch (error) {
+        console.error('Error reordering image:', error);
+      }
+    }
   }
   
-  if (draggedIndex === null || draggedIndex === index) return;
-  const draggedItem = pages.value[draggedIndex];
-  pages.value.splice(draggedIndex, 1);
-  pages.value.splice(index, 0, draggedItem);
+  if (event.currentTarget) {
+    (event.currentTarget as HTMLElement).style.transform = '';
+  }
+  
   draggedIndex = null;
+  touchStartY = null;
 };
 
-
-const tools: Tool[] = [
-  { 
-    name: 'Resize', 
-    icon: 'bi-arrows-angle-expand', 
-    options: {
-      width: { label: 'Width', value: 800, type: 'number', min: 1, max: 4000, step: 1 },
-      height: { label: 'Height', value: 600, type: 'number', min: 1, max: 4000, step: 1 }
-    }
-  },
-  { 
-    name: 'Crop', 
-    icon: 'bi-crop',
-    options: {
-      aspect: { label: 'Aspect Ratio', value: '16:9', type: 'select', choices: ['16:9', '4:3', '1:1', 'Free'] }
-    }
-  },
-  { 
-    name: 'Rotate', 
-    icon: 'bi-arrow-clockwise',
-    options: {
-      angle: { label: 'Angle', value: 90, type: 'number', min: -180, max: 180, step: 1 }
-    }
-  },
-  { 
-    name: 'Filters', 
-    icon: 'bi-filter',
-    options: {
-      brightness: { label: 'Brightness', value: 100, type: 'number', min: 0, max: 200, step: 1 },
-      contrast: { label: 'Contrast', value: 100, type: 'number', min: 0, max: 200, step: 1 }
-    }
-  },
-  { 
-    name: 'Adjust', 
-    icon: 'bi-sliders',
-    options: {
-      saturation: { label: 'Saturation', value: 100, type: 'number', min: 0, max: 200, step: 1 },
-      exposure: { label: 'Exposure', value: 0, type: 'number', min: -100, max: 100, step: 1 }
-    }
-  },
-];
+const isPremiumUser = computed(() => subscriptionStore.isPremium);
 
 const activeTool = ref<string | null>(null);
+
+const basicTools = computed(() => {
+  if (!projectStore.filterParameters) return [];
+  return Object.entries(projectStore.filterParameters)
+    .filter(([, tool]) => !tool.isPremium)
+    .map(([name,]) => name);
+});
+
+const premiumTools = computed(() => {
+  if (!projectStore.filterParameters) return [];
+  return Object.entries(projectStore.filterParameters)
+    .filter(([, tool]) => tool.isPremium)
+    .map(([name,]) => name);
+});
+
+const getIconForTool = (toolName: string): string => {
+  const iconMap: Record<string, string> = {
+    autoAdjust: 'bi-magic',
+    binarization: 'bi-palette',
+    addBorder: 'bi-border-all',
+    brightness: 'bi-brightness-high',
+    contrast: 'bi-circle-half',
+    cropping: 'bi-crop',
+    grayscale: 'bi-palette2',
+    'object-identification': 'bi-box',
+    ocr: 'bi-file-text',
+    'person-count': 'bi-people',
+    'remove-bg': 'bi-eraser',
+    resize: 'bi-arrows-angle-expand',
+    rotation: 'bi-arrow-clockwise',
+    saturation: 'bi-droplet-half',
+    'smart-crop': 'bi-crop',
+  };
+
+  return iconMap[toolName] || 'bi-question-circle';
+};
 
 const addNewPage = () => {
   pages.value.push({ id: Date.now(), imageUrl: null });
@@ -300,43 +480,38 @@ const addNewPage = () => {
 const handleFilesDropped = async (files: File[]) => {
   const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
   
-  if (imageFiles.length === 0) return;
+  if (imageFiles.length === 0 || !project.value) return;
 
-  const newPages = await Promise.all(imageFiles.map(async (file) => ({
-    id: Date.now() + Math.random(),
-    imageUrl: URL.createObjectURL(file)
-  })));
-
-  if (pages.value[currentPage.value].imageUrl === null) {
-    pages.value.splice(currentPage.value, 1, newPages[0]);
-    if (newPages.length > 1) {
-      pages.value.push(...newPages.slice(1));
+  for (const file of imageFiles) {
+    try {
+      const { id, imageUrl } = await projectStore.addProjectImage(project.value._id, file);
+      if (pages.value[currentPage.value].imageUrl === null) {
+        pages.value[currentPage.value] = { id, imageUrl };
+      } else {
+        pages.value.push({ id, imageUrl });
+      }
+    } catch (error) {
+      console.error('Error adding image:', error);
     }
-  } else {
-    pages.value.push(...newPages);
   }
 
-  currentPage.value = pages.value.indexOf(newPages[0]);
+  currentPage.value = pages.value.length - imageFiles.length;
 };
 
-const deleteCurrentPage = () => {
-  if (pages.value.length > 1) {
-    pages.value.splice(currentPage.value, 1);
-    if (currentPage.value >= pages.value.length) {
-      currentPage.value = pages.value.length - 1;
+const deleteCurrentPage = async () => {
+  if (project.value && pages.value.length > 0) {
+    try {
+      await projectStore.removeProjectImage(project.value._id, currentPage.value);
+      pages.value.splice(currentPage.value, 1);
+      if (pages.value.length === 0) {
+        pages.value.push({ id: 0, imageUrl: null });
+      }
+      if (currentPage.value >= pages.value.length) {
+        currentPage.value = Math.max(0, pages.value.length - 1);
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
     }
-  } else {
-    pages.value[0].imageUrl = null;
-  }
-};
-
-const downloadCurrentImage = () => {
-  const currentImage = pages.value[currentPage.value].imageUrl;
-  if (currentImage) {
-    const link = document.createElement('a');
-    link.href = currentImage;
-    link.download = `project-image-${currentPage.value + 1}.png`;
-    link.click();
   }
 };
 
@@ -345,11 +520,18 @@ const selectTool = (toolName: string) => {
     activeTool.value = null;
   } else {
     activeTool.value = toolName;
+    isToolDrawerOpen.value = false;
   }
 };
 
-const applyTool = (tool: Tool) => {
-  console.log(`Applying ${tool.name} with options:`, tool.options);
+const applyTool = async (tool: Tool) => {
+  if (project.value) {
+    try {
+      await projectStore.addProjectTool(project.value._id, tool);
+    } catch (error) {
+      console.error('Error applying tool:', error);
+    }
+  }
   activeTool.value = null;
 };
 
@@ -357,8 +539,11 @@ const cancelTool = () => {
   activeTool.value = null;
 };
 
-const getToolMenuPosition = (index: number): 'top' | 'center' | 'bottom' => {
-  const totalTools = tools.length;
+const getToolMenuPosition = (toolName: string): 'top' | 'center' | 'bottom' => {
+  const allTools = [...(basicTools.value || []), ...(premiumTools.value || [])];
+  const index = allTools.findIndex(tool => tool === toolName);
+  const totalTools = allTools.length;
+
   if (index < totalTools / 3) return 'top';
   if (index >= totalTools * 2 / 3) return 'bottom';
   return 'center';
@@ -434,28 +619,176 @@ const zoomImage = (event: WheelEvent | TouchEvent) => {
     lastPinchDistance = dist;
   }
 };
+
+watch(currentPage, (newPage) => {
+  if (newPage < 0) {
+    currentPage.value = 0;
+  } else if (newPage >= pages.value.length) {
+    currentPage.value = pages.value.length - 1;
+  }
+});
+
+const removeTool = async (index: number) => {
+  if (project.value) {
+    try {
+      await projectStore.removeProjectTool(project.value._id, index);
+    } catch (error) {
+      console.error('Error removing tool:', error);
+    }
+  }
+};
+
+
+watch(project, (newProject) => {
+  if (newProject) {
+    projectTitle.value = newProject.name;
+    pages.value = newProject.images.map((image, index) => ({
+      id: index,
+      imageUrl: image.imageUrl,
+    }));
+    if (pages.value.length === 0) {
+      pages.value.push({ id: 0, imageUrl: null });
+    }
+  }
+}, { immediate: true });
+
+const processProject = async () => {
+  if (!project.value) return;
+  
+  processingStatus.value = 'processing';
+  try {
+    await projectStore.processProject(projectId.value);
+    
+    await new Promise<void>((resolve) => {
+      const unwatch = watch(() => projectStore.getProjectNotification(projectId.value), async (newNotification) => {
+        if (newNotification && !newNotification.message.isPreview && newNotification.message.kind != "canceled" ) {
+          notification.value = newNotification.message.url;
+          processingStatus.value = 'completed';
+          unwatch();
+          resolve();
+        }
+      });
+    });
+    if (notification.value) {
+      const link = document.createElement('a');
+      link.href = notification.value;
+      link.download = `project-${project.value._id}.zip`;
+      link.click();
+    }
+    setTimeout(() => {
+      processingStatus.value = 'idle';
+      projectStore.removeNonPreviewNotification(projectId.value);
+    }, 2000);
+  } catch (error) {
+    console.error('Error processing project:', error);
+    processingStatus.value = 'error';
+  }
+};
+
+const cancelProcessing = async () => {
+  if (!project.value) return;
+  
+  try {
+    await projectStore.deleteProcess(project.value._id);
+    processingStatus.value = 'idle';
+    notification.value = null;
+    projectStore.removeCanceledNotification(projectId.value);
+  } catch (error) {
+    console.error('Error canceling process:', error);
+  }
+};
+
+const processPreview = async () => {
+  if(!project.value) return;
+
+  isProcessingPreview.value = true;
+  try{
+    await projectStore.processPreview(projectId.value, currentPage.value)
+
+    await new Promise<void>((resolve) => {
+      const unwatch = watch(() => projectStore.getProjectNotification(projectId.value), async (newNotification) => {
+        if (newNotification && newNotification.message.isPreview && newNotification.message.kind != "canceled") {
+          unwatch();
+        
+          notification.value = newNotification.message.url
+          if (notification.value) {
+            const response = await fetch(notification.value);
+            const zipBlob = await response.blob();
+            const zip = new JSZip();
+            const contents = await zip.loadAsync(zipBlob);
+
+            const previewFiles: PreviewData = {};
+            for(const [filename, file] of Object.entries(contents.files)) {
+              if(!file.dir){
+                const content = await file.async('blob');
+                if(filename.endsWith('.json')) {
+                  const jsonContent = JSON.parse(await content.text()) as Record<string, unknown>;
+                  previewFiles[filename] = {type: 'json', content: jsonContent};
+                } else {
+                  previewFiles[filename] = {type: 'image', url: URL.createObjectURL(content) };
+                }
+              }
+            }
+
+            previewData.value = previewFiles;
+            showPreviewModal.value = true;
+            resolve();
+          }
+        }
+      });
+    });
+  } catch  (error) {
+    console.error("Error processing preview:", error);
+  } finally {
+    isProcessingPreview.value = false;
+  }
+}
+
+onUnmounted(() => {
+  projectStore.removeNonPreviewNotification(projectId.value);
+});
+
+const handleClosePreviewModal = () => {
+  showPreviewModal.value = false;
+  previewData.value = {};
+  projectStore.removePreviewNotification(projectId.value);
+};
+
+const applyButtonText = computed(() => {
+  switch (processingStatus.value) {
+    case 'processing':
+      return 'Processing...';
+    case 'completed':
+      return '✓ Completed';
+    case 'error':
+      return 'Error - Try Again';
+    default:
+      return 'Apply Pipeline';
+  }
+});
+
+const applyButtonClass = computed(() => {
+  return {
+    'bg-blue-500 hover:bg-blue-600': processingStatus.value !== 'completed',
+    'bg-green-500 hover:bg-green-600': processingStatus.value === 'completed',
+  };
+});
 </script>
 
 <style scoped>
-
 @media (max-width: 768px) {
-  .md\:w-20 {
-    width: 100%;
-    height: auto;
+  .aspect-square {
+    aspect-ratio: 1 / 1;
   }
-  
-  .md\:flex-col {
-    flex-direction: row;
-  }
-  
-  .md\:space-y-6 {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-  
-  .md\:space-x-0 {
-    margin-right: 1rem;
-    margin-left: 1rem;
-  }
+}
+
+.grid > div {
+  transition: transform 0.2s ease-out;
+}
+
+.grid > div:active {
+  cursor: grabbing;
+  z-index: 10;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 </style>

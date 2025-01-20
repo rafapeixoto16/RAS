@@ -12,10 +12,11 @@
         <RouterView />
       </div>
 
-      <!-- Controla a exibição do TutorialModal -->
       <TutorialModal v-if="shouldShowTutorialModal" />
       <Footer />
     </div>
+
+    <div id="modal-target"></div>
   </div>
 </template>
 
@@ -34,9 +35,8 @@ const isFullWidthRoute = computed(() => {
   return route.meta.fullWidth === true
 })
 
-const excludedPages = ['/login', '/', '/signin', '/signout']; // Rotas onde o modal não deve aparecer
+const includedPages = ['/dashboard'];
 
-// Computed para verificar se o modal deve ser exibido
-const shouldShowTutorialModal = computed(() => !excludedPages.includes(route.path));
+const shouldShowTutorialModal = computed(() => includedPages.includes(route.path));
 
 </script>

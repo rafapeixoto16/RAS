@@ -1,5 +1,5 @@
 <template>
-  <div :class="['relative', placement]" ref="triggerElement">
+  <div :class="['relative', placement, 'custom-dropdown']" ref="triggerElement">
     <span @click="toggleDropdown" class="cursor-pointer">
       <i v-if="isIcon" :class="trigger"></i>
       <span v-else>{{ trigger }}</span>
@@ -16,6 +16,7 @@
               v-for="option in options"
               :key="option.label"
               class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              @click.stop="handleOptionClick(option)"
             >
               <div
                 class="flex items-center gap-2"
@@ -38,6 +39,7 @@
             v-for="option in options"
             :key="option.label"
             class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            @click.stop="handleOptionClick(option)"
           >
             <a
               v-if="option.route"
@@ -61,13 +63,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
-
-interface Project {
-  id: number;
-  title: string;
-  imageUrl: string;
-  lastEdited: string;
-}
+import type { Project } from "@/types/project";
 
 interface Option {
   label: string;
@@ -85,7 +81,7 @@ interface Props {
   isSidebar?: boolean;
   project?: Project;
   appendToBody?: boolean;
-  menuColor?: string; // Add a new prop for menu color
+  menuColor?: string;
 }
 
 const props = defineProps<Props>();
@@ -97,14 +93,15 @@ const project = props.project;
 const options = props.options;
 const isIcon = props.isIcon;
 const appendToBody = props.appendToBody;
-const menuColor = props.menuColor || "#F5F7FA"; // Default to a light color if no menuColor prop is passed
+const menuColor = props.menuColor || "#F5F7FA";
 
 const isOpen = ref(false);
 const triggerElement = ref<HTMLElement | null>(null);
 const dropdownElement = ref<HTMLElement | null>(null);
 const dropdownStyle = ref({});
 
-const toggleDropdown = () => {
+const toggleDropdown = (event: Event) => {
+  event.stopPropagation();
   isOpen.value = !isOpen.value;
   if (isOpen.value && appendToBody) {
     updateDropdownPosition();
@@ -117,7 +114,7 @@ const updateDropdownPosition = () => {
     dropdownStyle.value = {
       top: `${rect.bottom + window.scrollY}px`,
       left: `${rect.left + window.scrollX}px`,
-      backgroundColor: menuColor, // Apply the background color from the prop
+      backgroundColor: menuColor,
     };
   }
 };
@@ -134,11 +131,9 @@ const handleClick = (action: () => void, project: Project) => {
   if (typeof action === "function" && !isSidebar) {
     action();
   } else if (String(action).includes("open-new-tab")) {
-    emit("open-new-tab", project.id);
-  } else if (String(action).includes("rename")) {
-    emit("rename", project.id);
+    emit("open-new-tab", project._id);
   } else if (String(action).includes("move-to-trash")) {
-    emit("move-to-trash", project.id);
+    emit("move-to-trash", project._id);
   }
 };
 
@@ -150,6 +145,15 @@ const handleClickOutside = (event: MouseEvent | TouchEvent) => {
   ) {
     isOpen.value = false;
   }
+};
+
+const handleOptionClick = (option: Option) => {
+  if (option.action && project) {
+    handleClick(option.action, project);
+  } else if (option.route) {
+    openInNewTab(option);
+  }
+  isOpen.value = false;
 };
 
 onMounted(() => {

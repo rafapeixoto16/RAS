@@ -1,11 +1,7 @@
 import axiosInstance from '../axiosConfig';
-import { useAuthStore } from '@/stores/authStore';
 
-const authStore = useAuthStore()
-
-export const changeUserPassword = async (password: string) => {
+export const changeUserPassword = async (password: string, accessToken: string) => {
   try {
-    const accessToken = authStore.accessToken;
     const response = await axiosInstance.put('/api/v1/user/password', {password: password}, {
       headers: {
         Authorization: `Bearer ${accessToken}`,

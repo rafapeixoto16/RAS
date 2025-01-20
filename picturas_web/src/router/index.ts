@@ -74,7 +74,7 @@ const router = createRouter({
       meta: { fullWidth: true },
     },
     {
-      path: '/create-project',
+      path: '/project/:id',
       name: 'createproject',
       component: () => import('../views/ProjectsView.vue'),
     },
@@ -98,6 +98,12 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('../views/Error404View.vue'),
+      meta: { fullWidth: true },
+    },
+    {
+      path: '/eula',
+      name: 'Eula',
+      component: () => import('../views/EulaView.vue'),
       meta: { fullWidth: true },
     }
   ],

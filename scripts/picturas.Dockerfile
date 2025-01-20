@@ -1,6 +1,7 @@
-FROM python:3.13.1-alpine3.21
+FROM python:3.13.1-bookworm
 
-RUN apk add nodejs npm
+RUN apt-get update
+RUN apt-get install nodejs npm -y
 
 WORKDIR /app
 

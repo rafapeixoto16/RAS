@@ -10,9 +10,10 @@
       <div class="mb-8">
         <h3 class="text-lg font-medium text-gray-900 mb-2">Current Plan</h3>
         <div class="bg-gray-100 p-4 rounded-lg">
-          <p class="text-lg font-semibold">{{ currentPlan.isPremium ? 'Premium' : 'Free' }}</p>
-          <p v-if="currentPlan.isPremium" class="text-gray-600">${{ currentPlan.plan === 'month' ? monthlyPrice : yearlyPrice }} / {{ currentPlan.plan }}</p>
+          <p class="text-lg font-semibold">{{ subscriptionsStore.isPremium ? 'Premium' : 'Free' }}</p>
+          <p v-if="subscriptionsStore.isPremium" class="text-gray-600">${{ subscriptionsStore.currentPlan === 'month' ? monthlyPrice : yearlyPrice }} / {{ subscriptionsStore.currentPlan }}</p>
           <button @click="goToPlans" class="mt-2 text-blue-600 hover:text-blue-800">Check our available plans</button>
+          <button v-if="subscriptionsStore.isPremium" @click="cancelSubscription" class="mt-2 ml-4 text-red-600 hover:text-red-800">Cancel Subscription</button>
         </div>
       </div>
 
@@ -21,8 +22,8 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <i class="bi bi-credit-card text-2xl mr-2"></i>
-            <span v-if="billingInfo.last4">
-              {{ billingInfo.brand }} •••• •••• •••• {{ billingInfo.last4 }}
+            <span v-if="subscriptionsStore.billingInfo.last4">
+              {{ subscriptionsStore.billingInfo.brand }} •••• •••• •••• {{ subscriptionsStore.billingInfo.last4 }}
             </span>
             <span v-else class="text-gray-600">No payment method set</span>
           </div>
@@ -38,37 +39,17 @@ import { useRouter } from 'vue-router';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { getPlans } from '@/api';
 
-interface BillingInfo {
-  last4?: string;
-  brand?: string;
-}
-
-interface SubscriptionStatus {
-  isPremium: boolean;
-  plan: 'regular' | 'month' | 'year';
-  trialUsed: boolean;
-}
-
 const router = useRouter();
 const subscriptionsStore = useSubscriptionStore();
 const monthlyPrice = ref(0)
 const yearlyPrice = ref(0)
 const isLoading = ref(true);
 
-const currentPlan = ref<SubscriptionStatus>({
-  isPremium: false,
-  plan: 'regular',
-  trialUsed: false
-});
-
-const billingInfo = ref<BillingInfo>({});
 
 onMounted(async () => {
   isLoading.value = true;
   try {
     await subscriptionsStore.fetchBillingInfo();
-    billingInfo.value = subscriptionsStore.billingInfo;
-    currentPlan.value = subscriptionsStore.status;
     
     const plans = await getPlans()
         if (plans["month"]) {
@@ -86,5 +67,14 @@ onMounted(async () => {
 
 const goToPlans = () => {
   router.push('/plans');
+};
+
+const cancelSubscription = async () => {
+  try {
+    await subscriptionsStore.cancelPremiumSubscription();
+    router.go(0);
+  } catch (error) {
+    console.error('Failed to cancel subscription:', error);
+  }
 };
 </script>

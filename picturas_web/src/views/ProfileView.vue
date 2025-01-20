@@ -104,6 +104,7 @@ import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { updateProfile, updateProfilePic } from '@/api/mutations/updateProfile';
 import { getUserInfo } from '@/api/queries/getUserInfo';
 import { useUserStore } from '@/stores/userStore';
+import { useAuthStore } from '@/stores/authStore';
 
 interface User {
   username: string;
@@ -171,7 +172,8 @@ const confirmChanges = async () => {
       location: user.value.location,
       bio: user.value.bio,
     };
-    await updateProfile(updatedData);
+    const accessToken = useAuthStore().accessToken || '';
+    await updateProfile(updatedData, accessToken);
     originalUser.value = { ...user.value };
     isEditing.value = false;
     showConfirmationModal.value = false;
@@ -188,7 +190,7 @@ const handleAvatarUpload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
     try {
-      const result = await updateProfilePic(file);
+      const result = await updateProfilePic(file, useAuthStore().accessToken || '');
       user.value.avatarUrl = result.avatarUrl;
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -208,7 +210,7 @@ const goHome = () => {
 onMounted(async () => {
   isLoading.value = true;
   try {
-    const resp = await getUserInfo();
+    const resp = await getUserInfo(useAuthStore().accessToken ?? '');
     const filteredUser = {
       username: resp.username,
       email: resp.email,

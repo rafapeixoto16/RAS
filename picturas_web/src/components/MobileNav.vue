@@ -1,8 +1,7 @@
 <template>
   <div>
-    <!-- Mobile Header -->
     <div
-      class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden z-20"
+      class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden z-50"
     >
       <router-link
         to="/dashboard" 
@@ -45,9 +44,8 @@
       </button>
     </div>
 
-    <!-- Mobile Menu -->
     <div
-      class="fixed inset-0 bg-black bg-opacity-50 z-10 transition-opacity duration-300 md:hidden"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden"
       :class="{
         'opacity-0 pointer-events-none': !isOpen,
         'opacity-100': isOpen,
@@ -61,39 +59,44 @@
       >
         <div class="flex-grow overflow-y-auto">
           <div class="pt-20 px-4 space-y-4">
-            <router-link
+            <button
               class="flex items-center justify-center px-2 py-3 w-full bg-azure-radiance-500 text-sm xl:text-base text-white font-bold hover:bg-azure-radiance-800  rounded-xl"
-              to="/create-project"
-              @click="closeMenu"
+              @click="handleCreateProject"
             >
               <i class="bi bi-plus mr-2 fs-5 text-[20px]"></i>
               Create a Project
+            </button>
+            <router-link v-if="!authStore.isLoggedIn()"
+              to="/plans"
+              class="flex items-center justify-center px-2 py-3 w-full bg-white hover:bg-azure-radiance-500 text-sm xl:text-base text-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
+            >
+              <i class="bi bi-gem mr-2"></i>
+              Check our Plans
             </router-link>
-
-            <button
+            <button v-else-if="!subscriptionsStore.isPremium && authStore.isLoggedIn()"
               class="flex items-center justify-center px-2 py-3 w-full bg-white hover:bg-azure-radiance-500 text-sm xl:text-base text-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
               @click="openPremiumModal"
             >
               <i class="bi bi-gem mr-2"></i>
               Try Premium for 30 days
-          </button>
+            </button>
           </div>
 
           <div class="mt-8 px-4 space-y-2">
             <h2 class="text-sm font-semibold">Projects</h2>
-            <MobileProjectList :projects="projects" @close-menu="closeMenu" class="bg-blue-50" />
+            <MobileProjectList :projects="projectStore.projects" @close-menu="closeMenu" class="bg-blue-50" />
           </div>
         </div>
         
-        <div class="px-4 py-2 border-t border-gray-200">
-          <router-link
-            class="flex items-center px-4 py-3 w-full bg-blue-50 text-sm xl:text-base text-gray-500 font-semibold hover:text-gray-600"
-            to="/trash"
-            @click="closeMenu"
-          >
+        <div 
+          class="px-4 py-2 border-t border-gray-200 mt-auto"
+          @dragover.prevent
+          @drop="onDrop"
+        >
+          <div class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500">
             <i class="bi bi-trash mr-2"></i>
-            Trash
-          </router-link>
+            Drag here to delete
+          </div>
         </div>
 
         <div class="border-t border-gray-200 p-4">
@@ -122,6 +125,11 @@
         :open="isOpenPremium"
         @close="openPremiumModal"
       ></premium-upgrade>
+      <ProjectNameModal 
+        :is-open="isProjectModalOpen"
+        @create="createProject"
+        @cancel="isProjectModalOpen = false"
+      />
     </div>
   </div>
 </template>
@@ -132,9 +140,15 @@ import MobileProfileMenu from "./MobileProfileMenu.vue";
 import PremiumUpgrade from "./PremiumUpgrade.vue";
 import { useAuthStore } from '@/stores/authStore';
 import { ref, computed } from "vue";
+import { useProjectStore } from "@/stores/projectsStore";
+import router from "@/router";
+import ProjectNameModal from './ProjectNameModal.vue';
+import { useSubscriptionStore } from "@/stores/subscriptionStore";
 
+const projectStore = useProjectStore();
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn());
+const subscriptionsStore = useSubscriptionStore();
 
 const props = defineProps<{
   isOpen: boolean;
@@ -143,17 +157,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "update:isOpen", value: boolean): void;
 }>();
+
 const isOpenPremium = ref(false);
-const projects = [
-  { id: 1, name: "Project 1", link: "/project1" },
-  { id: 2, name: "Project 2", link: "/project2" },
-  { id: 3, name: "Project 3", link: "/project3" },
-  { id: 4, name: "Project 4", link: "/project4" },
-  { id: 5, name: "Project 5", link: "/project5" },
-  { id: 6, name: "Project 6", link: "/project6" },
-  { id: 7, name: "Project 7", link: "/project7" },
-  { id: 8, name: "Project 8", link: "/project8" },
-];
+const isProjectModalOpen = ref(false);
 
 const toggleMenu = () => {
   emit("update:isOpen", !props.isOpen);
@@ -163,10 +169,34 @@ const closeMenu = () => {
   emit("update:isOpen", false);
 };
 
+const handleCreateProject = () => {
+  isProjectModalOpen.value = true;
+};
+
+const createProject = async (name: string) => {
+  try {
+    const newProject = await projectStore.createProject({ name: name });
+    isProjectModalOpen.value = false;
+    emit("update:isOpen", false);
+    if (newProject) {
+      router.push(`/project/${newProject._id}`);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const openPremiumModal = () => {
   isOpenPremium.value = !isOpenPremium.value;
 };
 
+const onDrop = async (event: DragEvent) => {
+  event.preventDefault();
+  const projectId = event.dataTransfer?.getData('text');
+  if (projectId) {
+    await projectStore.deleteProject(projectId);
+  }
+};
 </script>
 
 <style scoped>

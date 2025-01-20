@@ -21,20 +21,20 @@ frontend_url: "http://192.168.49.2"
 
 filters:
   - auto-adjust-filter
-#  - binarization-filter
-#  - borders-add-filter
-#  - brightness-filter
-#  - contrast-filter
-#  - cropping-filter
-#  - grayscale-filter
-#  - object-identification-filter
-#  - ocr-filter
-#  - person-count-filter
+  - binarization-filter
+  - borders-add-filter
+  - brightness-filter
+  - contrast-filter
+  - cropping-filter
+  - grayscale-filter
+  - object-identification-filter
+  - ocr-filter
+  - person-count-filter
 #  - remove-bg-filter
-#  - resize-filter
-#  - rotate-filter
-#  - saturation-filter
-#  - smart-crop-filter
+  - resize-filter
+  - rotate-filter
+  - saturation-filter
+  - smart-crop-filter
   - watermark-filter
 
 # Miscellaneous

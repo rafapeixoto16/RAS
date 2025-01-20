@@ -1,0 +1,361 @@
+import { defineStore } from 'pinia';
+import { getProjects } from '@/api/queries/getProjects';
+import { getProject } from '@/api/queries/getProject';
+import { createProject } from '@/api/mutations/createProject';
+import { updateProject } from '@/api/mutations/updateProject';
+import { deleteProject } from '@/api/mutations/deleteProject';
+import { addImage } from '@/api/mutations/addImage';
+import { reorderImage } from '@/api/mutations/reorderImage';
+import { removeImage } from '@/api/mutations/removeImage';
+import type { Notification, Project, FilterParameters } from '@/types/project';
+import { useAuthStore } from './authStore';
+import { getFiltersParemeters, addTool, removeTool, reorderTool, deleteProcess, processProject, processPreview } from '@/api';
+import { getSocket } from '@/utils/socket';
+
+interface ProjectState {
+  projects: Project[];
+  currentProject: Project | null;
+  loading: boolean;
+  error: string | null;
+  filterParameters: FilterParameters | null;
+  notifications: Notification[];
+}
+
+export const useProjectStore = defineStore('projectStore', {
+  state: (): ProjectState => ({
+    projects: [],
+    currentProject: null,
+    loading: false,
+    error: null,
+    filterParameters: null,
+    notifications: [],
+  }),
+
+  actions: {
+    async fetchProjects() {
+      this.loading = true;
+      try {
+        if (useAuthStore().accessToken) {
+          const projects = await getProjects(useAuthStore().accessToken ?? '');
+          this.projects = [];
+          for (const project of projects) {
+            this.projects.push({...project, images: project.images.map((img: string, idx: number) => ({id: idx, imageUrl: img}))});
+          }
+        } else {
+          throw new Error('Access token is null');
+        }
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while fetching projects';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchProject(projectId: string) {
+      this.loading = true;
+      try {
+        this.currentProject = await getProject(projectId, useAuthStore().accessToken ?? '');
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while fetching the project';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async createProject(projectData: { name: string }) {
+      this.loading = true;
+      try {
+        const newProject = await createProject(projectData, useAuthStore().accessToken ?? '');
+        this.projects = [newProject, ...this.projects];
+        return newProject;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while creating the project';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async updateProject(projectId: string, projectData: { name: string }) {
+      this.loading = true;
+      try {
+        await updateProject(projectId, projectData, useAuthStore().accessToken ?? '');
+        await this.fetchProjects()
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while updating the project';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async deleteProject(projectId: string) {
+      this.loading = true;
+      try {
+        await deleteProject(projectId, useAuthStore().accessToken ?? '');
+        this.projects = this.projects.filter(p => p._id !== projectId);
+        if (this.currentProject && this.currentProject._id === projectId) {
+          this.currentProject = null;
+        }
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while deleting the project';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async addProjectImage(projectId: string, imageFile: File) {
+      this.loading = true;
+      try {
+        const { id, imageUrl } = await addImage(projectId, imageFile, useAuthStore().accessToken ?? '');
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          project.images.push({ id: id, imageUrl });
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          this.currentProject.images.push({ id: id, imageUrl });
+        }
+        return { id: id, imageUrl };
+      } catch (error) {
+      this.error = error instanceof Error ? error.message : 'An error occurred while adding the image';
+      throw error;
+      } finally {
+      this.loading = false;
+      }
+    },
+
+    async reorderProjectImage(projectId: string, oldIndex: number, newIndex: number) {
+      this.loading = true;
+      try {
+        const { reorderedImage, imageIdx } = await reorderImage(projectId, oldIndex, newIndex);
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          const [removedImage] = project.images.splice(oldIndex, 1);
+          project.images.splice(newIndex, 0, removedImage);
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          const [removedImage] = this.currentProject.images.splice(oldIndex, 1);
+          this.currentProject.images.splice(newIndex, 0, removedImage);
+        }
+        return { reorderedImage, imageIdx };
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while reordering the image';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async removeProjectImage(projectId: string, imageIndex: number) {
+      this.loading = true;
+      try {
+        const removedImage = await removeImage(projectId, imageIndex);
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          project.images = project.images.filter((_, index) => index !== imageIndex);
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          this.currentProject.images = this.currentProject.images.filter((_, index) => index !== imageIndex);
+        }
+        return removedImage;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while removing the image';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchFilterParameters() {
+      this.loading = true;
+      try {
+        this.filterParameters = await getFiltersParemeters(useAuthStore().accessToken ?? '');
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while fetching filter parameters';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async addProjectTool(projectId: string, toolData: { filterName: string; args: Record<string, unknown> }) {
+      this.loading = true;
+      try {
+        const { index } = await addTool(projectId, toolData, useAuthStore().accessToken ?? '');
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          project.tools.push({ ...toolData });
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          this.currentProject.tools.push({ ...toolData });
+        }
+        return index;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while adding the tool';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async removeProjectTool(projectId: string, toolIndex: number) {
+      this.loading = true;
+      try {
+        const { removedTool } = await removeTool(projectId, toolIndex, useAuthStore().accessToken ?? '');
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          project.tools = project.tools.filter((_, index) => index !== toolIndex);
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          this.currentProject.tools = this.currentProject.tools.filter((_, index) => index !== toolIndex);
+        }
+        return removedTool;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while removing the tool';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async reorderProjectTool(projectId: string, oldIndex: number, newIndex: number) {
+      this.loading = true;
+      try {
+        const { reorderedTool, toolIdx } = await reorderTool(projectId, oldIndex, newIndex, useAuthStore().accessToken ?? '');
+        const project = this.projects.find(p => p._id === projectId);
+        if (project) {
+          const [removedTool] = project.tools.splice(oldIndex, 1);
+          project.tools.splice(newIndex, 0, removedTool);
+        }
+        if (this.currentProject && this.currentProject._id === projectId) {
+          const [removedTool] = this.currentProject.tools.splice(oldIndex, 1);
+          this.currentProject.tools.splice(newIndex, 0, removedTool);
+        }
+        return { reorderedTool, toolIdx };
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while reordering the tool';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async processPreview(projectId: string, imageIdx: number) {
+      this.loading = true;
+      try {
+        const result = await processPreview(projectId, imageIdx, useAuthStore().accessToken ?? '');
+
+        const socket = getSocket();
+        if (socket) {
+          socket.on('notification', (notification) => {
+            if (notification.projectId === projectId) {
+              this.receiveNotification(notification);
+            }
+          });
+        }
+
+        return result;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while processing the preview';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async processProject(projectId: string) {
+      this.loading = true;
+      try {
+        const result = await processProject(projectId, useAuthStore().accessToken ?? '');
+        
+        const socket = getSocket();
+        if (socket) {
+          socket.on('notification', (notification) => {
+            if (notification.projectId === projectId) {
+              this.receiveNotification(notification);
+            }
+          });
+        }
+        
+        return result;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while processing the project';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async deleteProcess(projectId: string) {
+      this.loading = true;
+      try {
+        const result = await deleteProcess(projectId, useAuthStore().accessToken ?? '');
+
+        const socket = getSocket();
+        if (socket) {
+          socket.on('notification', (notification) => {
+            if (notification.projectId === projectId) {
+              this.receiveNotification(notification);
+            }
+          });
+        }
+
+        return result;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'An error occurred while deleting the process';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async getResultProject(projectId: string) {
+      let project = this.projects.find(project => project._id === projectId);
+      while (project?.result === null) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      project = this.projects.find(project => project._id === projectId);
+      }
+      return project?.result ?? null;
+    },
+
+    async removePreviewNotification(projectId: string) {
+      this.notifications = this.notifications.filter(notification => !(notification.projectId === projectId && notification.message.isPreview));
+    },
+
+    async removeNonPreviewNotification(projectId: string) {
+      this.notifications = this.notifications.filter(notification => notification.projectId === projectId && notification.message.isPreview);
+    },
+
+    async removeCanceledNotification(projectId: string) {
+      this.notifications = this.notifications.filter(notification => !(notification.projectId === projectId && notification.message.kind == "canceled"));
+    },
+
+    receiveNotification(notification: Notification) {
+      this.notifications.push(notification);
+    },
+
+    setProjects(projects: Project[]) {
+      this.projects = projects;
+    },
+
+    clearError() {
+      this.error = null;
+    },
+
+    clearEverything() {
+      this.projects = [];
+      this.currentProject = null;
+      this.loading = false;
+      this.error = null;
+    },
+  },
+
+  getters: {
+    getProjectById: (state) => {
+      return (id: string) => state.projects.find(project => project._id === id);
+    },
+    getProjectNotification: (state) => {
+      return (projectId: string) => state.notifications.find(notification => notification.projectId === projectId);
+    },
+  },
+});

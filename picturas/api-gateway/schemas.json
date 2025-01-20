@@ -215,25 +215,6 @@
       "$schema": "http://json-schema.org/draft-07/schema#"
     }
   },
-  "remove-bg": {
-    "isPremium": true,
-    "schema": {
-      "$ref": "#/definitions/remove-bg",
-      "definitions": {
-        "remove-bg": {
-          "type": "object",
-          "properties": {
-            "fast": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
   "resize": {
     "isPremium": false,
     "schema": {

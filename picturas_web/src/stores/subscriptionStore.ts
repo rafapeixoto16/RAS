@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { getSubscriptionStatus, getBillingInfo } from '@/api/queries/subscriptions';
+import { useAuthStore } from './authStore';
+import { cancelSubscription } from '@/api';
 
 interface SubscriptionStatus {
   isPremium: boolean;
@@ -32,7 +34,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     isLoading.value = true;
     error.value = null;
     try {
-      ({ trialUsed: status.value.trialUsed, isPremium: status.value.isPremium, plan: status.value.plan } = await getSubscriptionStatus());
+      ({ trialUsed: status.value.trialUsed, isPremium: status.value.isPremium, plan: status.value.plan } = await getSubscriptionStatus(useAuthStore().accessToken ?? ''));
     } catch (err) {
       error.value = 'Failed to fetch subscription status';
       console.error(err);
@@ -43,12 +45,21 @@ export const useSubscriptionStore = defineStore('subscription', () => {
 
   const fetchBillingInfo = async () => {
     try {
-      const response = await getBillingInfo();
+      const response = await getBillingInfo(useAuthStore().accessToken ?? '');
       billingInfo.value = response;
     } catch (err) {
       console.error(err);
     }
   };
+
+  const cancelPremiumSubscription = async () => {
+    try {
+      await cancelSubscription(useAuthStore().accessToken ?? '');
+      await fetchSubscriptionStatus();
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return {
     status,
@@ -59,6 +70,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     currentPlan,
     hasTrialAvailable,
     fetchSubscriptionStatus,
-    fetchBillingInfo
+    cancelPremiumSubscription,
+    fetchBillingInfo,
   };
 });
