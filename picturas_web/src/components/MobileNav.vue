@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Mobile Header -->
     <div
       class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden z-50"
     >
@@ -45,7 +44,6 @@
       </button>
     </div>
 
-    <!-- Mobile Menu -->
     <div
       class="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden"
       :class="{
@@ -67,7 +65,7 @@
             >
               <i class="bi bi-plus mr-2 fs-5 text-[20px]"></i>
               Create a Project
-          </button>
+            </button>
 
             <button
               class="flex items-center justify-center px-2 py-3 w-full bg-white hover:bg-azure-radiance-500 text-sm xl:text-base text-azure-radiance-950 hover:text-azure-radiance-50 font-bold rounded rounded-xl"
@@ -75,7 +73,7 @@
             >
               <i class="bi bi-gem mr-2"></i>
               Try Premium for 30 days
-          </button>
+            </button>
           </div>
 
           <div class="mt-8 px-4 space-y-2">
@@ -84,15 +82,15 @@
           </div>
         </div>
         
-        <div class="px-4 py-2 border-t border-gray-200">
-          <router-link
-            class="flex items-center px-4 py-3 w-full bg-blue-50 text-sm xl:text-base text-gray-500 font-semibold hover:text-gray-600"
-            to="/trash"
-            @click="closeMenu"
-          >
+        <div 
+          class="px-4 py-2 border-t border-gray-200 mt-auto"
+          @dragover.prevent
+          @drop="onDrop"
+        >
+          <div class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500">
             <i class="bi bi-trash mr-2"></i>
-            Trash
-          </router-link>
+            Drag here to delete
+          </div>
         </div>
 
         <div class="border-t border-gray-200 p-4">
@@ -151,6 +149,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "update:isOpen", value: boolean): void;
 }>();
+
 const isOpenPremium = ref(false);
 const isProjectModalOpen = ref(false);
 
@@ -181,6 +180,14 @@ const createProject = async (name: string) => {
 
 const openPremiumModal = () => {
   isOpenPremium.value = !isOpenPremium.value;
+};
+
+const onDrop = async (event: DragEvent) => {
+  event.preventDefault();
+  const projectId = event.dataTransfer?.getData('text');
+  if (projectId) {
+    await projectStore.deleteProject(projectId);
+  }
 };
 </script>
 

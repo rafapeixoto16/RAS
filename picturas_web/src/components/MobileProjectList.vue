@@ -4,6 +4,9 @@
       v-for="project in visibleProjects"
       :key="project._id"
       class="relative group w-full"
+      draggable="true"
+      @dragstart="dragStart($event, project._id)"
+      @dragend="dragEnd"
     >
       <router-link
         :to="`/project/${project._id}`"
@@ -107,5 +110,19 @@ const moveToTrash = async (projectId: string) => {
 const renameProject = (projectId: string) => {
   console.log(`Renaming project ${projectId}`);
   closeOptionsMenu();
+};
+
+// New functions for drag and drop functionality
+const dragStart = (event: DragEvent, projectId: string) => {
+  if (event.dataTransfer) {
+    event.dataTransfer.setData('text/plain', projectId);
+    event.dataTransfer.effectAllowed = 'move';
+  }
+};
+
+const dragEnd = (event: DragEvent) => {
+  if (event.dataTransfer) {
+    event.dataTransfer.clearData();
+  }
 };
 </script>
