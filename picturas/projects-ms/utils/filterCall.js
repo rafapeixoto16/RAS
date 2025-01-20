@@ -8,6 +8,8 @@ const {
     RABBITMQ_PORT,
     RABBITMQ_USERNAME,
     RABBITMQ_PASSWORD,
+    FILTER_OUTPUT_EXCHANGE,
+    FILTER_OUTPUT_ROUTING_KEY,
     NOTIFICATION_QUEUE,
 } = process.env;
 
@@ -21,6 +23,9 @@ export async function connectToRabbitMQ() {
     channel = await connection.createChannel();
 
     await channel.assertQueue(NOTIFICATION_QUEUE, { durable: true });
+    await channel.assertExchange(FILTER_OUTPUT_EXCHANGE, 'direct', { durable: true });
+    await channel.assertQueue(FILTER_OUTPUT_EXCHANGE + '-queue', { durable: true });
+    await channel.bindQueue(FILTER_OUTPUT_EXCHANGE + '-queue', FILTER_OUTPUT_EXCHANGE, FILTER_OUTPUT_ROUTING_KEY);
 }
 
 async function sendMessage(queueName, message) {

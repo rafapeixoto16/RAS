@@ -51,14 +51,15 @@ const upload = multer({storage});
 
 router.post('/terminated/:userId/:id', upload.single('process'), async (req, res) => {
     try {
+        const { isPreview } = req.query;
         const { id, userId } = req.params;
         if (!req.file) return res.sendStatus(400);
         const process = req.file.buffer;
 
-        const imageUrl = await uploadArtifact(userId, id, process, false);
+        const uploadUrl = await uploadArtifact(userId, id, process, isPreview === "true");
         await removeProjectPipeline(userId, id);
 
-        res.status(200).json({ imageUrl });
+        res.status(200).json({ uploadUrl });
     } catch (error) {
         console.error('Migration error:', error);
         res.status(500).json({ message: 'Failed to terminate project.', error: error.message });

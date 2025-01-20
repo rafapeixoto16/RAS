@@ -220,11 +220,10 @@ async function filterTerminated(msg) {
             for (let file of upload) fs.unlinkSync(file);
 
             await freeRedis(projectId);
-
             const formData = new FormData();
             formData.append('process', zipBuffer, 'output.zip');
             const res = await axios.post(
-                `http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/terminated/${dt.userId}/${projectId}`,
+                `http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/terminated/${dt.userId}/${projectId}?isPreview=${dt.isPreview}`,
                 formData,
                 {
                     headers: formData.getHeaders(),
