@@ -25,6 +25,7 @@ SUBPROJECTS=(
 #  "grayscale-filter"
 #  "object-identification-filter"
 #  "ocr-filter"
+  "orchestrator-ms"
 #  "person-count-filter"
   "projects-ms"
 #  "remove-bg-filter"
