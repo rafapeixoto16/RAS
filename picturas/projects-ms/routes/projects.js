@@ -51,14 +51,13 @@ router.post('/', validateRequest({
             data.ttl = req.user.limits.ttlStartTime;
         }
 
-        const numProjects = await countProjects(userId);
-        if (numProjects < req.user.limits.projectsLimit){
+        const numProjects = await countProjects(req.user._id);
+        if (numProjects >= req.user.limits.projectsLimit){
             return res.status(412).json({error: "Limit of projects reached"})
         }
 
         const project = await addProject(data);
-        return res.status(200)
-            .json(await filterProject(project));
+        return res.status(200).json(await filterProject(project));
     } catch (error) {
         return res.status(500).json({ error: 'Failed to add project' });
     }
@@ -203,17 +202,17 @@ router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
     const { id } = req.params;
     const image = req.file;
     const userLimits = req.user.limits;
-
-    const numImages = await countImagesInProject(userId);
-    if (numImages < req.user.limits.imagesLimit){
-        return res.status(412).json({error: "Limit of images reached"})
-    }
-
+    
     if (!image) {
         return res.status(400).json({error: 'No image uploaded'});
     }
-
+    
     try {
+        const numImages = await countImagesInProject(req.user._id, id);
+        if (numImages >= req.user.limits.imagesLimit){
+            return res.status(412).json({error: "Limit of images reached"})
+        }
+
         const { imageIdx, imageUrl } = await addImage(req.user._id, id, image, userLimits);
         return res.status(200).json({
             id: imageIdx,

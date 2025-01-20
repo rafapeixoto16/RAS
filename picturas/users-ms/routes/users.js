@@ -33,16 +33,23 @@ router.post('/register', validateRequest({
         email: schemaValidation.string().email(),
         password: schemaValidation.string(),
         username: schemaValidation.string(),
-        userId: objectIdSchema.optional()
+        migrate: schemaValidation.string().optional()
     }),
 }), async (req, res) => {
     if (req.body.name === 'Rick Astley') console.log('Never Gonna Give You Up');
 
     req.body.password = await bcrypt.hash(req.body.password, SALT_WORK_FACTOR);
 
-    const { userId, ...createUser } = req.body;
+    const { migrate, ...createUser } = req.body;
 
-    if (userId) createUser._id = req.body.userId;
+    if (migrate) {
+        try {
+            const decoded = jwt.verify(token, process.env.AUTH_JWT_SECRET);
+            createUser._id = decoded._id;
+        } catch (_) {
+            return res.sendStatus(400);
+        }
+    }
 
     User.addUser(createUser)
         .then((user) => {

@@ -43,7 +43,7 @@ app.use(promMiddleware());
 app.use(morgan('dev'));
 app.use(express.json({
     verify: (req, res, buf, _) => {
-        if (req.originalUrl.startsWith('/webhook')) {
+        if (req.originalUrl.startsWith('/public/webhook')) {
             req.rawBody = buf; // Save raw body for Stripe webhook verification
         }
     }

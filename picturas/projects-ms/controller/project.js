@@ -35,7 +35,9 @@ export const countProjects = async (userId) => {
 }
 
 export const countImagesInProject = async (userId, projectId) => {
-    return getProject(userId, projectId).images.length
+    const p = await getProject(userId, projectId);
+    
+    return p.images ? p.images.length : 0;
 }
 
 export const updateProject = (userId, id, info) => {
