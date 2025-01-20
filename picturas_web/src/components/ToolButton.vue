@@ -7,9 +7,9 @@
       :disabled="disabled"
     >
       <i :class="['bi', icon, 'text-xl']"></i>
-      <span class="text-sm font-medium hidden md:block">{{ name }}</span>
+      <span class="text-sm font-medium hidden md:block">{{ formatOptionName(name) }}</span>
       <div class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none md:hidden">
-        {{ name }}
+        {{ formatOptionName(name) }}
       </div>
     </button>
     
@@ -52,6 +52,22 @@ defineEmits<{
   (e: 'apply', tool: { name: string; args: Record<string, unknown> }): void;
   (e: 'cancel'): void;
 }>();
+
+const formatOptionName = (name: string): string => {
+  const acronyms = ['OCR', 'PDF', 'RGB', 'URL', 'API'];
+  let formatted = name.replace(/-/g, ' ');
+  formatted = formatted.replace(/([A-Z])/g, ' $1');
+  const words = formatted.trim().split(/\s+/);
+  
+  const formattedWords = words.map(word => {
+    if (acronyms.includes(word.toUpperCase())) {
+      return word.toUpperCase();
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+  
+  return formattedWords.join(' ');
+};
 </script>
 
 <style scoped>

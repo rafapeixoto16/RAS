@@ -33,29 +33,8 @@
         </div>
       </div>
     </div>
-
-    <div
-      class="drag-drop-area border-2 border-dashed border-gray-400 rounded-lg p-6 flex flex-col items-center justify-center mb-8"
-      @dragover.prevent="onDragOver"
-      @dragleave.prevent="onDragLeave"
-      @drop.prevent="onDrop"
-      :class="{ 'bg-gray-100': isDragging }"
-    >
-      <p class="text-gray-500 mb-2 text-center">
-        Drag and drop an image here, or
-        <span class="text-blue-500 cursor-pointer hover:underline" @click="triggerFileUpload"
-          >click to upload</span
-        >.
-      </p>
-      <input
-        type="file"
-        class="hidden"
-        ref="fileInput"
-        @change="handleFileUpload"
-        accept="image/*"
-        multiple
-      />
-    </div>
+    
+    <DropZone @files-dropped="handleFiles" class="border-2 border-dashed border-gray-400 rounded-lg p-6 flex flex-col items-center justify-center mb-8" />
 
     <div v-if="showTitleModal" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
       <div class="bg-white p-6 sm:p-8 md:p-10 rounded-lg w-full max-w-lg md:max-w-1/3">
@@ -108,11 +87,11 @@ import { useRouter } from 'vue-router';
 import ProjectCard from "@/components/ProjectCard.vue";
 import { useProjectStore } from "@/stores/projectsStore";
 import Notification from '@/components/CustomNotification.vue';
+import DropZone from "@/components/DropZone.vue";
 const projectStore = useProjectStore();
 const router = useRouter();
 
 const searchQuery = ref("");
-const isDragging = ref(false);
 const notification = ref<string | null>(null);
 const showTitleModal = ref(false);
 const titleInput = ref("");
@@ -153,41 +132,10 @@ const moveToTrash = async (id: string) => {
   }
 };
 
-// Drag and Drop Handlers
-const onDragOver = () => {
-  isDragging.value = true;
-};
-
-const onDragLeave = () => {
-  isDragging.value = false;
-};
-
-const onDrop = (event: DragEvent) => {
-  isDragging.value = false;
-  const files = event.dataTransfer?.files;
-  if (files) {
-    handleFiles(Array.from(files));
-  }
-};
-
 const handleFiles = (files: File[]) => {
   newImageFiles.value = files;
   titleInput.value = '';
   showTitleModal.value = true;
-};
-
-const triggerFileUpload = () => {
-  const input = fileInput.value;
-  if (input) input.click();
-};
-
-const fileInput = ref<HTMLInputElement | null>(null);
-
-const handleFileUpload = (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (input.files) {
-    handleFiles(Array.from(input.files));
-  }
 };
 
 const showNotification = (message: string) => {
@@ -221,9 +169,3 @@ const closeTitleModal = () => {
   showTitleModal.value = false;
 };
 </script>
-
-<style scoped>
-.drag-drop-area {
-  transition: background-color 0.2s ease;
-}
-</style>

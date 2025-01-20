@@ -26,6 +26,7 @@
               v-model="name"
               type="text"
               placeholder="Enter your name"
+              required
               class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
             />
           </div>
@@ -36,6 +37,7 @@
               v-model="username"
               type="text"
               placeholder="Choose a username"
+              required
               class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
             />
           </div>
@@ -46,6 +48,7 @@
               v-model="email"
               type="email"
               placeholder="Enter your email"
+              required
               class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
             />
           </div>
@@ -57,6 +60,7 @@
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Create a password"
+                required
                 class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
               />
               <button 
@@ -76,6 +80,7 @@
                 v-model="confirmPassword"
                 :type="showConfirmPassword ? 'text' : 'password'"
                 placeholder="Confirm your password"
+                required
                 class="w-full px-3 py-2 bg-white bg-opacity-70 border border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
               />
               <button 
@@ -87,12 +92,19 @@
               </button>
             </div>
           </div>
+          <div class="mt-4 text-center text-sm text-blue-500">
+            <p>By creating an account, you automatically accept our Terms and Conditions.</p>
+          </div>
           <button 
             type="submit" 
             class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg"
+            :disabled="!isFormValid"
           >
             Create Account
           </button>
+          <div v-if="errorMessage" class="mt-4 text-red-600 text-center">
+            {{ errorMessage }}
+          </div>
         </form>
         <div class="mt-6 text-center">
           <p class="text-blue-500">
@@ -133,7 +145,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { register } from '@/api';
 
@@ -145,6 +157,7 @@ const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const errorMessage = ref('');
 
 const toggleShowPassword = () => {
   showPassword.value = !showPassword.value;
@@ -154,9 +167,26 @@ const toggleShowConfirmPassword = () => {
   showConfirmPassword.value = !showConfirmPassword.value;
 };
 
+const isFormValid = computed(() => {
+  return (
+    name.value.trim() !== '' &&
+    username.value.trim() !== '' &&
+    email.value.trim() !== '' &&
+    password.value.trim() !== '' &&
+    confirmPassword.value.trim() !== ''
+  );
+});
+
 const handleRegister = async () => {
+  errorMessage.value = '';
+
+  if (!isFormValid.value) {
+    errorMessage.value = 'Please fill in all required fields.';
+    return;
+  }
+
   if (password.value !== confirmPassword.value) {
-    console.error('Passwords do not match');
+    errorMessage.value = 'Passwords do not match. Please try again.';
     return;
   }
 
@@ -170,6 +200,7 @@ const handleRegister = async () => {
     router.push({ path: `/registration-success/${email.value}` });
   } catch (error) {
     console.error('Registration error:', error);
+    errorMessage.value = 'An error occurred during registration. Please try again.';
   }
 };
 

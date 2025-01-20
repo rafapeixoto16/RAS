@@ -2,7 +2,7 @@
   <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
     <div class="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">{{ toolName }}</h2>
+        <h2 class="text-2xl font-bold">{{ formatOptionName(toolName) }}</h2>
         <button 
           @click="cancel" 
           class="text-gray-400 hover:text-gray-500 focus:outline-none"
@@ -112,8 +112,20 @@ function getDefaultValue(type: string): number | string | boolean {
   }
 }
 
-const formatOptionName = (name: string) => {
-  return name.split(/(?=[A-Z])/).join(' ').replace(/^\w/, c => c.toUpperCase());
+const formatOptionName = (name: string): string => {
+  const acronyms = ['OCR', 'PDF', 'RGB', 'URL', 'API'];
+  let formatted = name.replace(/-/g, ' ');
+  formatted = formatted.replace(/([A-Z])/g, ' $1');
+  const words = formatted.trim().split(/\s+/);
+  
+  const formattedWords = words.map(word => {
+    if (acronyms.includes(word.toUpperCase())) {
+      return word.toUpperCase();
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+  
+  return formattedWords.join(' ');
 };
 
 const apply = () => {

@@ -22,14 +22,11 @@
               </h1>
             </template>
           </div>
-          <div class="flex items-center gap-4 w-full sm:w-auto justify-between mb-[10%] md:mb-0 sm:justify-end">
+          <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
             <span class="text-sm text-gray-500">Page {{ currentPage + 1 }} of {{ pages.length }}</span>
             <div class="flex space-x-2">
               <button @click="deleteCurrentPage" class="p-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
                 <i class="bi bi-trash text-xl"></i>
-              </button>
-              <button @click="downloadCurrentImage" class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200">
-                <i class="bi bi-download text-xl"></i>
               </button>
               <button 
                 @click="toggleGridView" 
@@ -37,6 +34,17 @@
               >
                 <i class="bi bi-grid text-xl"></i>
               </button>
+                <button 
+                @click="processPreview"
+                :disabled="isProcessingPreview"
+                class="p-2 bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2 rounded-md"
+                >
+                <i class="bi bi-eye text-xl"></i>
+                <span>Preview</span>
+                <span v-if="isProcessingPreview" class="text-sm">
+                  <i class="bi bi-arrow-repeat animate-spin"></i>
+                </span>
+                </button>
             </div>
           </div>
         </div>
@@ -151,12 +159,6 @@
             </template>
           </Carousel>
         </div>
-        <button 
-          @click="processPreview"
-          class="fixed left-4 bottom-4 md:bottom-auto md:top-4 w-14 h-14 bg-green-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-600 transition-colors duration-200 z-20"
-        >
-          <i class="bi bi-eye text-xl"></i>
-        </button>
       </main>
 
       <aside class="w-full md:w-72 bg-white border-l border-gray-200 overflow-y-auto flex-shrink-0">
@@ -171,7 +173,7 @@
             <button 
               @click="processProject" 
               :disabled="processingStatus === 'processing'"
-              class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+              :class="[applyButtonClass, 'w-full px-4 py-2 text-white rounded disabled:opacity-50 transition-colors duration-200']"
             >
               {{ applyButtonText }}
             </button>
@@ -305,6 +307,7 @@ const isToolDrawerOpen = ref(false);
 const appliedTools = computed(() => project.value ? project.value.tools : []);
 const processingStatus = ref<'idle' | 'processing' | 'completed' | 'error'>('idle');
 const notification = ref<string | null>(null);
+const isProcessingPreview = ref(false);
 
 onMounted(async () => {
   if (project.value) {
@@ -488,16 +491,6 @@ const deleteCurrentPage = async () => {
   }
 };
 
-const downloadCurrentImage = () => {
-  const currentImage = pages.value[currentPage.value].imageUrl;
-  if (currentImage) {
-    const link = document.createElement('a');
-    link.href = currentImage;
-    link.download = `project-image-${currentPage.value + 1}.png`;
-    link.click();
-  }
-};
-
 const selectTool = (toolName: string) => {
   if (activeTool.value === toolName) {
     activeTool.value = null;
@@ -658,6 +651,10 @@ const processProject = async () => {
       link.download = `project-${project.value._id}.zip`;
       link.click();
     }
+    setTimeout(() => {
+      processingStatus.value = 'idle';
+      projectStore.removeNonPreviewNotification(projectId.value);
+    }, 2000);
   } catch (error) {
     console.error('Error processing project:', error);
     processingStatus.value = 'error';
@@ -667,6 +664,7 @@ const processProject = async () => {
 const processPreview = async () => {
   if(!project.value) return;
 
+  isProcessingPreview.value = true;
   try{
     await projectStore.processPreview(projectId.value, currentPage.value)
 
@@ -704,6 +702,8 @@ const processPreview = async () => {
     });
   } catch  (error) {
     console.error("Error processing preview:", error);
+  } finally {
+    isProcessingPreview.value = false;
   }
 }
 
@@ -722,12 +722,19 @@ const applyButtonText = computed(() => {
     case 'processing':
       return 'Processing...';
     case 'completed':
-      return 'Download Results';
+      return '✓ Completed';
     case 'error':
       return 'Error - Try Again';
     default:
       return 'Apply Pipeline';
   }
+});
+
+const applyButtonClass = computed(() => {
+  return {
+    'bg-blue-500 hover:bg-blue-600': processingStatus.value !== 'completed',
+    'bg-green-500 hover:bg-green-600': processingStatus.value === 'completed',
+  };
 });
 </script>
 

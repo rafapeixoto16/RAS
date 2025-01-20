@@ -48,7 +48,7 @@
       for (const filename in zip.files) {
         if (zip.files[filename].dir) continue;
         const fileData = await zip.files[filename].async('blob');
-        const imageFile = new File([fileData], filename, { type: fileData.type });
+        const imageFile = new File([fileData], filename, { type: 'image/' + filename.split('.').pop() });
         if (imageFile.type.startsWith('image/')) {
         imageFiles.push(imageFile);
         }

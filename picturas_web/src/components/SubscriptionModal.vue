@@ -125,8 +125,10 @@ const cardElementInstance = ref<StripeCardElement | null>(null)
 const cardElement = ref<HTMLElement | null>(null)
 
 const initializeStripe = async () => {
+  const stripe_public_key = import.meta.env.STRIPE_PUBLIC_KEY
+
   if (!stripe.value) {
-    stripe.value = await loadStripe("pk_test_51QgoWeP6mytX6dcNsRxgjBSs7HRVpnVcFBHfvDE0U7tPMVIhvAjMMemhnE2A0d73W1S2UgMBJKRWg24k3VpzbtIZ000VZWv0WB");
+    stripe.value = await loadStripe(stripe_public_key);
   }
   
   if (stripe.value && !elements.value) {

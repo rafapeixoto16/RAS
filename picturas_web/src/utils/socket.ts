@@ -4,13 +4,21 @@ import { ref } from 'vue';
 let socket: Socket | null = null;
 const isConnected = ref(false);
 
-export function initializeSocket(token: string) {
+export function initializeSocket(token?: string) {
+  const authToken = token || localStorage.getItem('socketToken');
+  if (!authToken) {
+    console.error('No token provided for socket connection');
+    return;
+  }
+
   if (socket) return;
 
-socket = io('http://192.168.49.2', {
-    auth: { token },
-    path: '/api/ws'
-});
+  localStorage.setItem('socketToken', authToken);
+
+  socket = io('http://192.168.49.2', {
+    auth: { token: authToken },
+    path: '/api/ws',
+  });
 
   socket.on('connect', () => {
     console.log('Socket connected');
@@ -35,6 +43,8 @@ export function deactivateSocket() {
     isConnected.value = false;
     console.log('Socket deactivated');
   }
+
+  localStorage.removeItem('socketToken');
 }
 
 export function getSocket() {
@@ -43,4 +53,8 @@ export function getSocket() {
 
 export function useSocketStatus() {
   return { isConnected };
+}
+
+if (localStorage.getItem('socketToken')) {
+  initializeSocket();
 }
