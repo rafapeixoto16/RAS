@@ -99,10 +99,13 @@
             class="relative group"
             draggable="true"
             @dragstart="onDragStart(index, $event)"
-            @dragover="onDragOver($event)"
-            @dragenter="onDragEnter($event)"
-            @dragleave="onDragLeave($event)"
+            @dragover.prevent
+            @dragenter.prevent
+            @dragleave.prevent
             @drop="onDrop(index, $event)"
+            @touchstart="onTouchStart(index, $event)"
+            @touchmove="onTouchMove($event)"
+            @touchend="onTouchEnd(index, $event)"
           >
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
               <button 
@@ -357,55 +360,68 @@ watch(() => pages.value.length, (newLength) => {
 });
 
 let draggedIndex: number | null = null;
+let touchStartY: number | null = null;
 
-const onDragStart = (index: number, event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault();
-  }
+const onDragStart = (index: number, event: DragEvent) => {
   draggedIndex = index;
+  event.dataTransfer?.setData('text/plain', index.toString());
 };
 
-const onDragOver = (event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault(); 
-  } else {
-    event.preventDefault();
-  }
-};
-
-const onDragEnter = (event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault();
-  } else {
-    event.preventDefault();
-  }
-};
-
-const onDragLeave = (event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault();
-  } else {
-    event.preventDefault();
-  }
-};
-
-const onDrop = async (index: number, event: DragEvent | TouchEvent) => {
-  if (event instanceof TouchEvent) {
-    event.preventDefault(); 
-  }
+const onDrop = async (index: number, event: DragEvent) => {
+  event.preventDefault();
+  const droppedIndex = parseInt(event.dataTransfer?.getData('text/plain') || '-1', 10);
   
-  if (draggedIndex === null || draggedIndex === index || !project.value) return;
+  if (droppedIndex === -1 || droppedIndex === index || !project.value) return;
   
   try {
-    await projectStore.reorderProjectImage(project.value._id, draggedIndex, index);
-    const draggedItem = pages.value[draggedIndex];
-    pages.value.splice(draggedIndex, 1);
-    pages.value.splice(index, 0, draggedItem);
+    await projectStore.reorderProjectImage(project.value._id, droppedIndex, index);
+    const [movedItem] = pages.value.splice(droppedIndex, 1);
+    pages.value.splice(index, 0, movedItem);
   } catch (error) {
     console.error('Error reordering image:', error);
   }
+};
+
+const onTouchStart = (index: number, event: TouchEvent) => {
+  draggedIndex = index;
+  touchStartY = event.touches[0].clientY;
+};
+
+const onTouchMove = (event: TouchEvent) => {
+  if (draggedIndex === null || touchStartY === null) return;
+  
+  const touch = event.touches[0];
+  const deltaY = touch.clientY - touchStartY;
+  
+  (event.currentTarget as HTMLElement).style.transform = `translateY(${deltaY}px)`;
+};
+
+const onTouchEnd = async (index: number, event: TouchEvent) => {
+  if (draggedIndex === null || touchStartY === null || !project.value) return;
+  
+  const touch = event.changedTouches[0];
+  const deltaY = touch.clientY - touchStartY;
+  const threshold = 50;
+  
+  if (Math.abs(deltaY) > threshold) {
+    const newIndex = index + (deltaY > 0 ? 1 : -1);
+    if (newIndex >= 0 && newIndex < pages.value.length) {
+      try {
+        await projectStore.reorderProjectImage(project.value._id, draggedIndex, newIndex);
+        const [movedItem] = pages.value.splice(draggedIndex, 1);
+        pages.value.splice(newIndex, 0, movedItem);
+      } catch (error) {
+        console.error('Error reordering image:', error);
+      }
+    }
+  }
+  
+  if (event.currentTarget) {
+    (event.currentTarget as HTMLElement).style.transform = '';
+  }
   
   draggedIndex = null;
+  touchStartY = null;
 };
 
 const isPremiumUser = computed(() => subscriptionStore.isPremium);
@@ -743,5 +759,15 @@ const applyButtonClass = computed(() => {
   .aspect-square {
     aspect-ratio: 1 / 1;
   }
+}
+
+.grid > div {
+  transition: transform 0.2s ease-out;
+}
+
+.grid > div:active {
+  cursor: grabbing;
+  z-index: 10;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 </style>
