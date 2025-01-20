@@ -4,6 +4,7 @@ import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import subscriptionsRouter from './routes/subscriptions.js';
+import privateRouter from './routes/private.js';
 import {promMiddleware, useGatewayAuth} from "@picturas/ms-helper";
 import {initStripe} from "./config/stripe.js";
 import {serverIsReady, startPLServer} from "@picturas/ms-helper";
@@ -48,11 +49,14 @@ app.use(express.json({
     }
 }));
 
+// Private Router
+app.use('/private', privateRouter);
+
 // Auth from Gateway
 app.use(useGatewayAuth);
 
 // Routers
-app.use('/', subscriptionsRouter);
+app.use('/public', subscriptionsRouter);
 
 // 404
 app.use((req, res) => {

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-app:
+  undeploy-app:
     runs-on: ubuntu-latest
 
     steps:

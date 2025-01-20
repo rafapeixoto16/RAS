@@ -30,6 +30,14 @@ export const addProject = async (u) => {
     return new Project(u).save();
 };
 
+export const countProjects = async (userId) => {
+    return Project.countDocuments({ userId });
+}
+
+export const countImagesInProject = async (userId, projectId) => {
+    return getProject(userId, projectId).images.length
+}
+
 export const updateProject = (userId, id, info) => {
     return Project.updateOne({ userId, _id: id }, info).exec();
 };
@@ -59,6 +67,10 @@ export const getImage = async (projectId, imageRef) => {
 
     return rewriteS3Url(image.url);
 };
+
+export const deleteProjects = (userId) => {
+    return Project.deleteMany({ userId }).exec();
+}
 
 export const filterProject = async (project) => ({
     name: project.name,

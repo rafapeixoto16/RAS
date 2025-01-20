@@ -22,7 +22,7 @@ module "gke" {
       machine_type = "e2-medium"
 
       min_count       = 1
-      max_count       = 3
+      max_count       = 5
       local_ssd_count = 0
       disk_size_gb    = 100
       disk_type       = "pd-standard"
@@ -44,6 +44,8 @@ module "gke" {
     all = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
 

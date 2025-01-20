@@ -8,6 +8,7 @@
     "dependencies": {
         "@picturas/ms-helper": "file:../ms-helper",
         "@picturas/schema-validation": "file:../schema-validation",
+        "axios": "^1.7.9",
         "bcrypt": "^5.1.1",
         "express": "^4.21.2",
         "jsonwebtoken": "^9.0.2",

@@ -15,7 +15,9 @@ import {
     uploadArtifact,
     objectIdSchema,
     filterProject,
-    reorderImage
+    reorderImage,
+    countProjects,
+    countImagesInProject
 } from '../controller/project.js';
 import { queryProjectSchema } from '../models/queryProject.js';
 import { schemaValidation, validateRequest } from '@picturas/schema-validation';
@@ -39,7 +41,6 @@ router.post('/', validateRequest({
         name: schemaValidation.string()
     })
 }), async (req, res) => {
-    // TODO we can easily limit the number of project
     try {
         const data = {
             ...req.body,
@@ -48,6 +49,11 @@ router.post('/', validateRequest({
 
         if (req.user.limits.hasTtl) {
             data.ttl = req.user.limits.ttlStartTime;
+        }
+
+        const numProjects = await countProjects(userId);
+        if (numProjects < req.user.limits.projectsLimit){
+            return res.status(412).json({error: "Limit of projects reached"})
         }
 
         const project = await addProject(data);
@@ -142,12 +148,10 @@ router.post('/:id/tool', validateRequest({
     const { id } = req.params;
     const toolInformation = req.body;
 
-    // if the user is not premium and it tries to add a premium tool just send a 401
-    // (Not sure if this is the best way to do it)
     const isToolPremium = schemas[toolInformation.filterName].isPremium;
 
     if (isToolPremium && !req.user.isPremium) {
-        return res.status(401).json({ error: 'You need to be premium to use this tool' });
+        return res.status(402).json({ error: 'You need to be premium to use this tool' });
     }
 
     try {
@@ -200,7 +204,10 @@ router.post('/:id/image', multer.single('projectImage'), async (req, res) => {
     const image = req.file;
     const userLimits = req.user.limits;
 
-    // TODO we can easily limit the number of images in project
+    const numImages = await countImagesInProject(userId);
+    if (numImages < req.user.limits.imagesLimit){
+        return res.status(412).json({error: "Limit of images reached"})
+    }
 
     if (!image) {
         return res.status(400).json({error: 'No image uploaded'});
