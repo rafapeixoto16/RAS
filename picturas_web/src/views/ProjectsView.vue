@@ -92,7 +92,7 @@
       </aside>
 
       <main class="flex-1 overflow-hidden relative">
-        <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+        <div v-if="isGridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 max-h-[calc(100vh-4rem)] overflow-y-auto sm:max-h-none sm:overflow-visible">
           <div 
             v-for="(page, index) in pages" 
             :key="page.id" 
