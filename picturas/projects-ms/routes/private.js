@@ -3,6 +3,7 @@ import { deleteProjects, getProjects, uploadArtifact } from '../controller/proje
 import minioClient from '../config/minioClient.js';
 import { listObjectsPromise } from '../models/projectModel.js';
 import { removeProjectPipeline } from '../controller/pipeline.js';
+import multer from 'multer';
 
 const router = Router();
 
@@ -43,17 +44,18 @@ router.post('/migrateAccount', async (req, res) => {
 
         res.status(200).json({ message: 'Account migration completed successfully.' });
     } catch (error) {
-        console.error('Migration error:', error);
         res.status(500).json({ message: 'Failed to migrate account.', error: error.message });
     }
-
 });
 
-router.post('/terminated/:id', async (req, res) => {
+const storage = multer.memoryStorage();
+const upload = multer({storage});
+
+router.post('/terminated/:userId/:id', upload.single('process'), async (req, res) => {
     try {
-        const { id } = req.params;
-        const userId = req.user._id;
-        const { process } = req.body;
+        const { id, userId } = req.params;
+        if (!req.file) return res.sendStatus(400);
+        const process = req.file.buffer;
 
         const imageUrl = await uploadArtifact(userId, id, process, false);
         await removeProjectPipeline(userId, id);
@@ -61,9 +63,8 @@ router.post('/terminated/:id', async (req, res) => {
         res.status(200).json({ imageUrl });
     } catch (error) {
         console.error('Migration error:', error);
-        res.status(500).json({ message: 'Failed to migrate account.', error: error.message });
+        res.status(500).json({ message: 'Failed to terminate project.', error: error.message });
     }
-
 });
 
 export default router;

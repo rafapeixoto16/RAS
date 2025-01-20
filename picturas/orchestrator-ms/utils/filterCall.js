@@ -222,13 +222,14 @@ async function filterTerminated(msg) {
             await freeRedis(projectId);
 
             const formData = new FormData();
-            formData.append('process', zipBuffer);
-            const res = await axios.post(`http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/terminated/${projectId}`, {
-                headers: {
-                    "Content-Type": 'multipart/form-data; boundary=' + formData.getBoundary()
-                },
-                data: formData
-            });
+            formData.append('process', zipBuffer, 'output.zip');
+            const res = await axios.post(
+                `http://${process.env.PROJECTS_MS}:${process.env.PROJECTS_MS_PORT}/private/terminated/${dt.userId}/${projectId}`,
+                formData,
+                {
+                    headers: formData.getHeaders(),
+                }
+            );
             await sendMessage(process.env.NOTIFICATION_QUEUE, JSON.stringify({userId: dt.userId, projectId, message: {kind: 'finished', url: res.data.uploadUrl, isPreview: dt.isPreview}}));
         } else {
             await redisClient.set(termKey, termCount);

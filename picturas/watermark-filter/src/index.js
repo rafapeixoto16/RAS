@@ -39,6 +39,8 @@ if (process.env.EXPORT_SCHEMA === 'true') {
             PICTURAS_WATERMARK_IMAGE_PATH: resolve(dirname(fileURLToPath(import.meta.url)), '../picturas-watermark-tool-ms/watermark.png')
         },
     });
+
+    process.exit(1);
 })();
 
 startPLServer();
