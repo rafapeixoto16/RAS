@@ -2,12 +2,13 @@
 set -e
 
 # Usage:
+# export STRIPE_PUBLIC_KEY=...
 # ./scripts/build-docker
 # ./scripts/build-docker true localhost:5000 tag
 
 TAG=${3:-latest}
 
-docker build -t web:$TAG -f scripts/web.Dockerfile .
+docker build -t web:$TAG --build-arg STRIPE_PUBLIC_KEY=$STRIPE_PUBLIC_KEY -f scripts/web.Dockerfile .
 
 if [[ "$1" == "true" ]]; then
   docker tag web:$TAG $2/web:$TAG
@@ -23,7 +24,7 @@ SUBPROJECTS=(
   "contrast-filter"
   "cropping-filter"
   "grayscale-filter"
-  "object-identification-filter"
+#  "object-identification-filter"
   "ocr-filter"
   "orchestrator-ms"
   "person-count-filter"

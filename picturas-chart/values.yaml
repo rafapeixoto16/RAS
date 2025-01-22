@@ -27,7 +27,7 @@ filters:
   - contrast-filter
   - cropping-filter
   - grayscale-filter
-  - object-identification-filter
+#  - object-identification-filter
   - ocr-filter
   - person-count-filter
 #  - remove-bg-filter

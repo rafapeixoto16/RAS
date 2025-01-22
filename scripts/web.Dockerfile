@@ -1,5 +1,7 @@
 FROM node:lts-alpine AS build-stage
 
+ARG STRIPE_PUBLIC_KEY="stripe-public-key"
+
 WORKDIR /app
 
 COPY picturas_web/package*.json ./
