@@ -161,27 +161,6 @@
       "$schema": "http://json-schema.org/draft-07/schema#"
     }
   },
-  "object-identification": {
-    "isPremium": true,
-    "schema": {
-      "$ref": "#/definitions/object-identification",
-      "definitions": {
-        "object-identification": {
-          "type": "object",
-          "properties": {
-            "minScore": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "default": 0.3
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
   "ocr": {
     "isPremium": true,
     "schema": {
