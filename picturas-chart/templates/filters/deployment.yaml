@@ -63,7 +63,7 @@ spec:
         - name: nfs-volume
           {{- if $.Values.nfs_enabled }}
           nfs:
-            path: /picturas
+            path: /pipeline
             server: {{ $.Values.nfs_server }}
           {{- else }}
           hostPath:

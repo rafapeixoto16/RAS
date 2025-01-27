@@ -87,12 +87,13 @@ module "gke" {
 }
 
 resource "google_filestore_instance" "nfs_server" {
-  name = "pipeline-data"
+  name = "pipeline"
   tier = "BASIC_HDD"
+  location = var.gke_zones[0]
 
   file_shares {
     capacity_gb = 1024
-    name        = "pipeline-data"
+    name        = "pipeline"
   }
 
   networks {
