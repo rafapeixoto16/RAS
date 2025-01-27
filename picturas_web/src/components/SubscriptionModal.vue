@@ -29,7 +29,7 @@
                 <CreditCard class="h-5 w-5 animate-in zoom-in" />
                 Upgrade to Premium
               </DialogTitle>
-              
+
               <div class="mt-2">
                 <p class="text-sm text-gray-500">
                   Get unlimited access to all premium features for ${{ price }}/{{ billingCycle }}
@@ -102,21 +102,21 @@
 </template>
 
 <script setup lang="ts">
-import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import { CreditCard, Loader2, CheckIcon, XIcon } from 'lucide-vue-next'
-import { subscribe } from '@/api/mutations/subscriptions'
-import { useSubscriptionStore } from '@/stores/subscriptionStore'
-import { useAuthStore } from '@/stores/authStore'
-import { loadStripe } from "@stripe/stripe-js"
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
+import { CheckIcon, CreditCard, Loader2, XIcon } from 'lucide-vue-next';
+import { subscribe } from '@/api/mutations/subscriptions';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useAuthStore } from '@/stores/authStore';
 import type {
   Stripe,
   StripeCardElement,
   StripeCardElementOptions,
   StripeConstructorOptions,
   StripeElementsOptions,
-} from "@stripe/stripe-js"
-import { computed, onBeforeMount, ref, useTemplateRef } from "vue"
-import { StripeElement, StripeElements } from 'vue-stripe-js'
+} from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { computed, onBeforeMount, ref, useTemplateRef } from 'vue';
+import { StripeElement, StripeElements } from 'vue-stripe-js';
 
 const props = defineProps<{
   isOpen: boolean
@@ -133,7 +133,7 @@ const isLoading = ref(false)
 const status = ref<'idle' | 'loading' | 'success' | 'error'>('idle')
 const message = ref('')
 const subscriptionStore = useSubscriptionStore()
-const publishableKey = import.meta.env.STRIPE_PUBLIC_KEY;
+const publishableKey = "pk_test_51QgAMx2N0LZkFOX8kS6Uup5aA9DPOQyZung7JCahsiIwxTL04x2w2isGgXQ3H47h9mpQRT6bf0myenjv2Lu97eRw00kSryOqGS";
 const stripeLoaded = ref(false)
 
 const stripeOptions = ref<StripeConstructorOptions>({})
@@ -199,7 +199,7 @@ const handleSubmit = async () => {
     status.value = 'success'
     message.value = 'Welcome aboard! Your subscription is now active.'
     await subscriptionStore.fetchSubscriptionStatus()
-    
+
     setTimeout(() => {
       emit('success')
       closeModal()

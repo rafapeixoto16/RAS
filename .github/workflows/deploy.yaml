@@ -23,7 +23,7 @@ jobs:
 
       - name: Configure Docker to use GCR
         run: |
-          gcloud auth configure-docker us-central1-docker.pkg.dev
+          gcloud auth configure-docker us-central1-docker.pkg.dev -q
 
       - name: Access Kubernetes Cluster
         uses: 'google-github-actions/get-gke-credentials@v2'
