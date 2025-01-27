@@ -107,6 +107,12 @@ spec:
             - mountPath: {{ .Values.filter_shared_dir }}
               name: nfs-volume
       volumes:
-        - name: nfs-volume # Simulated with hostPath (single node)
+        - name: nfs-volume
+          {{- if .Values.nfs_enabled }}
+          nfs:
+            path: /picturas
+            server: {{ .Values.nfs_server }}
+          {{- else }}
           hostPath:
             path: /tmp/picturas
+          {{- end}}

@@ -171,6 +171,9 @@ s3_profile_picture_bucket: "profile"
 s3_picture_bucket: "picture"
 s3_temp_bucket: "temp"
 
+nfs_enabled: false
+nfs_server: '127.0.0.1'
+
 filter_shared_dir: /mnt/nfs
 
 email_hostname: "mailhog-node"

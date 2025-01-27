@@ -35,7 +35,7 @@ module "gke" {
       auto_upgrade       = true
       service_account = "terraform-sa@geometric-rock-440710-k5.iam.gserviceaccount.com"
       preemptible        = true
-      initial_node_count = 2
+      initial_node_count = 3
       accelerator_count  = 0
     },
   ]
@@ -83,6 +83,21 @@ module "gke" {
     default-node-pool = [
       "default-node-pool",
     ]
+  }
+}
+
+data "google_filestore_instance" "nfs_server" {
+  name = "pipeline-data"
+  tier = "BASIC_HDD"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "pipeline-data"
+  }
+
+  networks {
+    network = var.gke_network
+    modes   = ["MODE_IPV4"]
   }
 }
 
