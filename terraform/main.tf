@@ -35,7 +35,7 @@ module "gke" {
       auto_upgrade       = true
       service_account = "terraform-sa@geometric-rock-440710-k5.iam.gserviceaccount.com"
       preemptible        = true
-      initial_node_count = 3
+      initial_node_count = 5
       accelerator_count  = 0
     },
   ]
@@ -86,7 +86,7 @@ module "gke" {
   }
 }
 
-data "google_filestore_instance" "nfs_server" {
+resource "google_filestore_instance" "nfs_server" {
   name = "pipeline-data"
   tier = "BASIC_HDD"
 
